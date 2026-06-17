@@ -1,0 +1,3413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI Solving Math</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Azeret+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script>
+window.MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]]},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#060914;--s1:#0d1426;--s2:#111d35;--s3:#16243f;
+  --b:rgba(120,160,255,.1);--b2:rgba(120,160,255,.06);
+  --c1:#7eb3ff;--c2:#a78bfa;--c3:#34d399;--c4:#fb923c;--c5:#f472b6;
+  --t:#ddeeff;--t2:rgba(221,238,255,.55);--t3:rgba(221,238,255,.22);
+  --r:16px;--r2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* AURORA */
+.aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.aurora-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:blobMove 12s ease-in-out infinite}
+.ab1{width:420px;height:420px;background:radial-gradient(circle,#4f46e5,transparent);top:-120px;left:-100px;animation-duration:14s}
+.ab2{width:360px;height:360px;background:radial-gradient(circle,#7c3aed,transparent);top:22%;right:-80px;animation-duration:11s;animation-delay:-4s}
+.ab3{width:310px;height:310px;background:radial-gradient(circle,#0891b2,transparent);bottom:12%;left:8%;animation-duration:16s;animation-delay:-7s}
+.ab4{width:260px;height:260px;background:radial-gradient(circle,#be185d,transparent);bottom:-60px;right:18%;animation-duration:13s;animation-delay:-2s}
+@keyframes blobMove{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(28px,-18px) scale(1.1)}66%{transform:translate(-18px,28px) scale(.95)}}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(126,179,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(126,179,255,.03) 1px,transparent 1px);background-size:50px 50px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent)}
+
+.page{display:flex;justify-content:center;min-height:100vh}
+.wrap{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;background:rgba(6,9,20,.85);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--b)}
+.hdr-main{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.logo{display:flex;align-items:center;gap:11px;cursor:default}
+.logo-hex{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(126,179,255,.2),0 8px 24px rgba(79,70,229,.4);animation:hexGlow 4s ease infinite;color:#fff;font-size:14px;position:relative;flex-shrink:0;letter-spacing:-4px}
+@keyframes hexGlow{0%,100%{box-shadow:0 0 0 1px rgba(126,179,255,.2),0 8px 24px rgba(79,70,229,.4)}50%{box-shadow:0 0 0 2px rgba(167,139,250,.4),0 8px 32px rgba(124,58,237,.6)}}
+.logo-ping{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--c3);border:2px solid var(--bg);box-shadow:0 0 8px var(--c3)}
+.logo-ping::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--c3);animation:pingRipple 2s ease infinite;opacity:0}
+@keyframes pingRipple{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+.logo-name{font-family:'Bricolage Grotesque',sans-serif;font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-tag{font-size:.58rem;color:var(--t3);font-weight:500;letter-spacing:2px;text-transform:uppercase;font-family:'Azeret Mono',monospace}
+.hdr-actions{display:flex;gap:7px;align-items:center}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--s2);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:16px;color:var(--t2);position:relative}
+.icon-btn:hover{background:var(--s3);border-color:rgba(126,179,255,.25)}
+.icon-btn:active{transform:scale(.9)}
+.lang-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:50px;background:var(--s2);border:1px solid var(--b);font-size:.72rem;font-weight:700;cursor:pointer;color:var(--t);transition:all .2s;font-family:'Outfit',sans-serif}
+.lang-btn:hover{background:var(--s3)}
+.lang-btn:active{transform:scale(.93)}
+.badge-dot{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--c2);border:2px solid var(--bg);font-size:.55rem;font-weight:800;display:none;align-items:center;justify-content:center;color:#fff;font-family:'Azeret Mono',monospace}
+.badge-dot.show{display:flex}
+
+/* STREAK BAR */
+.streak-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;border-top:1px solid var(--b2);background:rgba(126,179,255,.02)}
+.streak-item{display:flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;font-family:'Azeret Mono',monospace}
+.streak-fire{font-size:.9rem}
+.streak-val{color:var(--c4)}
+.xp-bar-wrap{flex:1;margin:0 12px;height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--c3),var(--c1));border-radius:4px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.level-badge{padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.3));border:1px solid rgba(126,179,255,.2);font-size:.62rem;font-weight:800;color:var(--c1);font-family:'Azeret Mono',monospace}
+
+/* TICKER */
+.ticker-wrap{overflow:hidden;padding:5px 0;border-top:1px solid var(--b2);background:rgba(126,179,255,.02);display:flex;align-items:center}
+.ticker-badge{background:linear-gradient(90deg,var(--c1),var(--c2));color:#fff;padding:2px 10px;font-size:.58rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;font-family:'Azeret Mono',monospace;flex-shrink:0;margin-right:14px;border-radius:0 4px 4px 0}
+.ticker-inner{overflow:hidden;flex:1}
+.ticker-txt{display:inline-block;font-size:.62rem;color:var(--t2);font-weight:600;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;animation:tickerAnim 28s linear infinite;font-family:'Azeret Mono',monospace}
+@keyframes tickerAnim{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+
+/* SIDE PANEL */
+.scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:999;backdrop-filter:blur(6px)}
+.scrim.open{display:block}
+.side-panel{position:fixed;top:0;right:-110%;width:82%;max-width:320px;height:100vh;background:var(--s1);z-index:1000;transition:right .32s cubic-bezier(.2,.8,.2,1);border-left:1px solid var(--b);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.side-panel.open{right:0}
+.sp-head{padding:18px 16px 14px;border-bottom:1px solid var(--b2);background:linear-gradient(180deg,rgba(79,70,229,.08),transparent)}
+.sp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.sp-title{font-family:'Bricolage Grotesque',sans-serif;font-size:.95rem;font-weight:800;color:var(--t);display:flex;align-items:center;gap:8px}
+.sp-title::before{content:'';width:3px;height:14px;border-radius:2px;background:linear-gradient(var(--c1),var(--c2));flex-shrink:0}
+.sp-close{width:30px;height:30px;border-radius:8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.sp-close:hover{background:rgba(248,113,113,.2)}
+.sp-sub{font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;letter-spacing:.5px}
+.sp-list{flex:1;overflow-y:auto;padding:10px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.sp-list::-webkit-scrollbar{width:3px}
+.sp-list::-webkit-scrollbar-thumb{background:var(--b);border-radius:2px}
+.sp-item{padding:11px 12px;border-radius:var(--r2);margin-bottom:7px;background:var(--s2);border:1px solid var(--b2);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.sp-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--c1),var(--c2));border-radius:2px 0 0 2px}
+.sp-item:hover{background:var(--s3);border-color:rgba(126,179,255,.2)}
+.sp-item:active{transform:scale(.97)}
+.sp-q{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t);padding-right:8px}
+.sp-t{font-size:.62rem;color:var(--t3);margin-top:4px;font-family:'Azeret Mono',monospace;letter-spacing:.3px}
+.sp-empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.sp-empty-icon{font-size:34px;margin-bottom:10px;opacity:.5}
+.sp-empty-txt{font-size:.83rem;font-weight:600}
+.sp-foot{padding:10px;border-top:1px solid var(--b2)}
+.del-all{width:100%;padding:11px;border-radius:var(--r2);border:1px solid rgba(248,113,113,.2);background:rgba(248,113,113,.05);color:#f87171;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.del-all:hover{background:rgba(248,113,113,.1)}
+
+/* MAIN CONTENT */
+.cnt{padding:14px 14px 116px;flex:1}
+
+/* WELCOME */
+.welcome{text-align:center;padding:20px 16px 16px;animation:fadeUp .6s cubic-bezier(.2,.8,.2,1) both}
+.welcome-emoji{font-size:44px;margin-bottom:10px;display:block;animation:wobble 3s ease infinite}
+@keyframes wobble{0%,100%{transform:rotate(-5deg) scale(1)}50%{transform:rotate(5deg) scale(1.1)}}
+.welcome-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.45rem;font-weight:800;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#6ee7b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.welcome-sub{font-size:.83rem;color:var(--t2);line-height:1.6;max-width:280px;margin:0 auto 14px}
+
+/* STATS CARDS */
+.stats-row{display:flex;gap:8px;margin-bottom:14px}
+.stat-card{flex:1;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r2);padding:10px 12px;text-align:center;transition:.2s}
+.stat-card:hover{border-color:rgba(126,179,255,.2);background:var(--s2)}
+.stat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:1.3rem;font-weight:800;line-height:1}
+.stat-lbl{font-size:.6rem;color:var(--t3);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-family:'Azeret Mono',monospace;margin-top:3px}
+.stat-card:nth-child(1) .stat-num{color:var(--c3)}
+.stat-card:nth-child(2) .stat-num{color:var(--c1)}
+.stat-card:nth-child(3) .stat-num{color:var(--c4)}
+
+/* CHIPS */
+.chips-label{font-size:.6rem;color:var(--t3);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;font-family:'Azeret Mono',monospace;padding-left:2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;margin-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:6px 13px;border-radius:50px;background:var(--s2);border:1px solid var(--b2);font-size:.72rem;font-weight:600;cursor:pointer;color:var(--t2);transition:all .22s;white-space:nowrap}
+.chip:hover{border-color:rgba(126,179,255,.2);color:var(--t)}
+.chip:active{transform:scale(.92)}
+.chip.act{background:linear-gradient(135deg,rgba(79,70,229,.25),rgba(124,58,237,.25));border-color:rgba(126,179,255,.35);color:var(--c1);box-shadow:0 0 20px rgba(79,70,229,.12)}
+
+/* INPUT BOX */
+.inp-wrap{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);margin-bottom:12px;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.inp-wrap:focus-within{border-color:rgba(126,179,255,.3);box-shadow:0 0 0 4px rgba(79,70,229,.08),0 4px 24px rgba(0,0,0,.3)}
+.mode-tabs{display:flex;border-bottom:1px solid var(--b2);background:rgba(13,20,38,.5)}
+.mode-tab{flex:1;padding:11px 8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t3);transition:all .22s;position:relative;border-right:1px solid var(--b2)}
+.mode-tab:last-child{border-right:none}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--c3);box-shadow:0 0 8px var(--c3);display:none;animation:pulse 2s infinite}
+.mode-tab.act{color:var(--c1)}
+.mode-tab.act::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:2px;background:linear-gradient(90deg,var(--c1),var(--c2));border-radius:2px 2px 0 0}
+.mode-tab.act .dot{display:block}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
+.inp-body{padding:14px 14px 8px}
+textarea{width:100%;background:transparent;border:none;resize:none;font-size:.9rem;outline:none;line-height:1.75;color:var(--t);font-family:'Outfit',sans-serif;font-weight:400;caret-color:transparent;}
+textarea::placeholder{color:var(--t3)}
+#qt,#qc{caret-color:transparent;}
+#qt{height:100px}
+#qc{height:50px;margin-bottom:10px}
+.inp-footer{display:flex;align-items:center;gap:8px;padding:8px 14px 12px;border-top:1px solid var(--b2)}
+.wc-badge{font-family:'Azeret Mono',monospace;font-size:.63rem;color:var(--t3);font-weight:500;background:var(--s2);padding:3px 7px;border-radius:6px;border:1px solid var(--b2);white-space:nowrap}
+.prog-bar{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,#06b6d4,#6366f1,#8b5cf6);transition:.3s ease}
+.voice-btn{width:30px;height:30px;border-radius:8px;background:var(--s2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:.2s;flex-shrink:0}
+.voice-btn:hover{background:var(--s3);border-color:rgba(126,179,255,.25)}
+.voice-btn.listening{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.4);animation:voicePulse 1s ease infinite}
+@keyframes voicePulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 6px rgba(248,113,113,0)}}
+
+/* IMAGE ZONE */
+.img-zone{border:1.5px dashed rgba(126,179,255,.18);border-radius:var(--r2);padding:28px 20px;text-align:center;position:relative;cursor:pointer;background:rgba(79,70,229,.03);transition:all .25s}
+.img-zone:hover,.img-zone.drag{border-color:rgba(126,179,255,.4);background:rgba(79,70,229,.08)}
+.img-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.iz-icon{font-size:34px;margin-bottom:10px;display:block;animation:float 3s ease infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.iz-title{font-size:.88rem;font-weight:700;color:var(--t)}
+.iz-sub{font-size:.72rem;color:var(--t3);margin-top:4px}
+.iz-formats{display:flex;gap:5px;justify-content:center;margin-top:9px}
+.iz-fmt{font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:4px;font-family:'Azeret Mono',monospace;letter-spacing:.5px}
+.iz-fmt:nth-child(1){background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.2)}
+.iz-fmt:nth-child(2){background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+.iz-fmt:nth-child(3){background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.2)}
+.img-preview{position:relative;border-radius:var(--r2);overflow:hidden;border:1px solid var(--b)}
+.img-preview img{width:100%;max-height:220px;object-fit:contain;background:#000;display:block}
+.img-rm{position:absolute;top:8px;right:8px;background:rgba(248,113,113,.85);backdrop-filter:blur(8px);color:#fff;border:none;width:28px;height:28px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;z-index:20;transition:.2s;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.img-rm:hover{background:#f87171}
+.img-ld{position:absolute;inset:0;background:rgba(6,9,20,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.img-ld.on{display:flex}
+
+/* CAMERA BTN */
+.camera-row{display:flex;gap:8px;margin-top:8px}
+.cam-btn{flex:1;padding:10px;border-radius:var(--r2);border:1px solid var(--b2);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Outfit',sans-serif}
+.cam-btn:hover{background:var(--s3);color:var(--t);border-color:rgba(126,179,255,.2)}
+.cam-btn:active{transform:scale(.95)}
+
+/* SOLVE BUTTON */
+.go-btn{width:100%;padding:15px;border-radius:var(--r);font-size:.93rem;font-weight:800;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;margin-bottom:14px;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;background:linear-gradient(135deg,#4f46e5,#7c3aed,#2563eb);color:#fff;letter-spacing:.3px;box-shadow:0 8px 32px rgba(79,70,229,.35)}
+.go-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 60%)}
+.go-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,255,255,.05) 60deg,transparent 120deg);animation:shimmer 4s linear infinite}
+@keyframes shimmer{to{transform:rotate(360deg)}}
+.go-btn:hover{box-shadow:0 12px 40px rgba(79,70,229,.45)}
+.go-btn:active{transform:scale(.97)}
+.go-btn:disabled{background:var(--s2);color:var(--t3);box-shadow:none;cursor:not-allowed}
+.go-btn:disabled::before,.go-btn:disabled::after{display:none}
+.go-icon{font-size:1.1rem;position:relative;z-index:1}
+.go-txt{position:relative;z-index:1}
+
+/* LOADING */
+.loading-wrap{display:none;align-items:center;gap:16px;padding:14px 16px;border-radius:var(--r2);background:var(--s1);border:1px solid var(--b2);margin-bottom:14px}
+.loading-wrap.on{display:flex;animation:fadeUp .3s ease}
+
+/* ORBITAL DOTS LOGO */
+.orbit-logo{
+  width:44px;height:44px;
+  position:relative;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.orbit-ring{ display:none; }
+.orbit-dot{
+  position:absolute;
+  width:9px;height:9px;
+  border-radius:50%;
+  top:50%;left:50%;
+  margin:-4.5px 0 0 -4.5px;
+}
+.od1{
+  background:#7eb3ff;
+  box-shadow:0 0 10px #7eb3ff,0 0 20px rgba(126,179,255,.5);
+  animation:orbitSpin 1.6s linear infinite;
+  animation-delay:0s;
+}
+.od2{
+  background:#a78bfa;
+  box-shadow:0 0 10px #a78bfa,0 0 20px rgba(167,139,250,.5);
+  animation:orbitSpin 1.6s linear infinite;
+  animation-delay:-0.533s;
+}
+.od3{
+  background:#34d399;
+  box-shadow:0 0 10px #34d399,0 0 20px rgba(52,211,153,.5);
+  animation:orbitSpin 1.6s linear infinite;
+  animation-delay:-1.066s;
+}
+@keyframes orbitSpin{
+  0%  { transform: rotate(0deg)   translateY(-15px) rotate(0deg)   scale(1.1) }
+  25% { transform: rotate(90deg)  translateY(-15px) rotate(-90deg) scale(0.75)}
+  50% { transform: rotate(180deg) translateY(-15px) rotate(-180deg) scale(1.1)}
+  75% { transform: rotate(270deg) translateY(-15px) rotate(-270deg) scale(0.75)}
+  100%{ transform: rotate(360deg) translateY(-15px) rotate(-360deg) scale(1.1)}
+}
+
+.typing-label{font-size:.78rem;font-weight:700;color:var(--t2);font-family:'Outfit',sans-serif;letter-spacing:.3px;margin-bottom:8px}
+.typing-dots{display:flex;gap:6px;align-items:flex-end;height:18px}
+.typing-dot{
+  width:8px;height:8px;border-radius:50%;
+  animation:dotCascade 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(1){background:#7eb3ff;box-shadow:0 0 8px #7eb3ff;animation-delay:0s}
+.typing-dot:nth-child(2){background:#a78bfa;box-shadow:0 0 8px #a78bfa;animation-delay:.2s}
+.typing-dot:nth-child(3){background:#34d399;box-shadow:0 0 8px #34d399;animation-delay:.4s}
+@keyframes dotCascade{
+  0%,60%,100%{transform:translateY(0);opacity:.35}
+  30%{transform:translateY(-7px);opacity:1}
+}
+
+/* STATUS */
+.st-msg{padding:10px 14px;border-radius:var(--r2);margin-bottom:12px;font-size:.82rem;font-weight:600;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);color:var(--c3);display:none;align-items:center;gap:8px}
+.st-msg.show{display:flex}
+.st-msg.err{background:rgba(248,113,113,.07);border-color:rgba(248,113,113,.2);color:#f87171}
+
+/* CHAT */
+.chat-area{display:flex;flex-direction:column;gap:14px}
+.user-row{display:flex;justify-content:flex-end;animation:fadeUp .3s ease}
+.user-bubble{background:linear-gradient(135deg,rgba(79,70,229,.25),rgba(124,58,237,.2));border:1px solid rgba(126,179,255,.2);padding:11px 15px;border-radius:16px 16px 4px 16px;font-size:.87rem;max-width:84%;word-break:break-word;line-height:1.65;color:var(--t);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.ai-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;animation:fadeUp .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.ai-card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b2);background:linear-gradient(90deg,rgba(79,70,229,.08),transparent)}
+.ai-label{display:flex;align-items:center;gap:7px;font-family:'Azeret Mono',monospace;font-size:.7rem;font-weight:600;color:var(--c1);letter-spacing:.5px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--c3);box-shadow:0 0 8px var(--c3);animation:pulse 2.5s ease infinite}
+.card-actions{display:flex;gap:6px}
+.cp-btn,.sp-btn,.like-btn{font-size:.68rem;font-weight:700;font-family:'Outfit',sans-serif;color:var(--t2);background:var(--s2);border:1px solid var(--b2);padding:4px 10px;border-radius:7px;cursor:pointer;transition:.2s;white-space:nowrap}
+.cp-btn:hover,.sp-btn:hover{border-color:rgba(126,179,255,.3);color:var(--c1)}
+.like-btn:hover{border-color:rgba(244,114,182,.3);color:var(--c5)}
+.like-btn.liked{background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.3);color:var(--c5)}
+.ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t)}
+.ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
+.ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
+.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
+.ai-body ol{padding-left:0;list-style:none;counter-reset:li}
+.ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
+.ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
+.ai-body p{margin-bottom:9px}
+.ai-body strong{color:#c4b5fd;font-weight:700}
+.ai-body em{color:var(--c3);font-style:normal;font-weight:600}
+.ai-body ul{padding-left:20px;margin-bottom:9px}
+.ai-body code{background:rgba(255,255,255,.06);padding:2px 7px;border-radius:5px;font-family:'Azeret Mono',monospace;font-size:.8rem;border:1px solid var(--b2);color:#93c5fd}
+
+/* FEEDBACK ROW */
+.feedback-row{padding:9px 14px;border-top:1px solid var(--b2);display:flex;align-items:center;gap:8px;background:rgba(13,20,38,.4)}
+.fb-lbl{font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;flex:1}
+.fb-btn{width:28px;height:28px;border-radius:8px;background:transparent;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:.2s}
+.fb-btn:hover{background:var(--s2)}
+.fb-btn.sel-up{background:rgba(52,211,153,.15);border-color:var(--c3)}
+.fb-btn.sel-down{background:rgba(248,113,113,.15);border-color:#f87171}
+
+/* XP TOAST */
+.xp-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(79,70,229,.2));border:1px solid rgba(52,211,153,.3);backdrop-filter:blur(12px);border-radius:50px;padding:8px 20px;font-size:.78rem;font-weight:800;color:var(--c3);font-family:'Azeret Mono',monospace;letter-spacing:.5px;z-index:9999;opacity:0;transition:all .4s cubic-bezier(.2,.8,.2,1);pointer-events:none;white-space:nowrap}
+.xp-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* DAILY CHALLENGE CARD */
+.challenge-card{background:linear-gradient(135deg,rgba(79,70,229,.12),rgba(124,58,237,.08));border:1px solid rgba(126,179,255,.15);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.challenge-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3))}
+.challenge-card:hover{border-color:rgba(126,179,255,.25);transform:translateY(-1px)}
+.ch-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ch-badge{font-size:.6rem;font-weight:800;padding:3px 9px;border-radius:50px;background:linear-gradient(135deg,rgba(251,146,60,.2),rgba(234,88,12,.2));border:1px solid rgba(251,146,60,.3);color:var(--c4);font-family:'Azeret Mono',monospace;letter-spacing:.5px}
+.ch-xp{font-size:.65rem;font-weight:800;color:var(--c3);font-family:'Azeret Mono',monospace}
+.ch-q{font-size:.87rem;font-weight:600;color:var(--t);line-height:1.5;margin-bottom:6px}
+.ch-hint{font-size:.72rem;color:var(--t3)}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:50;padding:7px 10px 18px;background:rgba(6,9,20,.92);backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--b);display:flex;gap:4px}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:11px;background:transparent;border:1px solid transparent;color:var(--t3);transition:all .22s;font-family:'Outfit',sans-serif;cursor:pointer}
+.nb:hover{color:var(--t2)}
+.nb:active{transform:scale(.88)}
+.nb.act{background:rgba(79,70,229,.15);border-color:rgba(126,179,255,.2);color:var(--c1)}
+.nb-icon{font-size:1.25rem;line-height:1;position:relative}
+.nb-badge{position:absolute;top:-5px;right:-7px;width:13px;height:13px;border-radius:50%;background:var(--c2);color:#fff;font-size:.52rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--bg);font-family:'Azeret Mono',monospace}
+.nb-badge.show{display:flex}
+.nb-lbl{font-size:.56rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+
+/* QUIZ MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+.modal-bg.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes thinCaret{0%,100%{opacity:1}50%{opacity:0}}
+.thin-caret-active{caret-color:transparent!important;position:relative;}
+.thin-caret-active::after{content:'';position:absolute;width:1px;height:1.1em;background:#06b6d4;animation:thinCaret 1s step-end infinite;pointer-events:none;margin-left:0;}
+.modal{background:var(--s1);border:1px solid var(--b);border-radius:20px;padding:24px 20px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.5);animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:6px;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.modal-sub{font-size:.78rem;color:var(--t2);margin-bottom:18px;line-height:1.5}
+.quiz-q{font-size:.9rem;font-weight:600;color:var(--t);margin-bottom:14px;padding:12px 14px;background:var(--s2);border-radius:var(--r2);border:1px solid var(--b2);line-height:1.6}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.quiz-opt{padding:11px 14px;border-radius:var(--r2);background:var(--s2);border:1px solid var(--b2);font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;color:var(--t);text-align:left}
+.quiz-opt:hover:not(:disabled){background:var(--s3);border-color:rgba(126,179,255,.2)}
+.quiz-opt.correct{background:rgba(52,211,153,.15);border-color:var(--c3);color:var(--c3)}
+.quiz-opt.wrong{background:rgba(248,113,113,.1);border-color:#f87171;color:#f87171}
+.quiz-opt:disabled{cursor:default}
+.modal-close{width:100%;padding:12px;border-radius:var(--r2);background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:.2s}
+.modal-close:hover{opacity:.9}
+
+/* LEADERBOARD */
+.lb-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;margin-bottom:16px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.lb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r2);background:var(--s2);border:1px solid var(--b2)}
+.lb-rank{font-family:'Azeret Mono',monospace;font-size:.8rem;font-weight:800;width:22px;text-align:center}
+.lb-rank.gold{color:#fbbf24}
+.lb-rank.silver{color:#94a3b8}
+.lb-rank.bronze{color:#cd7c42}
+.lb-name{flex:1;font-size:.85rem;font-weight:600}
+.lb-score{font-family:'Azeret Mono',monospace;font-size:.75rem;color:var(--c3);font-weight:700}
+
+/* STREAMING CURSOR */
+.stream-cursor{display:none!important}.stream-dot3{display:none!important}
+  50%{transform:scale(1.1);opacity:1;}
+}
+@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ld-spinner{width:28px;height:28px;border:2.5px solid rgba(255,255,255,.08);border-top-color:var(--c1);border-radius:50%;animation:spin .8s linear infinite}
+.ld-label{font-size:.75rem;color:var(--t2);font-weight:600;font-family:'Azeret Mono',monospace}
+
+/* SAMJHAO MUJHE */
+.samjhao-wrap{margin-top:8px}
+.samjhao-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:var(--c2);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
+.samjhao-btn:hover{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.4)}
+.samjhao-btn:active{transform:scale(.94)}
+.samjhao-btn.open{background:rgba(167,139,250,.2);border-color:var(--c2)}
+.samjhao-panel{display:none;margin-top:8px;border-radius:10px;background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(124,58,237,.06));border:1px solid rgba(167,139,250,.2);overflow:hidden;animation:fadeUp .25s ease}
+.samjhao-panel.show{display:block}
+.samjhao-loading{padding:14px;display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--t2);font-family:'Azeret Mono',monospace}
+.samjhao-loading .ld-spinner{width:18px;height:18px;border-width:2px}
+.samjhao-content{padding:14px}
+.samjhao-section{margin-bottom:12px}
+.samjhao-section:last-child{margin-bottom:0}
+.samjhao-label{font-size:.65rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;font-family:'Azeret Mono',monospace;color:var(--c2);margin-bottom:5px}
+.samjhao-text{font-size:.83rem;line-height:1.7;color:var(--t2);background:rgba(13,20,38,.6);border-radius:8px;padding:9px 12px;border:1px solid rgba(126,179,255,.07)}
+
+/* STUDY GUILD */
+.guild-modal{max-width:440px}
+.guild-tabs{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--b);margin-bottom:16px}
+.guild-tab{flex:1;padding:9px 6px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--t3);background:var(--s2);text-align:center;transition:.2s;border:none;font-family:'Outfit',sans-serif}
+.guild-tab.act{background:linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.25));color:var(--c1)}
+.guild-section{display:none}
+.guild-section.act{display:block}
+
+/* My Guild card */
+.my-guild-card{background:linear-gradient(135deg,rgba(79,70,229,.12),rgba(124,58,237,.08));border:1px solid rgba(126,179,255,.2);border-radius:14px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden}
+.my-guild-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3))}
+.guild-name-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.guild-emoji{font-size:1.8rem;display:inline-flex;width:42px;height:42px;border-radius:10px;overflow:hidden}
+.guild-emoji img{width:100%;height:100%;object-fit:cover}
+.guild-info-name{font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:800;color:var(--t)}
+.guild-info-code{font-size:.62rem;color:var(--t3);font-family:'Azeret Mono',monospace;letter-spacing:.5px;margin-top:2px}
+.guild-xp-bar-wrap{margin-bottom:8px}
+.guild-xp-label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:5px}
+.guild-xp-track{height:6px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+.guild-xp-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .6s ease}
+.guild-rank-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:50px;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.3);font-size:.65rem;font-weight:800;color:var(--c4);font-family:'Azeret Mono',monospace;margin-bottom:12px}
+
+/* Members list */
+.guild-members{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.guild-member{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--s2);border:1px solid var(--b2)}
+.gm-avatar{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.gm-name{flex:1;font-size:.82rem;font-weight:600;color:var(--t)}
+.gm-xp{font-size:.68rem;font-weight:800;color:var(--c3);font-family:'Azeret Mono',monospace}
+.gm-you{font-size:.55rem;padding:2px 6px;border-radius:4px;background:rgba(79,70,229,.3);color:var(--c1);font-family:'Azeret Mono',monospace;font-weight:800}
+.gm-leader{font-size:.55rem;padding:2px 6px;border-radius:4px;background:rgba(250,204,21,.18);color:#facc15;font-family:'Azeret Mono',monospace;font-weight:800;margin-left:4px}
+.gm-make-leader{background:none;border:none;cursor:pointer;font-size:1rem;padding:2px 4px;flex-shrink:0;opacity:.6;transition:.2s}
+.gm-make-leader:hover{opacity:1;transform:scale(1.15)}
+
+/* Action buttons */
+.guild-actions{display:flex;gap:8px;margin-top:12px}
+.guild-act-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.75rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.guild-act-btn:hover{background:var(--s3);color:var(--t);border-color:rgba(126,179,255,.25)}
+.guild-act-btn.primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;box-shadow:0 4px 16px rgba(79,70,229,.3)}
+.guild-act-btn.primary:hover{opacity:.9}
+.guild-act-btn:active{transform:scale(.95)}
+
+/* Create / Join forms */
+.guild-form-group{margin-bottom:12px}
+.guild-form-label{font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;font-family:'Azeret Mono',monospace;color:var(--t3);margin-bottom:6px;display:block}
+.guild-input{width:100%;background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:11px 13px;font-size:.88rem;color:var(--t);font-family:'Outfit',sans-serif;outline:none;transition:border-color .2s}
+.guild-input:focus{border-color:rgba(126,179,255,.35)}
+.guild-input::placeholder{color:var(--t3)}
+.emoji-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ep-btn{width:42px;height:42px;border-radius:8px;border:1px solid var(--b2);background:var(--s2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;padding:0;overflow:hidden}
+.ep-btn img{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}
+.ep-btn.sel{border-color:var(--c1);background:rgba(79,70,229,.2)}
+.ep-btn:hover{background:var(--s3)}
+
+/* Invite code box */
+.invite-box{background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.invite-code{font-family:'Azeret Mono',monospace;font-size:1.2rem;font-weight:800;color:var(--c1);letter-spacing:3px}
+.invite-copy{padding:6px 12px;border-radius:8px;background:rgba(126,179,255,.1);border:1px solid rgba(126,179,255,.2);color:var(--c1);font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s}
+.invite-copy:hover{background:rgba(126,179,255,.2)}
+
+/* No guild state */
+.no-guild{text-align:center;padding:20px 10px}
+.no-guild-icon{font-size:40px;margin-bottom:10px}
+.no-guild-txt{font-size:.88rem;font-weight:600;color:var(--t2);margin-bottom:6px}
+.no-guild-sub{font-size:.75rem;color:var(--t3);margin-bottom:16px;line-height:1.5}
+
+/* Guild leaderboard */
+.guild-lb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);margin-bottom:7px}
+.glb-rank{font-family:'Azeret Mono',monospace;font-size:.8rem;font-weight:800;width:24px;text-align:center;flex-shrink:0}
+.glb-info{flex:1}
+.glb-name{font-size:.85rem;font-weight:700;color:var(--t)}
+.glb-members{font-size:.62rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-top:2px}
+.glb-xp{font-size:.72rem;font-weight:800;color:var(--c3);font-family:'Azeret Mono',monospace;text-align:right}
+.glb-xp span{display:block;font-size:.58rem;color:var(--t3);font-weight:500}
+
+/* NAME ONBOARDING SCREEN */
+.onboard-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .3s ease}
+.onboard-overlay.hide{animation:fadeOut .4s ease forwards}
+@keyframes fadeOut{to{opacity:0;pointer-events:none}}
+.onboard-card{width:100%;max-width:360px;background:var(--s1);border:1px solid var(--b);border-radius:24px;padding:32px 24px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6);position:relative;overflow:hidden}
+.onboard-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3))}
+.onboard-emoji{font-size:52px;margin-bottom:12px;display:block;animation:wobble 3s ease infinite}
+.onboard-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#6ee7b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.onboard-sub{font-size:.85rem;color:var(--t2);line-height:1.6;margin-bottom:24px}
+.onboard-input{width:100%;background:var(--s2);border:2px solid var(--b);border-radius:14px;padding:14px 16px;font-size:1rem;color:var(--t);font-family:'Outfit',sans-serif;outline:none;text-align:center;transition:border-color .2s;margin-bottom:8px}
+.onboard-input:focus{border-color:rgba(126,179,255,.4)}
+.onboard-input::placeholder{color:var(--t3)}
+.onboard-hint{font-size:.72rem;color:var(--t3);margin-bottom:20px;font-family:'Azeret Mono',monospace}
+.onboard-btn{width:100%;padding:15px;border-radius:14px;font-size:.95rem;font-weight:800;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;background:linear-gradient(135deg,#4f46e5,#7c3aed,#2563eb);color:#fff;letter-spacing:.3px;box-shadow:0 8px 32px rgba(79,70,229,.35);transition:all .2s}
+.onboard-btn:hover{opacity:.9;transform:translateY(-1px)}
+.onboard-btn:active{transform:scale(.97)}
+.onboard-btn:disabled{background:var(--s2);color:var(--t3);box-shadow:none;cursor:not-allowed}
+
+/* ONBOARDING SCREEN */
+.onboard-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s ease}
+.onboard-card{width:100%;max-width:380px;background:var(--s1);border:1px solid var(--b);border-radius:24px;padding:32px 24px;text-align:center;position:relative;overflow:hidden}
+.onboard-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3))}
+.onboard-logo{font-size:52px;margin-bottom:14px;animation:wobble 2.5s ease infinite}
+.onboard-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#6ee7b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.onboard-sub{font-size:.85rem;color:var(--t2);line-height:1.6;margin-bottom:24px}
+.onboard-label{font-size:.65rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;font-family:'Azeret Mono',monospace;color:var(--t3);text-align:left;margin-bottom:7px;display:block}
+.onboard-input{width:100%;background:var(--s2);border:1.5px solid var(--b);border-radius:12px;padding:14px 16px;font-size:1rem;color:var(--t);font-family:'Outfit',sans-serif;outline:none;transition:border-color .25s;margin-bottom:8px;text-align:center;font-weight:600}
+.onboard-input:focus{border-color:rgba(126,179,255,.4);box-shadow:0 0 0 4px rgba(79,70,229,.1)}
+.onboard-input::placeholder{color:var(--t3);font-weight:400}
+.onboard-avatar-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;justify-content:center;margin-bottom:20px;max-height:260px;overflow-y:auto;padding:4px;scrollbar-width:thin;scrollbar-color:var(--b) transparent;width:100%;box-sizing:border-box}
+.oa-btn{width:100%;aspect-ratio:1;border-radius:12px;border:2px solid var(--b2);background:var(--s2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;padding:0;overflow:hidden}
+.oa-btn img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block}
+.oa-btn.sel{border-color:var(--c1);background:rgba(79,70,229,.2);transform:scale(1.1)}
+.oa-btn:hover{background:var(--s3)}
+.onboard-btn{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:.2s;box-shadow:0 8px 28px rgba(79,70,229,.35)}
+.onboard-btn:hover{opacity:.92}
+.onboard-btn:active{transform:scale(.97)}
+
+/* AUTO-JOIN BANNER */
+.autojoin-banner{background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(79,70,229,.1));border:1px solid rgba(52,211,153,.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.aj-icon{font-size:1.4rem;flex-shrink:0}
+.aj-text{font-size:.82rem;color:var(--t2);line-height:1.5}
+.aj-text strong{color:var(--c3);font-weight:800}
+
+/* GRAPH CANVAS */
+.graph-wrap{margin-top:12px;border-radius:var(--r2);overflow:hidden;border:1px solid rgba(126,179,255,.15);background:rgba(6,9,20,.9)}
+.graph-header{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid rgba(126,179,255,.1);background:rgba(79,70,229,.07)}
+.graph-header-icon{font-size:.85rem}
+.graph-title{font-size:.68rem;font-weight:800;color:var(--c1);font-family:'Azeret Mono',monospace;letter-spacing:.5px;text-transform:uppercase}
+.graph-canvas-wrap{padding:4px;background:#060914}
+.graph-canvas-wrap canvas{display:block;width:100%;border-radius:8px}
+.graph-error{padding:10px 12px;font-size:.75rem;color:#f87171;font-family:'Azeret Mono',monospace}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="aurora"><div class="aurora-blob ab1"></div><div class="aurora-blob ab2"></div><div class="aurora-blob ab3"></div><div class="aurora-blob ab4"></div></div>
+  <div class="grid-bg"></div>
+  <div class="xp-toast" id="xp-toast">+10 XP 🎉</div>
+
+  <!-- LANGUAGE SELECT SCREEN (shows first, before name onboarding) -->
+  <div class="onboard-overlay" id="lang-select-overlay" style="display:none">
+    <div class="onboard-card">
+      <div class="onboard-logo">🌐</div>
+      <div class="onboard-title">Choose Your Language</div>
+      <div class="onboard-sub">अपनी भाषा चुनें<br>Select the language you want to use the app in</div>
+      <button class="onboard-btn" style="margin-bottom:12px" onclick="pickStartLang('hi')">🇮🇳 हिंदी (Hindi)</button>
+      <button class="onboard-btn" style="background:linear-gradient(135deg,#2563eb,#0ea5e9)" onclick="pickStartLang('en')">🇬🇧 English</button>
+    </div>
+  </div>
+
+  <!-- ONBOARDING SCREEN -->
+  <div class="onboard-overlay" id="onboard-overlay" style="display:none">
+    <div class="onboard-card">
+      <div class="onboard-logo">🧠</div>
+      <div class="onboard-title">AI Solving Math</div>
+      <div class="onboard-sub">Apna naam daalo aur padhai shuru karo!<br>XP kamao, Guilds banao, dosto ke saath compete karo.</div>
+      <label class="onboard-label">Tumhara Naam</label>
+      <input class="onboard-input" id="onboard-name" placeholder="e.g. Rahul, Priya..." maxlength="20" oninput="onboardNameCheck()"/>
+      <label class="onboard-label" style="margin-top:4px">Avatar Chuno</label>
+      <div class="onboard-avatar-row" id="onboard-avatars"></div>
+      <button class="onboard-btn" id="onboard-btn" onclick="finishOnboard()" disabled>🚀 Shuru Karo!</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="scrim" id="scrim" onclick="closePanel()"></div>
+
+    <!-- HISTORY PANEL -->
+    <div class="side-panel" id="panel">
+      <div class="sp-head">
+        <div class="sp-top"><div class="sp-title" id="sp-title-txt">History</div><button class="sp-close" onclick="closePanel()">✕</button></div>
+        <div class="sp-sub" id="sp-sub-txt">Recent questions</div>
+      </div>
+      <div class="sp-list" id="sp-list"></div>
+      <div class="sp-foot"><button class="del-all" id="del-all-btn" onclick="clearHistory()">🗑️ Sab Hatao</button></div>
+    </div>
+
+    <!-- QUIZ MODAL -->
+    <div class="modal-bg" id="quiz-modal">
+      <div class="modal">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div class="modal-title" id="quiz-modal-title">🧩 Quick Quiz</div>
+        </div>
+        <div class="modal-sub" id="quiz-sub">Sahi jawab do, XP kamao!</div>
+        <div id="quiz-score-bar" style="display:block;margin-bottom:14px;padding:8px 12px;border-radius:10px;background:rgba(126,179,255,.07);border:1px solid rgba(126,179,255,.15);font-family:'Azeret Mono',monospace;font-size:.72rem;color:var(--c1)">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span id="quiz-progress-txt">Q 1 / 10</span>
+            <span id="quiz-score-txt">Score: 0/0</span>
+          </div>
+        </div>
+        <div class="quiz-q" id="quiz-q">Quiz load ho raha hai...</div>
+        <div class="quiz-opts" id="quiz-opts"></div>
+        <div style="display:flex;gap:8px">
+          <button class="modal-close" id="quiz-next-btn" onclick="nextQuizQ()" style="display:none;background:linear-gradient(135deg,#059669,#10b981)">Next →</button>
+          <button class="modal-close" id="quiz-close-btn" onclick="closeQuiz()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD MODAL -->
+    <div class="modal-bg" id="lb-modal" onclick="if(event.target===this)closeLb()">
+      <div class="modal">
+        <div class="modal-title">🏆 Leaderboard</div>
+        <div class="modal-sub">Top solvers this week!</div>
+        <div class="lb-list" id="lb-list"></div>
+        <button class="modal-close" onclick="closeLb()">Close</button>
+      </div>
+    </div>
+
+    <!-- PROFILE MENU MODAL -->
+    <div class="modal-bg" id="profile-menu-modal" onclick="if(event.target===this)closeProfileMenu()">
+      <div class="modal" style="max-width:340px;text-align:center">
+        <div class="modal-title">👤 Profile</div>
+        <div class="modal-sub" style="margin-bottom:18px">Apna naam ya avatar badlo</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="guild-act-btn primary" style="width:100%;padding:14px" onclick="openChangeName()">✏️ Change Name</button>
+          <button class="guild-act-btn primary" style="width:100%;padding:14px" onclick="openChangeAvatar()">🖼️ Change Avatar</button>
+        </div>
+        <button class="modal-close" style="margin-top:14px" onclick="closeProfileMenu()">Close</button>
+      </div>
+    </div>
+
+    <!-- CHANGE NAME MODAL -->
+    <div class="modal-bg" id="change-name-modal" onclick="if(event.target===this)closeChangeName()">
+      <div class="modal" style="max-width:340px;text-align:center">
+        <div class="modal-title">✏️ Change Name</div>
+        <div class="modal-sub" style="margin-bottom:14px">Naya naam likho</div>
+        <input class="onboard-input" id="cn-name-input" maxlength="20" placeholder="e.g. Rahul, Priya..." style="margin-bottom:14px" onkeydown="if(event.key==='Enter')saveChangedName()"/>
+        <div style="display:flex;gap:10px">
+          <button class="guild-act-btn" style="flex:1" onclick="closeChangeName()">Cancel</button>
+          <button class="guild-act-btn primary" style="flex:1" onclick="saveChangedName()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANGE AVATAR MODAL -->
+    <div class="modal-bg" id="change-avatar-modal" onclick="if(event.target===this)closeChangeAvatar()">
+      <div class="modal" style="max-width:380px;text-align:center;overflow-x:hidden">
+        <div class="modal-title">🖼️ Change Avatar</div>
+        <div class="modal-sub" style="margin-bottom:10px">Naya avatar chuno</div>
+        <div class="onboard-avatar-row" id="change-avatar-row" style="margin-bottom:10px"></div>
+        <div style="display:flex;gap:10px">
+          <button class="guild-act-btn" style="flex:1" onclick="closeChangeAvatar()">Cancel</button>
+          <button class="guild-act-btn primary" style="flex:1" onclick="saveChangedAvatar()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT GUILD MODAL (leader only) -->
+    <div class="modal-bg" id="edit-guild-modal" style="z-index:2100" onclick="if(event.target===this)closeEditGuild()">
+      <div class="modal" style="max-width:380px;text-align:center">
+        <div class="modal-title">⚙️ Edit Guild</div>
+        <div class="modal-sub" style="margin-bottom:10px">Guild ka naam aur avatar badlo</div>
+        <div class="guild-form-group" style="text-align:left">
+          <label class="guild-form-label">Guild Ka Naam</label>
+          <input class="guild-input" id="eg-name-input" maxlength="24"/>
+        </div>
+        <div class="guild-form-group" style="text-align:left">
+          <label class="guild-form-label">Guild Avatar Chuno</label>
+          <div class="emoji-picker" id="eg-emoji-picker"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="guild-act-btn" style="flex:1" onclick="closeEditGuild()">Cancel</button>
+          <button class="guild-act-btn primary" style="flex:1" onclick="saveEditedGuild()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDY GUILD MODAL -->
+    <div class="modal-bg" id="guild-modal" onclick="if(event.target===this)closeGuild()">
+
+      <div class="modal guild-modal">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="modal-title">🎒 Study Guild</div>
+          <button onclick="closeGuild()" style="width:28px;height:28px;border-radius:8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;cursor:pointer;font-size:13px">✕</button>
+        </div>
+
+        <!-- TOP ACTION BUTTONS: Rankings & Join (always visible) -->
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button id="gt-rankings" onclick="switchGuildTab('rankings')" style="flex:1;padding:9px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px">🏆 Rankings</button>
+          <button id="gt-join" onclick="switchGuildTab('join')" style="flex:1;padding:9px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px">🔗 Join Guild</button>
+        </div>
+
+        <!-- BOTTOM TABS: My Guild + Create (Create hidden when in guild) -->
+        <div class="guild-tabs" style="margin-bottom:14px">
+          <button class="guild-tab act" id="gt-myguild" onclick="switchGuildTab('myguild')">🏠 My Guild</button>
+          <button class="guild-tab" id="gt-create" onclick="switchGuildTab('create')">➕ Create</button>
+        </div>
+
+        <!-- MY GUILD -->
+        <div class="guild-section act" id="gs-myguild">
+          <div id="guild-has-guild" style="display:none">
+            <div class="my-guild-card">
+              <div class="guild-name-row">
+                <span class="guild-emoji" id="g-emoji">🔥</span>
+                <div>
+                  <div class="guild-info-name" id="g-name">Loading...</div>
+                  <div class="guild-info-code">CODE: <span id="g-code">------</span></div>
+                </div>
+              </div>
+              <div class="guild-rank-badge">🏅 Rank <span id="g-rank">#1</span> • <span id="g-total-xp">0</span> Guild XP</div>
+              <div class="guild-xp-bar-wrap">
+                <div class="guild-xp-label"><span>Guild Progress</span><span id="g-xp-pct">0%</span></div>
+                <div class="guild-xp-track"><div class="guild-xp-fill" id="g-xp-fill" style="width:0%"></div></div>
+              </div>
+              <div style="font-size:.68rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:10px">👥 MEMBERS</div>
+              <div class="guild-members" id="g-members-list"></div>
+            </div>
+            <div class="invite-box">
+              <div>
+                <div style="font-size:.6rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:3px">INVITE CODE</div>
+                <div class="invite-code" id="g-invite-code">------</div>
+              </div>
+              <button class="invite-copy" onclick="copyInviteCode()">📋 Copy</button>
+            </div>
+            <div class="guild-actions">
+              <button class="guild-act-btn" id="g-edit-btn" style="display:none" onclick="openEditGuild()">⚙️ Edit Guild</button>
+              <button class="guild-act-btn" style="color:#f87171;border-color:rgba(248,113,113,.2)" onclick="leaveGuild()">🚪 Leave</button>
+            </div>
+          </div>
+          <div id="guild-no-guild" style="display:none">
+            <div class="no-guild">
+              <div class="no-guild-icon">🎒</div>
+              <div class="no-guild-txt">Koi Guild Nahi!</div>
+              <div class="no-guild-sub">Apne doston ke saath ek Study Guild banao ya join karo. Milke XP kamao aur rankings mein upar jao!</div>
+              <div class="guild-actions" style="justify-content:center">
+                <button class="guild-act-btn primary" onclick="switchGuildTab('create')">➕ Guild Banao</button>
+                <button class="guild-act-btn" onclick="switchGuildTab('join')">🔗 Join Karo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CREATE GUILD -->
+        <div class="guild-section" id="gs-create">
+          <div class="guild-form-group">
+            <label class="guild-form-label">Guild Ka Naam</label>
+            <input class="guild-input" id="gi-name" placeholder="e.g. Math Warriors 🔥" maxlength="24"/>
+          </div>
+          <div class="guild-form-group">
+            <label class="guild-form-label">Guild Emoji Chuno</label>
+            <div class="emoji-picker" id="emoji-picker"></div>
+          </div>
+          <button class="guild-act-btn primary" style="width:100%;margin-top:4px" onclick="createGuild()">🚀 Guild Banao!</button>
+        </div>
+
+        <!-- JOIN GUILD -->
+        <div class="guild-section" id="gs-join">
+          <div id="autojoin-banner" style="display:none" class="autojoin-banner">
+            <div class="aj-icon">🔗</div>
+            <div class="aj-text">Link se invite mila! <strong id="aj-guild-name"></strong> guild join karna chahte ho?</div>
+          </div>
+          <div class="guild-form-group">
+            <label class="guild-form-label">Invite Code Daalo</label>
+            <input class="guild-input" id="gi-join-code" placeholder="6-digit code" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-family:'Azeret Mono',monospace;font-size:1rem"/>
+          </div>
+          <div id="guild-join-preview" style="display:none;margin-bottom:12px"></div>
+          <button class="guild-act-btn primary" style="width:100%" onclick="joinGuild()">🔗 Guild Join Karo!</button>
+        </div>
+
+        <!-- RANKINGS -->
+        <div class="guild-section" id="gs-rankings">
+          <div style="font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:10px;letter-spacing:.5px">TOP GUILDS THIS WEEK</div>
+          <div id="guild-rankings-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="hdr">
+      <div class="hdr-main">
+        <div class="logo" onclick="openProfileMenu()" style="cursor:pointer">
+          <div class="logo-hex">🧑‍🎓👩‍🎓<div class="logo-ping"></div></div>
+          <div>
+            <div class="logo-name" id="hdr-username">AI Solving Math</div>
+            <div class="logo-tag" id="gr-tag">Online • Hindi</div>
+          </div>
+        </div>
+        <div class="hdr-actions">
+          <button class="icon-btn" onclick="openLb()" title="Leaderboard">🏆</button>
+          <button class="icon-btn" onclick="openQuiz()" title="Daily Quiz">⚡<div class="badge-dot show" id="quiz-badge">!</div></button>
+          <button class="lang-btn" onclick="switchLang()"><span id="lang-flag">🇮🇳</span><span id="lang-code">HI</span></button>
+          <div class="icon-btn" onclick="openPanel()">☰<div class="badge-dot" id="hist-badge"></div></div>
+        </div>
+      </div>
+
+      <!-- STREAK + XP -->
+      <div class="streak-bar">
+        <div class="streak-item"><span class="streak-fire">🔥</span><span class="streak-val" id="streak-val">0</span><span style="color:var(--t3)">day</span></div>
+        <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+        <div class="level-badge" id="level-badge">LVL 1</div>
+      </div>
+
+      <div class="ticker-wrap">
+        <div class="ticker-badge">LIVE</div>
+        <div class="ticker-inner"><div class="ticker-txt" id="ticker-txt">गणित • Physics • Chemistry • Biology • History • Geography • English • Hindi • Computer Science • Economics • All Subjects 24/7 Free</div></div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="cnt">
+      <div class="welcome" id="welcome">
+        <span class="welcome-emoji">🧠</span>
+        <div class="welcome-title" id="w-title">Kya sawaal hai aaj?</div>
+        <div class="welcome-sub" id="w-sub">Type karo, photo lo, aur AI se turant jawab pao!</div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" id="stat-solved">0</div><div class="stat-lbl">Solved</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-xp">0</div><div class="stat-lbl">XP</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-streak">0🔥</div><div class="stat-lbl">Streak</div></div>
+      </div>
+
+
+      <div class="chips-label" id="chip-label">SUBJECT CHUNNO</div>
+      <div class="chips" id="chips"></div>
+
+      <div class="inp-wrap">
+        <div class="mode-tabs">
+          <div class="mode-tab act" id="tab-text" onclick="switchMode('text')">
+            <div class="dot"></div><span>📝</span><span id="tab-t-lbl">Text</span>
+          </div>
+          <div class="mode-tab" id="tab-image" onclick="switchMode('image')">
+            <div class="dot"></div><span>📷</span><span id="tab-i-lbl">Image</span>
+          </div>
+        </div>
+
+        <div class="inp-body">
+          <div id="text-panel">
+            <textarea id="qt" placeholder="Apna sawaal yahan likho..." oninput="updateProgress()"></textarea>
+          </div>
+          <div id="img-panel" style="display:none">
+            <textarea id="qc" placeholder="Extra context (optional)..."></textarea>
+            <div id="img-zone" class="img-zone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="this.classList.remove('drag');handleDrop(event)">
+              <span class="iz-icon">📸</span>
+              <div class="iz-title" id="iz-title">Photo Upload Karo</div>
+              <div class="iz-sub" id="iz-sub">Tap karo ya drag karo</div>
+              <div class="iz-formats"><span class="iz-fmt">JPG</span><span class="iz-fmt">PNG</span><span class="iz-fmt">WEBP</span></div>
+            </div>
+            <div id="img-preview-wrap" class="img-preview" style="display:none">
+              <button class="img-rm" onclick="removeImg()">✕</button>
+              <img id="preview-img" src="" alt="upload"/>
+              <div class="img-ld" id="img-ld"><div class="ld-spinner"></div><div class="ld-label">Processing...</div></div>
+            </div>
+            <div class="camera-row">
+              <button class="cam-btn" onclick="triggerGallery()">📁 Gallery</button>
+              <button class="cam-btn" onclick="openCamera()">📷 Camera</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="inp-footer">
+          <div class="wc-badge" id="wc-badge">0 words</div>
+          <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+          <div class="voice-btn" id="mic-btn" onclick="openQuiz()" title="Quick Quiz" style="font-size:16px">🧩</div>
+        </div>
+      </div>
+
+      <button class="go-btn" id="go-btn" onclick="solve()">
+        <span class="go-icon">⚡</span><span class="go-txt" id="go-txt">Solve Now</span>
+      </button>
+
+      <div class="loading-wrap" id="loading-wrap">
+        <div class="orbit-logo">
+          <div class="orbit-ring"></div>
+          <div class="orbit-dot od1"></div>
+          <div class="orbit-dot od2"></div>
+          <div class="orbit-dot od3"></div>
+        </div>
+        <div>
+          <div class="typing-label" id="lt-label">Thinking</div>
+        </div>
+      </div>
+
+      <div class="st-msg" id="st-msg"></div>
+      <div class="chat-area" id="chat-area"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bnav">
+      <button class="nb act" id="nb-text" onclick="switchMode('text')">
+        <div class="nb-icon">📝</div><div class="nb-lbl" id="nb-t-lbl">Text</div>
+      </button>
+      <button class="nb" id="nb-image" onclick="switchMode('image')">
+        <div class="nb-icon">📷</div><div class="nb-lbl" id="nb-i-lbl">Image</div>
+      </button>
+      <button class="nb" id="nb-quiz" onclick="openQuiz()">
+        <div class="nb-icon">🧩</div><div class="nb-lbl">Quiz</div>
+      </button>
+      <button class="nb" onclick="openGuild()">
+        <div class="nb-icon">🎒</div><div class="nb-lbl">Guild</div>
+      </button>
+      <button class="nb" onclick="openPanel()">
+        <div class="nb-icon" style="position:relative">📜<div class="nb-badge" id="nb-badge"></div></div>
+        <div class="nb-lbl" id="nb-h-lbl">History</div>
+      </button>
+    </div>
+  </div>
+</div>
+<canvas id="cv" style="display:none"></canvas>
+<input type="file" id="file-inp" accept="image/*" onchange="handleImg(this)" style="display:none"/>
+<input type="file" id="camera-inp" accept="image/*" capture="environment" style="display:none" onchange="handleImg(this)"/>
+
+<script>
+// ══════════════════════════════════════════════════════
+// 🔒 SECURE API PROXY (Cloudflare Worker)
+// Replace with your deployed worker URL, e.g.:
+// 'https://ai-math-proxy.yourname.workers.dev'
+// API keys ab is worker me secret env vars ke roop me hain,
+// frontend code me kabhi visible nahi hongi.
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// 🔑 3-TIER AUTO FALLBACK (Background mein silently!)
+//  ✅ Tier 1 → NVIDIA NIM  (primary, free)
+//  ✅ Tier 2 → OpenRouter  (auto-fallback, free models)
+//  ✅ Tier 3 → Gemini      (last resort, free)
+// ══════════════════════════════════════════════════════
+
+// ── TIER 1: NVIDIA NIM ───────────────────────────────
+const NVIDIA_KEY  = '__NVIDIA_KEY__';
+const NVIDIA_BASE = 'https://integrate.api.nvidia.com/v1';
+
+// ── TIER 2: OPENROUTER ───────────────────────────────
+const OPENROUTER_KEY  = '__OPENROUTER_KEY__';
+const OPENROUTER_KEY2 = ''; // invalid key removed
+
+// ── TIER 3: GEMINI DIRECT ────────────────────────────
+const GEMINI_KEY = '__GEMINI_KEY__';
+
+// Internal aliases
+let _GEMINI_KEY = GEMINI_KEY;
+let _keysFetched = true;
+async function fetchRuntimeKeys(){ return; }
+
+// ══════════════════════════════════════════════════════
+// 🏆 JSONBIN.IO — SHARED LEADERBOARD
+// ══════════════════════════════════════════════════════
+const JSONBIN_BIN_ID = '__JSONBIN_BIN_ID__';
+const JSONBIN_API_KEY = '__JSONBIN_API_KEY__';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+// ── TIER 1 NVIDIA: Free text models ──────────────────
+const NVIDIA_MODELS = [
+  'meta/llama-4-scout-17b-16e-instruct',
+  'meta/llama-4-maverick-17b-128e-instruct',
+  'meta/llama-3.3-70b-instruct',
+  'meta/llama-3.1-70b-instruct',
+  'meta/llama-3.1-8b-instruct',
+  'mistralai/mistral-7b-instruct-v0.3',
+  'google/gemma-3-27b-it',
+  'microsoft/phi-3-mini-128k-instruct',
+];
+
+// ── TIER 1 NVIDIA: Free vision/image models ──────────
+const NVIDIA_IMAGE_MODELS = [
+  'meta/llama-4-scout-17b-16e-instruct',
+  'microsoft/phi-3.5-vision-instruct',
+  'meta/llama-3.2-11b-vision-instruct',
+  'meta/llama-3.1-8b-instruct',
+];
+
+// ── TIER 2 OPENROUTER: Free text models ──────────────
+const OR_TEXT_MODELS = [
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'meta-llama/llama-3.1-8b-instruct:free',
+  'mistralai/mistral-7b-instruct:free',
+  'deepseek/deepseek-r1:free',
+  'deepseek/deepseek-chat:free',
+  'google/gemma-3-27b-it:free',
+  'qwen/qwen3-8b:free',
+  'google/gemini-2.5-flash-lite-preview',
+  'google/gemini-2.5-flash',
+];
+
+// ── TIER 2 OPENROUTER: Free image models ─────────────
+const OR_IMAGE_MODELS = [
+  'google/gemini-2.5-flash',
+  'google/gemini-2.5-flash-lite-preview',
+  'qwen/qwen2.5-vl-72b-instruct:free',
+  'meta-llama/llama-3.2-11b-vision-instruct:free',
+];
+
+// ── ONLY MODEL: Gemini 2.5 Flash-Lite (cheapest/fastest) ──
+const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];
+const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash-lite'];
+
+// Compat aliases
+const MODEL_TEXT   = 'meta/llama-4-scout-17b-16e-instruct';
+const IMAGE_MODELS = NVIDIA_IMAGE_MODELS;
+
+// ── STATE ──────────────────────────────────────────────
+let lang='hi', mode='text', img64=null, loading=false;
+let history=[], activeChip=0;
+let xp=0, streak=0, solved=0, lastDate='';
+let recognition=null, isListening=false;
+const AVATAR_IMAGES = [
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Aarav&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Ananya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Vihaan&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Diya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Arjun&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Saanvi&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Rohan&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Ishita&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Karan&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Meera&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Aditya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Riya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Vivaan&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Pooja&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Yash&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Tanya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Kabir&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Anika&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Dev&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Sara&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Reyansh&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Kavya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Aryan&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Myra&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Shaurya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Navya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Vihan&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Aadhya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Krish&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
+"https://api.dicebear.com/9.x/adventurer/svg?seed=Zara&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf"
+];
+
+let userName='', userAvatar=0;
+
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch{return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+function loadState(){
+  lang=lsGet('sm_lang','hi');
+  history=lsGet('sm_hist',[]);
+  xp=lsGet('sm_xp',0);
+  streak=lsGet('sm_streak',0);
+  solved=lsGet('sm_solved',0);
+  lastDate=lsGet('sm_date','');
+  userName=lsGet('sm_username','');
+  userAvatar=lsGet('sm_avatar',0);
+  updateStreakCheck();
+  updateHeaderName();
+}
+
+function updateHeaderName(){
+  const el=document.getElementById('hdr-username');
+  if(el) el.textContent = userName ? userName : 'AI Solving Math';
+  const logoHex=document.querySelector('.logo-hex');
+  if(logoHex && userName && AVATAR_IMAGES[userAvatar]){
+    logoHex.innerHTML = `<img src="${AVATAR_IMAGES[userAvatar]}" style="width:100%;height:100%;object-fit:cover;border-radius:12px"><div class="logo-ping"></div>`;
+  }
+}
+
+function saveState(){
+  lsSet('sm_xp',xp); lsSet('sm_streak',streak);
+  lsSet('sm_solved',solved); lsSet('sm_date',lastDate);
+}
+
+function updateStreakCheck(){
+  const today=new Date().toDateString();
+  if(lastDate && lastDate!==today){
+    const diff=(new Date(today)-new Date(lastDate))/(1000*60*60*24);
+    if(diff>1){streak=0;lsSet('sm_streak',0);}
+  }
+}
+
+// ── STRINGS ──────────────────────────────────────────────
+const S={
+  hi:{flag:'🇮🇳',code:'HI',gr:'ऑनलाइन • हिंदी',tabT:'टेक्स्ट',tabI:'इमेज',tabV:'आवाज़',
+    stxt:'हल करें',utitle:'फोटो अपलोड करें',usub:'टैप करें या खींचकर लाएं',
+    phT:'अपना सवाल यहाँ लिखें...\nजैसे: 2x + 3 = 7, x = ?',phI:'अतिरिक्त जानकारी...',
+    noQ:'❌ पहले सवाल लिखें।',noImg:'❌ पहले फोटो अपलोड करें।',
+    noKey:'❌ API Key में समस्या है।',copy:'कॉपी करें',copied:'✓ कॉपी हो गया!',share:'शेयर करें',
+    htitle:'इतिहास',hclr:'🗑️ सब हटाएं',hemp:'कोई इतिहास नहीं',
+    ticker:'गणित • भौतिकी • रसायन विज्ञान • जीव विज्ञान • इतिहास • भूगोल • अंग्रेज़ी • हिंदी • कंप्यूटर साइंस • अर्थशास्त्र • सभी विषय 24/7 फ्री',
+    pills:['⚡ ऑटो','➕ गणित','⚛️ भौतिकी','🧪 रसायन','🌿 जीव विज्ञान','📚 जीके','🏛️ इतिहास','🌍 भूगोल','🇮🇳 हिंदी','🇬🇧 अंग्रेज़ी','💻 सीएस'],
+    bn:['टेक्स्ट','इमेज','इतिहास'],wtitle:'AI Solving Math',wsub:'टाइप करें, फोटो लें, और AI से तुरंत जवाब पाएं!',
+    chipLabel:'विषय चुनें',ltxt:'सोच रहा हूँ',spSub2:'हाल के सवाल',
+    failed:'❌ जवाब नहीं मिला — फिर से कोशिश करें',imgReady:'✅ इमेज तैयार है',
+    voiceStart:'बोल रहा हूँ... सुनिए',voiceStop:'प्रोसेस हो रहा है...',voiceErr:'आवाज़ नहीं मिली, फिर से कोशिश करें',
+    challenge:['2x + 5 = 13, x = ?','न्यूटन का तीसरा नियम क्या है?','H2O में कितने परमाणु हैं?','भारत की राजधानी क्या है?','√144 = ?'],
+    challengeHint:'टैप करके हल करें → +25 XP कमाएं',
+    quizTitle:'⚡ डेली क्विज़',quizSub:'सही जवाब दें, XP कमाएं!',
+    quizClose:'बंद करें',quizNext:'आगे →',quizDone:'✓ हो गया',quizAgain:'🔄 फिर से खेलें',
+    quizComplete:'क्विज़ पूरा हुआ!',quizScore:'आपका स्कोर:',quizAvail:'सवाल उपलब्ध हैं ✨',
+    quizShabad:'शाबाश! बहुत अच्छा! 🌟',quizAccha:'अच्छा किया! और अभ्यास करें 💪',quizTry:'कोई बात नहीं, फिर से कोशिश करें! 🔄',
+    quizWrong:'❌ गलत! सही जवाब:',quizResults:'🏆 परिणाम',
+    samjhaoBtn:'🤔 क्यों? (समझाएं)',samjhaoLoading:'समझा रहा हूँ...',samjhaoTitle:'💡 सिद्धांत समझें',
+    samjhaoFormula:'📐 फॉर्मूला / नियम:',samjhaoWhy:'🧠 ऐसा क्यों है?',samjhaoExample:'✏️ उदाहरण:'
+  },
+  en:{flag:'🇬🇧',code:'EN',gr:'Online • English',tabT:'Text',tabI:'Image',tabV:'Voice',
+    stxt:'Solve Now',utitle:'Upload Image',usub:'Tap or drag here',
+    phT:"Type your question...\nE.g. Solve: 2x + 3 = 7",phI:'Extra context...',
+    noQ:'❌ Please type a question first.',noImg:'❌ Please upload an image first.',
+    noKey:'❌ API Key issue.',copy:'Copy',copied:'✓ Copied!',share:'Share',
+    htitle:'History',hclr:'🗑️ Clear All',hemp:'No history yet',
+    ticker:'Math • Science • History • Geography • English • Hindi • Physics • Chemistry • Biology • CS • Economics • All Subjects 24/7 Free',
+    pills:['⚡ Auto','➕ Math','⚛️ Physics','🧪 Chem','🌿 Bio','📚 GK','🏛️ History','🌍 Geo','🇮🇳 Hindi','🇬🇧 English','💻 CS'],
+    bn:['Text','Image','History'],wtitle:'AI Solving Math',wsub:'Type it, snap it, get instant AI answers!',
+    chipLabel:'CHOOSE SUBJECT',ltxt:'Thinking',spSub2:'Recent questions',
+    failed:'❌ No response — try again',imgReady:'✅ Image ready',
+    voiceStart:'Listening... speak now',voiceStop:'Processing...',voiceErr:'Voice not detected, try again',
+    challenge:['Solve: 2x + 5 = 13','What is Newton\'s 3rd law?','How many atoms in H2O?','Capital of India?','√144 = ?'],
+    challengeHint:'Tap to solve → earn +25 XP',
+    quizTitle:'⚡ Daily Quiz',quizSub:'Answer correctly to earn XP!',
+    quizClose:'Close',quizNext:'Next →',quizDone:'✓ Done',quizAgain:'🔄 Play Again',
+    quizComplete:'Quiz Complete!',quizScore:'Your score:',quizAvail:'questions available ✨',
+    quizShabad:'Excellent! Outstanding! 🌟',quizAccha:'Good job! Keep practicing 💪',quizTry:'No worries, try again! 🔄',
+    quizWrong:'❌ Wrong! Correct answer:',quizResults:'🏆 Results',
+    samjhaoBtn:'🤔 Why? (Explain)',samjhaoLoading:'Explaining...',samjhaoTitle:'💡 Understand the Concept',
+    samjhaoFormula:'📐 Formula / Rule:',samjhaoWhy:'🧠 Why this works:',samjhaoExample:'✏️ Example:'
+  }
+};
+
+// ── AI QUIZ ENGINE (200 QUESTION POOL) ──────────────────
+// QUIZ_BANK se seedha pool banao — instant, no loading
+let QUIZ_POOL = [];       // Boot pe fill hoga
+let QUIZ_USED = new Set(); // jo pool question use ho chuke
+let quizPoolLoading = false;
+let quizPoolReady = false; // first use pe initialize hoga
+let QUIZ_POOL_LANG = null; // jis language ke liye pool bana tha
+
+const QUIZ_SUBJECTS = [
+  'Mathematics (algebra, geometry, arithmetic)',
+  'Physics (mechanics, electricity, optics)',
+  'Chemistry (elements, reactions, formulas)',
+  'Biology (cells, human body, plants)',
+  'General Knowledge (India, world, current affairs)',
+  'Computer Science (basics, internet, programming)',
+  'Geography (countries, capitals, rivers, mountains)',
+  'English Grammar (vocabulary, tenses, idioms)',
+  'History (ancient, medieval, modern India)',
+  'Economics (basic concepts, banking, finance)',
+];
+
+// Background mein silently 200 questions load karo
+async function preloadQuizPool() {
+  if (quizPoolLoading || quizPoolReady) return;
+  quizPoolLoading = true;
+
+  // 4 batches mein 50 questions each = 200 total
+  const BATCH_SIZE = 50;
+  const BATCHES = 4;
+
+  for (let batch = 0; batch < BATCHES; batch++) {
+    try {
+      const newQs = await fetchQuizBatch(BATCH_SIZE, QUIZ_POOL.length);
+      if (newQs && newQs.length > 0) {
+        QUIZ_POOL.push(...newQs);
+      }
+    } catch(e) {
+      console.warn('Batch', batch, 'failed:', e.message);
+    }
+    // Thoda wait taaki API pe load na pade
+    if (batch < BATCHES - 1) await new Promise(r => setTimeout(r, 800));
+  }
+
+  quizPoolLoading = false;
+  if (QUIZ_POOL.length >= 50) quizPoolReady = true;
+  console.log(`Quiz pool ready: ${QUIZ_POOL.length} questions`);
+}
+
+async function fetchQuizBatch(count, offset) {
+  // Subjects rotate karo variety ke liye
+  const subjects = [];
+  for (let i = 0; i < count; i++) {
+    subjects.push(QUIZ_SUBJECTS[(offset + i) % QUIZ_SUBJECTS.length]);
+  }
+
+  const langInstruction = lang==='en'
+    ? 'Generate questions and ALL options fully in English (no Hindi/Devanagari words at all).'
+    : 'Generate questions and ALL options in pure Hindi using Devanagari script only. Do NOT use Hinglish or Roman script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay as English/numerals, but everything else must be in Devanagari.';
+
+  const prompt = `Quiz master for Indian students. Generate exactly ${count} MCQ. Medium difficulty.
+
+Topics: ${subjects.join(', ')}
+
+Rules: 4 options, 1 correct, max 12 words/question, ans: 0=A 1=B 2=C 3=D
+${langInstruction}
+${lang!=='en'?`IMPORTANT: If an option is a full-form/definition/technical term that has a common Hindi translation (e.g. abbreviations like WWW, CPU, RAM, DNA, GDP), write the option in Hindi (Devanagari) instead of English. Numbers, units, formulas, proper nouns (names of people/places) can stay as-is.`:''}
+
+JSON only, no markdown:
+[{"q":"...","opts":["A","B","C","D"],"ans":0},...]`;
+
+  const resp = await callGemini(prompt);
+  const text = resp || '';
+  const clean = text.replace(/```json|```/g, '').trim();
+  try {
+    const jsonArr = clean.match(/\[[\s\S]*\]/);
+    if (!jsonArr) return [];
+    const parsed = JSON.parse(jsonArr[0]);
+    if (Array.isArray(parsed)) return parsed.slice(0, count);
+  } catch(e) { console.warn('Quiz JSON parse error:', e.message); }
+  return [];
+}
+
+// 10 fresh questions pool se nikaalo
+function pick10FromPool() {
+  // Language badal gayi — pool reset karo
+  if (QUIZ_POOL_LANG !== null && QUIZ_POOL_LANG !== lang) {
+    QUIZ_POOL = [];
+    QUIZ_USED.clear();
+    quizPoolReady = false;
+  }
+  QUIZ_POOL_LANG = lang;
+
+  // First use ya pool khatam — QUIZ_BANK se initialize karo
+  if (QUIZ_POOL.length === 0) {
+    QUIZ_POOL = shuffleArr([...(lang==='en' ? QUIZ_BANK_EN : QUIZ_BANK)]);
+    QUIZ_USED.clear();
+    quizPoolReady = true;
+  }
+
+  let available = QUIZ_POOL.filter((_, i) => !QUIZ_USED.has(i));
+  // Saare questions use ho gaye — re-shuffle karo
+  if (available.length < 10) {
+    QUIZ_USED.clear();
+    QUIZ_POOL = shuffleArr([...(lang==='en' ? QUIZ_BANK_EN : QUIZ_BANK)]);
+    available = [...QUIZ_POOL];
+  }
+
+  const picked = shuffleArr(available).slice(0, 10);
+  picked.forEach(q => {
+    const idx = QUIZ_POOL.indexOf(q);
+    if (idx >= 0) QUIZ_USED.add(idx);
+  });
+
+  // Last 30 questions bache to background mein 100 aur fetch karo
+  const remaining = QUIZ_POOL.length - QUIZ_USED.size;
+  if (remaining < 30 && !quizPoolLoading) {
+    setTimeout(() => fetchAndAppendMore(), 300);
+  }
+
+  return picked;
+}
+
+// NVIDIA se quiz questions fetch karo
+async function fetchQuizBatchNvidia(count, offset) {
+  const subjects = [];
+  for (let i = 0; i < count; i++) {
+    subjects.push(QUIZ_SUBJECTS[(offset + i) % QUIZ_SUBJECTS.length]);
+  }
+  const langInstruction2 = lang==='en'
+    ? 'Generate questions and ALL options fully in English (no Hindi/Devanagari words at all).'
+    : 'Generate questions and ALL options in pure Hindi using Devanagari script only. Do NOT use Hinglish or Roman script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay as English/numerals, but everything else must be in Devanagari.';
+
+  const prompt = `Generate exactly ${count} MCQ for Indian students. Medium difficulty.
+Topics: ${subjects.join(', ')}
+Rules: 4 options, 1 correct, max 12 words/question, ans: 0=A 1=B 2=C 3=D
+${langInstruction2}
+${lang!=='en'?`IMPORTANT: If an option is a full-form/definition/technical term that has a common Hindi translation (e.g. abbreviations like WWW, CPU, RAM, DNA, GDP), write the option in Hindi (Devanagari) instead of English. Numbers, units, formulas, proper nouns (names of people/places) can stay as-is.`:''}
+Return JSON array ONLY, no markdown, no explanation:
+[{"q":"...","opts":["A","B","C","D"],"ans":0},...]`;
+
+  // Try each NVIDIA NIM model
+  for(const model of NVIDIA_MODELS){
+    try{
+      const text=await callNvidiaNIM(prompt, model);
+      if(!text||!text.trim()) continue;
+      const jsonMatch=text.match(/\[[\s\S]*\]/);
+      if(!jsonMatch) continue;
+      const parsed=JSON.parse(jsonMatch[0]);
+      if(Array.isArray(parsed)&&parsed.length>0) return parsed.slice(0,count);
+    }catch(e){
+      console.warn('NVIDIA quiz batch model failed:',model,e.message);
+    }
+  }
+  return [];
+}
+
+// Background mein 100 aur questions — Anthropic + NVIDIA parallel
+async function fetchAndAppendMore() {
+  if (quizPoolLoading) return;
+  quizPoolLoading = true;
+  console.log('Fetching 100 more quiz questions in background...');
+  try {
+    // Anthropic: 2 batches × 50 = 100 questions
+    // NVIDIA: 2 batches × 50 = 100 questions
+    // Dono parallel chalao — jo pehle aaye woh pool mein add karo
+    const anthropicFetch = (async () => {
+      let count = 0;
+      for (let b = 0; b < 2; b++) {
+        try {
+          const qs = await fetchQuizBatch(50, QUIZ_POOL.length + count);
+          if (qs && qs.length > 0) { QUIZ_POOL.push(...qs); count += qs.length; }
+          if (b < 1) await new Promise(r => setTimeout(r, 500));
+        } catch(e) { console.warn('Anthropic quiz batch failed:', e.message); }
+      }
+      return count;
+    })();
+
+    const nvidiaFetch = (async () => {
+      let count = 0;
+      for (let b = 0; b < 2; b++) {
+        try {
+          const qs = await fetchQuizBatchNvidia(50, QUIZ_POOL.length + count);
+          if (qs && qs.length > 0) { QUIZ_POOL.push(...qs); count += qs.length; }
+          if (b < 1) await new Promise(r => setTimeout(r, 500));
+        } catch(e) { console.warn('NVIDIA quiz batch failed:', e.message); }
+      }
+      return count;
+    })();
+
+    const [aCount, nCount] = await Promise.all([anthropicFetch, nvidiaFetch]);
+    console.log(`Pool refreshed: +${aCount} Anthropic, +${nCount} NVIDIA. Total: ${QUIZ_POOL.length}`);
+  } catch(e) {
+    console.warn('Pool refresh failed:', e.message);
+  }
+  quizPoolLoading = false;
+}
+
+function shuffleArr(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Quiz ke liye 10 questions prepare karo (pool se)
+async function prepareQuizQuestions() {
+  return pick10FromPool();
+}
+
+// ── QUIZ_BANK — 60 built-in questions (instant, no API needed) ────────────
+const QUIZ_BANK_EN = [
+  // Mathematics
+  {q:'2 + 2 × 2 = ?',opts:['6','8','4','5'],ans:0},
+  {q:'What is √144?',opts:['11','12','13','14'],ans:1},
+  {q:'15% of 200 is?',opts:['25','30','35','40'],ans:1},
+  {q:'5! (5 factorial) = ?',opts:['25','100','120','150'],ans:2},
+  {q:'Sum of angles in a triangle?',opts:['90°','180°','270°','360°'],ans:1},
+  {q:'(-3) × (-4) = ?',opts:['-12','12','-7','7'],ans:1},
+  {q:'2⁸ = ?',opts:['64','128','256','512'],ans:2},
+  {q:'LCM of 4 and 6 = ?',opts:['12','24','8','6'],ans:0},
+  {q:'0.1 × 0.1 = ?',opts:['0.1','0.01','0.001','1'],ans:1},
+  {q:'Simple interest: P=100, R=10%, T=2yr?',opts:['10','15','20','25'],ans:2},
+  // Physics
+  {q:"What does Newton's 3rd law state?",opts:['Force = mass×acc','Every action has an equal reaction','Energy is conserved','Law of gravity'],ans:1},
+  {q:'Speed of sound in air (approx)?',opts:['300 m/s','343 m/s','400 m/s','500 m/s'],ans:1},
+  {q:"What is Ohm's law?",opts:['V=IR','P=IV','F=ma','E=mc²'],ans:0},
+  {q:'1 Watt = ?',opts:['1 J/s','1 N/m','1 kg/m','1 V/A'],ans:0},
+  {q:'Speed of light (approx)?',opts:['3×10⁶ m/s','3×10⁸ m/s','3×10¹⁰ m/s','3×10⁴ m/s'],ans:1},
+  {q:'Unit of electric current?',opts:['Volt','Ohm','Ampere','Watt'],ans:2},
+  // Chemistry
+  {q:'Chemical formula of water?',opts:['H2O','CO2','NaCl','H2SO4'],ans:0},
+  {q:'Formula of table salt?',opts:['NaOH','NaCl','KCl','MgCl2'],ans:1},
+  {q:'Atomic number of oxygen?',opts:['6','7','8','9'],ans:2},
+  {q:'Symbol of gold?',opts:['Go','Gd','Au','Ag'],ans:2},
+  {q:'Ratio of carbon to oxygen in CO2?',opts:['1:1','1:2','2:1','1:3'],ans:1},
+  {q:'pH of pure water?',opts:['5','6','7','8'],ans:2},
+  // Biology
+  {q:'Which gas is released in photosynthesis?',opts:['CO2','N2','O2','H2'],ans:2},
+  {q:'Full form of DNA?',opts:['Deoxyribonucleic Acid','Double Nucleic Acid','Diribonucleic Acid','Deoxyribose Acid'],ans:0},
+  {q:'How many bones in human body?',opts:['196','206','216','226'],ans:1},
+  {q:'Which vitamin comes from sunlight?',opts:['Vitamin A','Vitamin B','Vitamin C','Vitamin D'],ans:3},
+  {q:'What gives blood its red color?',opts:['Hemoglobin','Plasma','Platelet','WBC'],ans:0},
+  {q:'What is the smallest cell?',opts:['Neuron','Red Blood Cell','Mycoplasma','Egg Cell'],ans:2},
+  // General Knowledge
+  {q:"What is India's capital?",opts:['Mumbai','Delhi','Kolkata','Chennai'],ans:1},
+  {q:'How many states does India have (2024)?',opts:['26','28','29','30'],ans:1},
+  {q:'Which is the largest ocean?',opts:['Atlantic','Indian','Arctic','Pacific'],ans:3},
+  {q:'How often do Olympic Games happen?',opts:['Every 2 years','Every 3 years','Every 4 years','Every 5 years'],ans:2},
+  {q:'When did India gain independence?',opts:['1945','1946','1947','1948'],ans:2},
+  {q:'What is the highest mountain?',opts:['K2','Kangchenjunga','Mount Everest','Lhotse'],ans:2},
+  // Computer Science
+  {q:'Full form of WWW?',opts:['World Wide Web','World Web Wide','Wide World Web','Web World Wide'],ans:0},
+  {q:'1 byte = how many bits?',opts:['4','6','8','16'],ans:2},
+  {q:'Full form of CPU?',opts:['Central Processing Unit','Computer Processing Unit','Central Program Unit','Core Processing Unit'],ans:0},
+  {q:'Full form of HTML?',opts:['Hyper Text Markup Language','High Text Markup Language','Hyper Text Modern Language','Hyper Transfer Markup Language'],ans:0},
+  {q:'Full form of RAM?',opts:['Read Access Memory','Random Access Memory','Rapid Access Memory','Read And Memory'],ans:1},
+  {q:'Binary 10 = decimal?',opts:['1','2','3','4'],ans:1},
+  // Geography
+  {q:'Largest country by area?',opts:['China','USA','Canada','Russia'],ans:3},
+  {q:'Where is the Nile River?',opts:['Asia','Africa','Europe','South America'],ans:1},
+  {q:"India's longest river?",opts:['Yamuna','Ganga','Godavari','Narmada'],ans:1},
+  {q:'Pacific Ocean lies between which continents?',opts:['Asia-Africa','Asia/Australia and the Americas','Europe-Africa','Africa-Americas'],ans:1},
+  {q:'Smallest country in the world?',opts:['Monaco','San Marino','Vatican City','Maldives'],ans:2},
+  // English Grammar
+  {q:'"She __ to school daily." — correct word?',opts:['go','going','goes','gone'],ans:2},
+  {q:'Plural of "child"?',opts:['childs','childes','children','childrens'],ans:2},
+  {q:'Synonym of "happy"?',opts:['sad','angry','joyful','tired'],ans:2},
+  {q:'Antonym of "ancient"?',opts:['old','modern','classic','historic'],ans:1},
+  {q:'"I have been studying" — which tense is this?',opts:['Simple Past','Present Perfect Continuous','Past Continuous','Future Perfect'],ans:1},
+  // History
+  {q:"Who was India's first Prime Minister?",opts:['Sardar Patel','Subhas Chandra Bose','Jawaharlal Nehru','Rajendra Prasad'],ans:2},
+  {q:'Who founded the Mughal Empire?',opts:['Akbar','Humayun','Babur','Aurangzeb'],ans:2},
+  {q:'Who built the Taj Mahal?',opts:['Akbar','Shah Jahan','Jahangir','Aurangzeb'],ans:1},
+  {q:'When was the Battle of Plassey?',opts:['1757','1764','1857','1947'],ans:0},
+  // Economics
+  {q:'Full form of GDP?',opts:['Gross Domestic Product','General Domestic Product','Gross Domestic Production','Global Domestic Product'],ans:0},
+  {q:"What is India's currency?",opts:['Dollar','Pound','Rupee','Euro'],ans:2},
+  {q:'What does inflation mean?',opts:['Prices going down','Prices going up','Currency getting stronger','GDP increasing'],ans:1},
+  {q:'Full form of RBI?',opts:['Reserve Bank of India','Regional Bank of India','Rural Bank of India','Retail Bank of India'],ans:0},
+  {q:'What does "Bull market" mean?',opts:['Prices falling','Prices rising','Market is closed','Currency is weak'],ans:1},
+];
+
+const QUIZ_BANK = [
+  // Mathematics
+  {q:'2 + 2 × 2 = ?',opts:['6','8','4','5'],ans:0},
+  {q:'√144 कितना होता है?',opts:['11','12','13','14'],ans:1},
+  {q:'200 का 15% कितना है?',opts:['25','30','35','40'],ans:1},
+  {q:'5! (5 factorial) = ?',opts:['25','100','120','150'],ans:2},
+  {q:'एक त्रिभुज के कोणों का योग?',opts:['90°','180°','270°','360°'],ans:1},
+  {q:'(-3) × (-4) = ?',opts:['-12','12','-7','7'],ans:1},
+  {q:'2⁸ = ?',opts:['64','128','256','512'],ans:2},
+  {q:'4 और 6 का LCM = ?',opts:['12','24','8','6'],ans:0},
+  {q:'0.1 × 0.1 = ?',opts:['0.1','0.01','0.001','1'],ans:1},
+  {q:'साधारण ब्याज: P=100, R=10%, T=2 वर्ष?',opts:['10','15','20','25'],ans:2},
+  // Physics
+  {q:'न्यूटन के तीसरे नियम में क्या होता है?',opts:['बल = द्रव्यमान×त्वरण','हर क्रिया की बराबर प्रतिक्रिया होती है','ऊर्जा संरक्षित रहती है','गुरुत्वाकर्षण का नियम'],ans:1},
+  {q:'हवा में ध्वनि की गति (लगभग)?',opts:['300 m/s','343 m/s','400 m/s','500 m/s'],ans:1},
+  {q:'ओम का नियम क्या है?',opts:['V=IR','P=IV','F=ma','E=mc²'],ans:0},
+  {q:'1 वाट = ?',opts:['1 J/s','1 N/m','1 kg/m','1 V/A'],ans:0},
+  {q:'प्रकाश की गति (लगभग)?',opts:['3×10⁶ m/s','3×10⁸ m/s','3×10¹⁰ m/s','3×10⁴ m/s'],ans:1},
+  {q:'विद्युत धारा की इकाई?',opts:['वोल्ट','ओम','एम्पीयर','वाट'],ans:2},
+  // Chemistry
+  {q:'पानी का रासायनिक सूत्र?',opts:['H2O','CO2','NaCl','H2SO4'],ans:0},
+  {q:'टेबल सॉल्ट का सूत्र?',opts:['NaOH','NaCl','KCl','MgCl2'],ans:1},
+  {q:'ऑक्सीजन का परमाणु संख्या?',opts:['6','7','8','9'],ans:2},
+  {q:'सोने का प्रतीक?',opts:['Go','Gd','Au','Ag'],ans:2},
+  {q:'CO2 में कार्बन और ऑक्सीजन का अनुपात?',opts:['1:1','1:2','2:1','1:3'],ans:1},
+  {q:'शुद्ध पानी का pH?',opts:['5','6','7','8'],ans:2},
+  // Biology
+  {q:'प्रकाश संश्लेषण में कौन सी गैस निकलती है?',opts:['CO2','N2','O2','H2'],ans:2},
+  {q:'DNA का पूरा नाम?',opts:['डीऑक्सीराइबोन्यूक्लिइक एसिड','डबल न्यूक्लिइक एसिड','डाइराइबोन्यूक्लिइक एसिड','डीऑक्सीराइबोज एसिड'],ans:0},
+  {q:'मानव शरीर में कितनी हड्डियाँ होती हैं?',opts:['196','206','216','226'],ans:1},
+  {q:'कौन सा विटामिन सूर्य के प्रकाश से मिलता है?',opts:['विटामिन A','विटामिन B','विटामिन C','विटामिन D'],ans:3},
+  {q:'खून का लाल रंग किससे आता है?',opts:['हीमोग्लोबिन','प्लाज़्मा','प्लेटलेट','WBC'],ans:0},
+  {q:'सबसे छोटी कोशिका कौन सी है?',opts:['न्यूरॉन','लाल रक्त कोशिका','माइकोप्लाज़्मा','अंडाणु'],ans:2},
+  // General Knowledge
+  {q:'भारत की राजधानी कहाँ है?',opts:['मुंबई','दिल्ली','कोलकाता','चेन्नई'],ans:1},
+  {q:'भारत में कितने राज्य हैं (2024)?',opts:['26','28','29','30'],ans:1},
+  {q:'सबसे बड़ा महासागर कौन सा है?',opts:['अटलांटिक','हिंद महासागर','आर्कटिक','प्रशांत'],ans:3},
+  {q:'ओलंपिक खेल कितने साल में एक बार होते हैं?',opts:['2','3','4','5'],ans:2},
+  {q:'भारत को स्वतंत्रता कब मिली?',opts:['1945','1946','1947','1948'],ans:2},
+  {q:'सबसे ऊँचा पर्वत कौन सा है?',opts:['K2','कंचनजंगा','माउंट एवरेस्ट','ल्होत्से'],ans:2},
+  // Computer Science
+  {q:'WWW का पूरा नाम?',opts:['वर्ल्ड वाइड वेब','वर्ल्ड वेब वाइड','वाइड वर्ल्ड वेब','वेब वर्ल्ड वाइड'],ans:0},
+  {q:'1 बाइट = कितने बिट्स?',opts:['4','6','8','16'],ans:2},
+  {q:'CPU का पूरा नाम?',opts:['सेंट्रल प्रोसेसिंग यूनिट','कंप्यूटर प्रोसेसिंग यूनिट','सेंट्रल प्रोग्राम यूनिट','कोर प्रोसेसिंग यूनिट'],ans:0},
+  {q:'HTML का पूरा नाम?',opts:['हाइपर टेक्स्ट मार्कअप लैंग्वेज','हाई टेक्स्ट मार्कअप लैंग्वेज','हाइपर टेक्स्ट मॉडर्न लैंग्वेज','हाइपर ट्रांसफर मार्कअप लैंग्वेज'],ans:0},
+  {q:'RAM का पूरा नाम?',opts:['रीड एक्सेस मेमोरी','रैंडम एक्सेस मेमोरी','रैपिड एक्सेस मेमोरी','रीड एंड मेमोरी'],ans:1},
+  {q:'बाइनरी में 10 = दशमलव में?',opts:['1','2','3','4'],ans:1},
+  // Geography
+  {q:'क्षेत्रफल में दुनिया का सबसे बड़ा देश?',opts:['चीन','अमेरिका','कनाडा','रूस'],ans:3},
+  {q:'नील नदी कहाँ है?',opts:['एशिया','अफ्रीका','यूरोप','दक्षिण अमेरिका'],ans:1},
+  {q:'भारत की सबसे लंबी नदी?',opts:['यमुना','गंगा','गोदावरी','नर्मदा'],ans:1},
+  {q:'प्रशांत महासागर किन दो महाद्वीपों के बीच है?',opts:['एशिया-अफ्रीका','एशिया/ऑस्ट्रेलिया और अमेरिका','यूरोप-अफ्रीका','अफ्रीका-अमेरिका'],ans:1},
+  {q:'दुनिया का सबसे छोटा देश?',opts:['मोनाको','सैन मैरिनो','वैटिकन सिटी','मालदीव'],ans:2},
+  // English Grammar
+  {q:'"She __ to school daily." — सही शब्द?',opts:['go','going','goes','gone'],ans:2},
+  {q:'"child" का बहुवचन?',opts:['childs','childes','children','childrens'],ans:2},
+  {q:'"happy" का समानार्थी शब्द?',opts:['sad','angry','joyful','tired'],ans:2},
+  {q:'"ancient" का विलोम शब्द?',opts:['old','modern','classic','historic'],ans:1},
+  {q:'"I have been studying" — यह कौन सा tense है?',opts:['Simple Past','Present Perfect Continuous','Past Continuous','Future Perfect'],ans:1},
+  // History
+  {q:'भारत के पहले प्रधानमंत्री कौन थे?',opts:['सरदार पटेल','सुभाष चंद्र बोस','जवाहरलाल नेहरू','राजेंद्र प्रसाद'],ans:2},
+  {q:'मुग़ल साम्राज्य की स्थापना किसने की?',opts:['अकबर','हुमायूँ','बाबर','औरंगज़ेब'],ans:2},
+  {q:'ताज महल किसने बनवाया?',opts:['अकबर','शाहजहाँ','जहाँगीर','औरंगज़ेब'],ans:1},
+  {q:'प्लासी का युद्ध कब हुआ?',opts:['1757','1764','1857','1947'],ans:0},
+  // Economics
+  {q:'GDP का पूरा नाम?',opts:['ग्रॉस डोमेस्टिक प्रोडक्ट','जनरल डोमेस्टिक प्रोडक्ट','ग्रॉस डोमेस्टिक प्रोडक्शन','ग्लोबल डोमेस्टिक प्रोडक्ट'],ans:0},
+  {q:'भारत की मुद्रा क्या है?',opts:['डॉलर','पाउंड','रुपया','यूरो'],ans:2},
+  {q:'महंगाई (inflation) का मतलब क्या है?',opts:['कीमतें कम होना','कीमतें ज़्यादा होना','मुद्रा मज़बूत होना','GDP बढ़ना'],ans:1},
+  {q:'RBI का पूरा नाम?',opts:['रिज़र्व बैंक ऑफ़ इंडिया','रीजनल बैंक ऑफ़ इंडिया','रूरल बैंक ऑफ़ इंडिया','रिटेल बैंक ऑफ़ इंडिया'],ans:0},
+  {q:'शेयर बाज़ार में "Bull market" का मतलब?',opts:['कीमतें गिर रही हैं','कीमतें बढ़ रही हैं','बाज़ार बंद है','मुद्रा कमज़ोर है'],ans:1},
+];
+
+// Backup questions (used only if AI fails)
+const QUIZ_BACKUP = [
+  {q:'2 + 2 × 2 = ?',opts:['6','8','4','5'],ans:0},
+  {q:'Paani ka chemical formula kya hai?',opts:['H2O','CO2','NaCl','O2'],ans:0},
+  {q:'Newton ne kitne laws diye the?',opts:['2','3','4','1'],ans:1},
+  {q:'√64 kitna hota hai?',opts:['6','7','8','9'],ans:2},
+  {q:'Bharat ki rajdhani kahan hai?',opts:['Mumbai','Delhi','Kolkata','Chennai'],ans:1},
+  {q:'1 kilometre mein kitne metres hote hain?',opts:['100','500','1000','10000'],ans:2},
+  {q:'Photosynthesis mein kaunsi gas release hoti hai?',opts:['CO2','N2','O2','H2'],ans:2},
+  {q:'Earth ek chakkar kitne din mein lagaati hai?',opts:['24 hours','12 hours','365 days','30 days'],ans:2},
+  {q:'Light ki speed kitni hoti hai?',opts:['3×10⁸ m/s','3×10⁶ m/s','3×10⁴ m/s','3×10¹⁰ m/s'],ans:0},
+  {q:'DNA ka full form kya hai?',opts:['डीऑक्सीराइबोज न्यूक्लिइक एसिड','डीऑक्सीराइबोन्यूक्लिइक एसिड','डाइराइबोन्यूक्लिइक एसिड','डबल न्यूक्लिइक एसिड'],ans:1},
+];
+
+// ── INIT ──────────────────────────────────────────────
+function applyLang(){
+  const s=S[lang];
+  document.getElementById('lang-flag').textContent=s.flag;
+  document.getElementById('lang-code').textContent=s.code;
+  document.getElementById('gr-tag').textContent=s.gr;
+  document.getElementById('ticker-txt').textContent=s.ticker;
+  document.getElementById('tab-t-lbl').textContent=s.tabT;
+  document.getElementById('tab-i-lbl').textContent=s.tabI;
+  const tabV=document.getElementById('tab-v-lbl');if(tabV)tabV.textContent=s.tabV;
+  document.getElementById('go-txt').textContent=s.stxt;
+  document.getElementById('lt-label').textContent=s.ltxt;
+  document.getElementById('w-title').textContent=s.wtitle;
+  document.getElementById('w-sub').textContent=s.wsub;
+  document.getElementById('chip-label').textContent=s.chipLabel;
+  document.getElementById('iz-title').textContent=s.utitle;
+  document.getElementById('iz-sub').textContent=s.usub;
+  document.getElementById('sp-title-txt').textContent=s.htitle;
+  document.getElementById('sp-sub-txt').textContent=s.spSub2;
+  document.getElementById('del-all-btn').textContent=s.hclr;
+  document.getElementById('qt').placeholder=s.phT;
+  document.getElementById('qc').placeholder=s.phI;
+  document.getElementById('nb-t-lbl').textContent=s.bn[0];
+  document.getElementById('nb-i-lbl').textContent=s.bn[1];
+  document.getElementById('nb-h-lbl').textContent=s.bn[2];
+  // Quiz modal language update (if open)
+  const quizSub=document.getElementById('quiz-sub');
+  if(quizSub)quizSub.textContent=s.quizSub;
+  const qClose=document.getElementById('quiz-close-btn');
+  if(qClose&&qClose.textContent!=='✓ Done'&&qClose.textContent!=='✓ Ho Gaya')qClose.textContent=s.quizClose;
+  document.getElementById('ch-hint')?.remove();
+  renderChips(); renderHistory(); updateStatsUI(); updateXpBar();
+}
+
+function renderChips(){
+  document.getElementById('chips').innerHTML=S[lang].pills.map((p,i)=>
+    `<div class="chip${i===activeChip?' act':''}" onclick="setChip(${i})">${p}</div>`
+  ).join('');
+}
+function setChip(i){activeChip=i;renderChips();}
+function switchLang(){lang=lang==='hi'?'en':'hi';lsSet('sm_lang',lang);applyLang();}
+
+function switchMode(m){
+  mode=m;
+  document.getElementById('text-panel').style.display=m==='text'?'block':'none';
+  document.getElementById('img-panel').style.display=m==='image'?'block':'none';
+  document.getElementById('tab-text')?.classList.toggle('act',m==='text');
+  document.getElementById('tab-image')?.classList.toggle('act',m==='image');
+  document.getElementById('nb-text')?.classList.toggle('act',m==='text');
+  document.getElementById('nb-image')?.classList.toggle('act',m==='image');
+}
+
+function updateProgress(){
+  const t=document.getElementById('qt').value;
+  const wc=t.trim()?t.trim().split(/\s+/).filter(Boolean).length:0;
+  document.getElementById('wc-badge').textContent=wc+' words';
+  const pct=Math.min((t.length/500)*100,100);
+  const fill=document.getElementById('prog-fill');
+  fill.style.width=pct+'%';
+  fill.style.background=pct>80?'linear-gradient(90deg,#f87171,#fb923c)':'linear-gradient(90deg,#06b6d4,#6366f1,#8b5cf6)';
+}
+
+// ── GAMIFICATION ──────────────────────────────────────
+function addXP(pts,label=''){
+  xp+=pts;
+  const today=new Date().toDateString();
+  if(lastDate!==today){streak++;lastDate=today;}
+  saveState(); updateStatsUI(); updateXpBar();
+  showXpToast(`+${pts} XP${label?' — '+label:''} 🎉`);
+  lbSyncMe();
+  if(myGuild){
+    const me={xp};
+    const totalXP=[...(myGuild.members||[]), me].reduce((s,m)=>s+m.xp,0);
+    guildSyncMine(totalXP, (myGuild.members||[]).length+1);
+  }
+}
+
+function updateStatsUI(){
+  document.getElementById('stat-solved').textContent=solved;
+  document.getElementById('stat-xp').textContent=xp;
+  document.getElementById('stat-streak').textContent=streak+'🔥';
+  document.getElementById('streak-val').textContent=streak;
+}
+
+function updateXpBar(){
+  const lvl=Math.floor(xp/100)+1;
+  const pct=(xp%100);
+  document.getElementById('xp-bar-fill').style.width=pct+'%';
+  document.getElementById('level-badge').textContent='LVL '+lvl;
+}
+
+function showXpToast(msg){
+  const t=document.getElementById('xp-toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── IMAGE ──────────────────────────────────────────────
+function triggerGallery(){
+  const inp=document.getElementById('file-inp');
+  inp.removeAttribute('capture');
+  inp.click();
+}
+function openCamera(){
+  const inp=document.getElementById('camera-inp');
+  inp.click();
+}
+
+// img-zone tap = gallery
+document.addEventListener('DOMContentLoaded',()=>{
+  const zone=document.getElementById('img-zone');
+  if(zone) zone.addEventListener('click',triggerGallery);
+  fetchRuntimeKeys();
+});
+
+function handleImg(input){
+  const file=input.files[0]; if(!file)return;
+  img64=null;
+  document.getElementById('img-zone').style.display='none';
+  document.getElementById('img-preview-wrap').style.display='block';
+  document.getElementById('img-ld').classList.add('on');
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    const im=new Image();
+    im.onload=()=>{
+      const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+      let max=1100,w=im.width,h=im.height;
+      if(w>h&&w>max){h=Math.round(h*max/w);w=max;}
+      else if(h>max){w=Math.round(w*max/h);h=max;}
+      cv.width=w;cv.height=h;
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+      ctx.drawImage(im,0,0,w,h);
+      let q=0.88,url=cv.toDataURL('image/jpeg',q);
+      while(url.length>1400000&&q>0.15){q-=0.1;url=cv.toDataURL('image/jpeg',q);}
+      img64=url.split(',')[1];
+      document.getElementById('preview-img').src=url;
+      document.getElementById('img-ld').classList.remove('on');
+      setSt(`${S[lang].imgReady} (${Math.round(img64.length*0.75/1024)}KB)`);
+    };
+    im.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('img-zone').classList.remove('drag');
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('image/')){
+    const dt=new DataTransfer(); dt.items.add(file);
+    const inp=document.getElementById('file-inp'); inp.files=dt.files;
+    handleImg(inp);
+  }
+}
+
+function removeImg(){
+  img64=null;
+  document.getElementById('img-zone').style.display='block';
+  document.getElementById('img-preview-wrap').style.display='none';
+  document.getElementById('file-inp').value='';
+  setSt('');
+}
+
+function setSt(msg,err=false){
+  const el=document.getElementById('st-msg');
+  el.textContent=msg;
+  el.className='st-msg'+(msg?' show':'')+(err?' err':'');
+}
+
+// ── VOICE INPUT ──────────────────────────────────────────
+function toggleVoice(){
+  if(isListening)stopVoice(); else startVoice();
+}
+
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setSt('❌ Browser voice support nahi karta',true);return;}
+  recognition=new SR();
+  recognition.lang=lang==='hi'?'hi-IN':'en-US';
+  recognition.continuous=false; recognition.interimResults=true;
+  recognition.onstart=()=>{
+    isListening=true;
+    document.getElementById('mic-btn').classList.add('listening');
+    const _me=document.getElementById('mic-emoji'); if(_me) _me.textContent='🔴';
+    const _vs=document.getElementById('voice-status'); if(_vs) _vs.textContent=S[lang].voiceStart;
+    const _vt=document.getElementById('voice-transcript'); if(mode==='voice'&&_vt) _vt.textContent='';
+  };
+  recognition.onresult=(e)=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    const _vt2=document.getElementById('voice-transcript');
+    if(mode==='voice'){ if(_vt2) _vt2.textContent=t; }
+    else{ document.getElementById('qt').value=t; updateProgress(); }
+  };
+  recognition.onend=()=>{
+    isListening=false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    const _me2=document.getElementById('mic-emoji'); if(_me2) _me2.textContent='🎤';
+    if(mode==='voice'){
+      const _vt3=document.getElementById('voice-transcript');
+      const t=_vt3 ? _vt3.textContent : '';
+      if(t){ document.getElementById('qt').value=t; switchMode('text'); setTimeout(()=>solve(),300); }
+    }
+  };
+  recognition.onerror=()=>{
+    isListening=false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    const _me3=document.getElementById('mic-emoji'); if(_me3) _me3.textContent='🎤';
+    setSt(S[lang].voiceErr,true);
+  };
+  recognition.start();
+}
+
+function stopVoice(){
+  if(recognition){recognition.stop();}
+}
+
+// ══════════════════════════════════════════════════════
+// 🔧 API HELPER — messages builder (OpenAI format)
+// ══════════════════════════════════════════════════════
+function buildMessages(userContent){
+  if(typeof userContent === 'string'){
+    return [{role:'user', content: userContent}];
+  }
+  const parts = userContent.map(item => {
+    if(item.type === 'text')  return {type:'text', text: item.text};
+    if(item.type === 'image') return {type:'image_url', image_url:{url:'data:image/jpeg;base64,'+item.data}};
+    return null;
+  }).filter(Boolean);
+  return [{role:'user', content: parts}];
+}
+
+// ══════════════════════════════════════════════════════
+// 📡 SSE STREAM READER — har chunk ko real-time parse karo
+// ══════════════════════════════════════════════════════
+async function readSSEStream(response, onChunk){
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    buffer += decoder.decode(value, {stream:true});
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // incomplete line wapis buffer mein
+    for(const line of lines){
+      const trimmed = line.trim();
+      if(!trimmed || trimmed === 'data: [DONE]') continue;
+      if(trimmed.startsWith('data: ')){
+        try{
+          const json = JSON.parse(trimmed.slice(6));
+          const chunk = json.choices?.[0]?.delta?.content || '';
+          if(chunk) onChunk(chunk);
+        } catch(e){ /* incomplete JSON ignore */ }
+      }
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// 🟢 TIER 1 — NVIDIA NIM STREAMING
+// ══════════════════════════════════════════════════════
+async function callNvidiaNIM(userContent, model, onChunk=null){
+  const streaming = !!onChunk;
+  const res = await fetch(NVIDIA_BASE + '/chat/completions', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
+    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, temperature:0.3, stream: streaming})
+  });
+  if(!res.ok){
+    const data = await res.json().catch(()=>({}));
+    throw new Error('NV:' + (data.detail || data.error?.message || res.status));
+  }
+  if(streaming){
+    let full = '';
+    await readSSEStream(res, chunk => { full += chunk; onChunk(chunk); });
+    if(!full.trim()) throw new Error('NV_EMPTY');
+    return full;
+  }
+  const data = await res.json().catch(()=>({}));
+  const text = data.choices?.[0]?.message?.content || '';
+  if(!text.trim()) throw new Error('NV_EMPTY');
+  return text;
+}
+
+// ══════════════════════════════════════════════════════
+// 🟡 TIER 2 — OPENROUTER STREAMING
+// ══════════════════════════════════════════════════════
+async function callOpenRouterModel(userContent, model, onChunk=null){
+  const streaming = !!onChunk;
+  const keys = [OPENROUTER_KEY, OPENROUTER_KEY2].filter(k => k && k.length > 10);
+  let lastErr = null;
+  for(const key of keys){
+    try{
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+key,
+          'HTTP-Referer':'https://ai-solving-math.app',
+          'X-Title':'AI Solving Math'
+        },
+        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, stream: streaming})
+      });
+      if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
+      if(streaming){
+        let full = '';
+        await readSSEStream(res, chunk => { full += chunk; onChunk(chunk); });
+        if(!full.trim()) throw new Error('OR_EMPTY');
+        return full;
+      }
+      const data = await res.json().catch(()=>({}));
+      if(data.error){ lastErr=new Error('OR_ERR'); continue; }
+      const text = data.choices?.[0]?.message?.content || '';
+      if(text.trim()) return text;
+      lastErr = new Error('OR_EMPTY');
+    } catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('OR_FAILED');
+}
+
+// ══════════════════════════════════════════════════════
+// 🔵 TIER 3 — GEMINI STREAMING (SSE)
+// ══════════════════════════════════════════════════════
+async function callGeminiModel(userContent, model, onChunk=null){
+  if(!GEMINI_KEY) throw new Error('NO_GEMINI_KEY');
+  const streaming = !!onChunk;
+  let parts;
+  if(typeof userContent === 'string'){
+    parts = [{text: userContent}];
+  } else {
+    parts = userContent.map(item => {
+      if(item.type === 'text')  return {text: item.text};
+      if(item.type === 'image') return {inline_data:{mime_type:'image/jpeg', data: item.data}};
+      return null;
+    }).filter(Boolean);
+  }
+  const endpoint = streaming ? 'streamGenerateContent?alt=sse' : 'generateContent';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}${endpoint.includes('?') ? '&' : '?'}key=${GEMINI_KEY}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens:3000, temperature:0.3}})
+  });
+  if(!res.ok){
+    const data = await res.json().catch(()=>({}));
+    throw new Error('GM:' + (data.error?.message || res.status));
+  }
+  if(streaming){
+    // Gemini SSE: each data line has candidates[0].content.parts[].text
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', full = '';
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for(const line of lines){
+        const trimmed = line.trim();
+        if(!trimmed || trimmed==='data: [DONE]') continue;
+        if(trimmed.startsWith('data: ')){
+          try{
+            const json = JSON.parse(trimmed.slice(6));
+            const chunk = json.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
+            if(chunk){ full += chunk; onChunk(chunk); }
+          } catch(e){}
+        }
+      }
+    }
+    if(!full.trim()) throw new Error('GM_EMPTY');
+    return full;
+  }
+  const data = await res.json().catch(()=>({}));
+  const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
+  if(!text.trim()) throw new Error('GM_EMPTY');
+  return text;
+}
+
+// ══════════════════════════════════════════════════════
+// 🚀 MAIN ENGINE — 3-TIER AUTO FALLBACK
+//  NVIDIA → OpenRouter → Gemini (sabse cheap aakhri try)
+// ══════════════════════════════════════════════════════
+async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
+
+  // ── TIER 1: NVIDIA NIM ──────────────────────────────
+  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
+  for(const model of nvModels){
+    try{
+      console.log('[T1] NVIDIA:', model);
+      const r = await callNvidiaNIM(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T1] ✅ NVIDIA success'); return r; }
+    } catch(e){ console.warn('[T1] NVIDIA failed:', model, e.message); }
+  }
+
+  // ── TIER 2: OPENROUTER ──────────────────────────────
+  console.warn('[T2] NVIDIA failed → OpenRouter...');
+  const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
+  for(const model of orModels){
+    try{
+      console.log('[T2] OpenRouter:', model);
+      const r = await callOpenRouterModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); return r; }
+    } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); }
+  }
+
+  // ── TIER 3: GEMINI (cheapest, aakhri try) ───────────
+  console.warn('[T3] OpenRouter failed → Gemini...');
+  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
+  let lastErr;
+  for(const model of gmModels){
+    try{
+      console.log('[T3] Gemini:', model);
+      const r = await callGeminiModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T3] ✅ Gemini success'); return r; }
+    } catch(e){ console.warn('[T3] Gemini failed:', model, e.message); lastErr = e; }
+  }
+
+  throw lastErr || new Error('ALL_3_TIERS_FAILED');
+}
+
+// ── Legacy aliases ─────────────────────────────────────
+async function callGemini(userContent){ return await callGeminiDirect(userContent); }
+async function callNvidiaFallback(userContent){ return await callWithAutoFallback(userContent, false); }
+async function callNvidia(userContent, model){ return await callNvidiaNIM(userContent, model); }
+async function callWithImageFallback(userContent){ return await callWithAutoFallback(userContent, true); }
+async function callAnthropic(userContent){ return await callWithAutoFallback(userContent, false); }
+async function callGeminiDirect(userContent){
+  for(const model of GEMINI_TEXT_MODELS){
+    try{
+      const r = await callGeminiModel(userContent, model);
+      if(r && r.trim()) return r;
+    } catch(e){ console.warn('GeminiDirect failed:', model, e.message); }
+  }
+  return await callWithAutoFallback(userContent, false);
+}
+async function callOpenRouter(userContent, model){ return await callOpenRouterModel(userContent, model); }
+
+// ── SOLVE ──────────────────────────────────────────────
+async function solve(){
+  const s=S[lang];
+  const qt=document.getElementById('qt').value.trim();
+  const qc=document.getElementById('qc').value.trim();
+  if(loading)return;
+  if(mode==='text'&&!qt){setSt(s.noQ,true);return;}
+  if(mode==='image'&&!img64){setSt(s.noImg,true);return;}
+
+  loading=true; setSt('');
+  document.getElementById('go-btn').disabled=true;
+  // loading-wrap hidden (thinking shown in chat now)
+  document.getElementById('welcome').style.display='none';
+
+  const displayQ=mode==='image'?(qc||'📷 Image Question'):qt;
+  const subject=activeChip>0?S[lang].pills[activeChip]:'';
+
+  // ── System prompt (text + image common) ───────────────
+  const sys=`You are AI Solving Math, a smart tutor made by Harsh.
+If asked your name or identity: say only "Main hoon AI Solving Math, made by Harsh."
+Language rule: ${lang==='hi' ? 'Reply ONLY in pure Hindi using Devanagari script (शुद्ध हिंदी). Do NOT use Hinglish or Roman/English script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay in English/numerals, but all sentences and explanations must be written in Devanagari script.' : 'Reply in English.'}
+${subject?`Subject context: ${subject}`:''}
+
+RESPONSE FORMAT RULES (follow strictly):
+- NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
+- ANY math/calculation → show each step on new line, final answer bold. EXACTLY like this example:
+<div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
+- For algebra/equation → same format, each line one operation, last line is Answer bold.
+- LANGUAGE/GRAMMAR/THEORY/CONCEPT/GK → ONLY: <div class="step">Full explanation in flowing sentences. No bullets. No numbered steps. One paragraph.</div>
+- Be FAST. Give answer directly. No intro text. No explanation unless asked.
+- OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
+
+  // ── Image-specific prompt (sabhi questions solve karo) ──
+  const imgPrompt=`${sys}
+
+IMAGE ANALYSIS RULES — FOLLOW STRICTLY:
+1. SCAN the ENTIRE image carefully from top to bottom, left to right.
+2. FIND every single question, problem, exercise, or sub-part visible — even if they are numbered (Q1, Q2, 1., 2., a), b) etc.).
+3. SOLVE EACH AND EVERY question one by one. DO NOT skip any question. DO NOT solve only the first one.
+4. For EACH question, wrap its answer in a separate numbered heading like:
+   <div class="step"><strong>Q1.</strong> [question text here]<br>[step-by-step solution]<br><strong>Answer: [final answer]</strong></div>
+5. If multiple subjects/topics are in the image (Math + Science + English etc.), solve ALL of them.
+6. If a question has sub-parts (a, b, c), solve EVERY sub-part separately.
+7. NEVER say "I can only see one question" — look harder and list every visible text/problem.
+8. OUTPUT: Only raw HTML. No markdown. No extra explanation outside HTML tags.
+
+Context from user: ${qc||'Solve all questions in this image'}
+
+Now solve EVERY question visible in the image:`;
+
+  let userContent;
+  if(mode==='image'){
+    userContent=[
+      {type:'text', text: imgPrompt},
+      {type:'image', data: img64}
+    ];
+  } else {
+    userContent=`${sys}\n\nQuestion: ${qt}`;
+  }
+
+  // ── Chat card pehle create karo (streaming ke liye) ──
+  const id = 'id-' + Date.now();
+  appendStreamCard(id, displayQ);
+
+  // ── Thinking indicator chat mein dikhao (card ke upar) ──
+  const thinkId = id + '-think';
+  const thinkEl = document.createElement('div');
+  thinkEl.id = thinkId;
+  thinkEl.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--s1);border:1px solid var(--b2);margin-bottom:10px;animation:fadeUp .3s ease">
+    <div class="orbit-logo" style="width:32px;height:32px;flex-shrink:0"><div class="orbit-ring"></div><div class="orbit-dot od1"></div><div class="orbit-dot od2"></div><div class="orbit-dot od3"></div></div>
+    <div class="typing-label">Thinking...</div>
+  </div>`;
+  const _wrap = document.getElementById(id+'-wrap');
+  if(_wrap) _wrap.insertBefore(thinkEl, _wrap.firstChild);
+
+  // ── Raw text buffer collect karo streaming chunks se ──
+  let rawBuffer = '';
+  let renderTimer = null;
+  const bodyEl = document.getElementById(id + '-body');
+
+  function flushRender(){
+    if(!bodyEl) return;
+    const html = cleanHtml(rawBuffer);
+    bodyEl.innerHTML = html;
+    // Typing cursor show karo
+    // stream-cursor removed
+    if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
+  }
+
+  let cardShown = false;
+  function onChunk(chunk){
+    rawBuffer += chunk;
+    // Show card + remove thinking on first chunk
+    if(!cardShown){
+      cardShown = true;
+      const card = document.getElementById(id+'-card');
+      if(card) card.style.display = '';
+      const think = document.getElementById(id+'-think');
+      if(think) think.remove();
+    }
+    // Throttle: har 80ms render karo
+    if(!renderTimer){
+      renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(); }, 80);
+    }
+  }
+
+  try{
+    const rawText = await callWithAutoFallback(userContent, mode==='image', onChunk);
+
+    // ── Final render — cursor hatao, samjhao buttons lagao ──
+    if(renderTimer){ clearTimeout(renderTimer); renderTimer=null; }
+    const finalHtml = cleanHtml(rawText || rawBuffer);
+    if(!finalHtml.trim()){
+      bodyEl.innerHTML = lang==='hi' ? '❌ खाली जवाब मिला, फिर से कोशिश करें' : '❌ Empty response, try again';
+      return;
+    }
+    const enriched = injectSamjhaoButtons(finalHtml, id);
+    bodyEl.style.display = 'block';
+    bodyEl.innerHTML = enriched;
+
+    // Update gamification
+    solved++;
+    addXP(10, 'Question solved');
+    const item = {id, q:displayQ, html:finalHtml, t:new Date().toISOString()};
+    history.unshift(item);
+    if(history.length>80) history = history.slice(0,80);
+    lsSet('sm_hist', history);
+    renderHistory();
+
+    if(mode==='text'){document.getElementById('qt').value=''; updateProgress();}
+    else{removeImg(); document.getElementById('qc').value='';}
+    setSt('');
+
+    if(needsGraph(displayQ)) setTimeout(()=>renderGraph(id, displayQ), 200);
+    if(window.MathJax?.typesetPromise) setTimeout(()=>window.MathJax.typesetPromise([bodyEl]), 100);
+    setTimeout(()=>document.getElementById(id+'-wrap')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
+
+  }catch(e){
+    console.error('All APIs failed:',e);
+    const _errQ = document.getElementById('qt') ? document.getElementById('qt').value.trim() : '';
+    if(bodyEl) bodyEl.innerHTML = lang==='hi'
+      ? `<div style="color:#f87171">❌ जवाब नहीं मिला — इंटरनेट चेक करें या फिर से कोशिश करें</div>
+         <button onclick="document.getElementById('qt').value='${_errQ.replace(/'/g,"\'")}';this.closest('.ai-card').style.display='none';solve();" 
+           style="margin-top:10px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">🔄 फिर से कोशिश करें</button>`
+      : `<div style="color:#f87171">❌ Could not get answer — Check internet & try again</div>
+         <button onclick="document.getElementById('qt').value='${_errQ.replace(/'/g,"\'")}';this.closest('.ai-card').style.display='none';solve();" 
+           style="margin-top:10px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">🔄 Try Again</button>`;
+    setSt('', false);
+  }finally{
+    // Always show card (even on error)
+    const _card = document.getElementById(id+'-card');
+    if(_card) _card.style.display = '';
+    // Remove thinking indicator
+    const _think = document.getElementById(id+'-think');
+    if(_think) _think.remove();
+    loading=false;
+    document.getElementById('go-btn').disabled=false;
+    // loading-wrap off
+  }
+}
+
+function cleanHtml(text){
+  if(!text)return'';
+  // Strip code fences
+  text=text.replace(/```html/gi,'').replace(/```/g,'').trim();
+  // Convert **bold** → <strong>
+  text=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  // Remove remaining single stars
+  text=text.replace(/\*([^*]+)\*/g,'$1');
+
+  // Already valid HTML — return as-is (handles Q1/Q2 multi-answer divs)
+  if(text.includes('<div class="step">')||text.includes('<ol>')||text.includes('<li>')){
+    return text;
+  }
+
+  // ── Markdown Q1./Q2. style → numbered question blocks ──
+  // Pattern: "Q1." or "1." or "Question 1:" at start of line
+  if(/^(Q\d+[\.:]|\d+[\.)]|Question\s*\d+[\.:])\s/im.test(text)){
+    const lines = text.split(/\n+/).filter(l=>l.trim());
+    let html='';
+    let curBlock='';
+    let curQ='';
+
+    const isQHeader = l => /^(Q\d+[\.:]|\d+[\.)]|Question\s*\d+[\.:])\s/i.test(l.trim());
+
+    lines.forEach(line=>{
+      if(isQHeader(line)){
+        if(curBlock.trim()){
+          html+=`<div class="step"><strong>${esc(curQ)}</strong><br>${curBlock.replace(/\n/g,'<br>')}</div>`;
+        }
+        curQ  = line.trim();
+        curBlock='';
+      } else {
+        curBlock += (curBlock?'\n':'')+line;
+      }
+    });
+    if(curBlock.trim()||curQ){
+      html+=`<div class="step"><strong>${esc(curQ)}</strong><br>${curBlock.replace(/\n/g,'<br>')}</div>`;
+    }
+    if(html) return html;
+  }
+
+  // ── Numbered list: "1. ..." ──
+  if(/^\s*\d+\.\s/.test(text)){
+    const items=text.split(/\n+/).filter(l=>l.trim());
+    let inList=false, html='';
+    items.forEach(line=>{
+      if(/^\d+\.\s/.test(line.trim())){
+        if(!inList){html+='<ol>';inList=true;}
+        html+=`<li>${line.replace(/^\d+\.\s*/,'')}</li>`;
+      } else {
+        if(inList){html+='</ol>';inList=false;}
+        if(line.trim()) html+=`<div class="step">${line}</div>`;
+      }
+    });
+    if(inList)html+='</ol>';
+    return html||`<div class="step">${text}</div>`;
+  }
+
+  // ── Plain text — paragraph-split into step divs ──
+  const formatted=text
+    .replace(/\n\n+/g,'</div><div class="step">')
+    .replace(/\n/g,'<br>');
+  return `<div class="step">${formatted}</div>`;
+}
+
+// ── SAMJHAO MUJHE ──────────────────────────────────────
+function injectSamjhaoButtons(html, cardId){
+  // After each <li> or .step, inject a samjhao button
+  const s=S[lang];
+  let stepIdx=0;
+  // Inject after </li>
+  html=html.replace(/<\/li>/g,()=>{
+    const sid=`${cardId}-s${stepIdx++}`;
+    return `</li><div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
+  });
+  // Inject after </div> that closes a .step
+  html=html.replace(/(<div class="step">[\s\S]*?<\/div>)/g,(match)=>{
+    const sid=`${cardId}-s${stepIdx++}`;
+    return `${match}<div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
+  });
+  return html;
+}
+
+async function toggleSamjhao(sid, cardId){
+  const btn=document.getElementById('btn-'+sid);
+  const panel=document.getElementById('panel-'+sid);
+  if(!btn||!panel)return;
+  const s=S[lang];
+
+  // Toggle close if already open
+  if(panel.classList.contains('show')){
+    panel.classList.remove('show');
+    btn.classList.remove('open');
+    btn.textContent=s.samjhaoBtn;
+    return;
+  }
+
+  btn.classList.add('open');
+  btn.textContent=s.samjhaoLoading;
+  panel.classList.add('show');
+
+  // Already loaded — just show
+  if(panel.dataset.loaded==='1'){
+    btn.textContent=s.samjhaoBtn;
+    return;
+  }
+
+  panel.innerHTML=`<div class="samjhao-loading"><div class="ld-spinner"></div>${s.samjhaoLoading}</div>`;
+
+  // ── Robust step text extraction ──
+  const cardBody=document.getElementById(cardId+'-body');
+  const stepIdx=parseInt(sid.split('-s').pop())||0;
+  // querySelectorAll on li and .step — but exclude nested samjhao-wrap children
+  const stepEls=cardBody?Array.from(cardBody.querySelectorAll('li, .step')).filter(el=>!el.closest('.samjhao-wrap')):[];
+  const stepEl=stepEls[stepIdx]||stepEls[0];
+  // Get clean text — strip any samjhao button text inside
+  let stepText='';
+  if(stepEl){
+    const clone=stepEl.cloneNode(true);
+    clone.querySelectorAll('.samjhao-wrap').forEach(n=>n.remove());
+    stepText=(clone.innerText||clone.textContent||'').trim();
+  }
+
+  // ── Robust question extraction ──
+  // Walk up from cardBody → ai-card → parent div → user-bubble sibling
+  let question='';
+  try{
+    const aiCard=cardBody?.closest('.ai-card');
+    const wrapper=aiCard?.parentElement;
+    const userRow=wrapper?.querySelector('.user-bubble');
+    if(userRow) question=(userRow.innerText||userRow.textContent||'').trim();
+  }catch(_){}
+
+  const prompt=lang==='hi'
+    ?`छात्र को यह स्टेप समझाओ। केवल JSON दो, कुछ और नहीं। पूरा जवाब शुद्ध हिंदी (देवनागरी लिपि) में लिखो, Hinglish या Roman script में नहीं।
+सवाल: "${question}"
+स्टेप: "${stepText}"
+JSON format (no markdown, no extra text):
+{"formula":"यहाँ इस्तेमाल हुआ फॉर्मूला/नियम (1-2 लाइन, हिंदी में)","why":"यह स्टेप क्यों ज़रूरी है (2-3 लाइन, हिंदी में)","example":"एक और उदाहरण (1-2 लाइन, हिंदी में)"}`
+    :`Explain this step to a student. Return JSON only, nothing else.
+Question: "${question}"
+Step: "${stepText}"
+JSON format (no markdown, no extra text):
+{"formula":"Formula/Rule used here (1-2 lines)","why":"Why this step is needed (2-3 lines)","example":"One more similar example (1-2 lines)"}`;
+
+  try{
+    const raw=await callWithAutoFallback(prompt, false);
+    // Robust JSON extraction — find first { ... } block
+    const jsonMatch=raw.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('NO_JSON');
+    const data=JSON.parse(jsonMatch[0]);
+    panel.innerHTML=`
+      <div class="samjhao-content">
+        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoFormula}</div><div class="samjhao-text">${esc(data.formula||'—')}</div></div>
+        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoWhy}</div><div class="samjhao-text">${esc(data.why||'—')}</div></div>
+        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoExample}</div><div class="samjhao-text">${esc(data.example||'—')}</div></div>
+      </div>`;
+    panel.dataset.loaded='1';
+  }catch(err){
+    console.error('Samjhao error:',err);
+    panel.dataset.loaded='';
+    btn.classList.remove('open');
+    panel.classList.remove('show');
+    panel.innerHTML=`<div class="samjhao-loading" style="color:#f87171;cursor:pointer" onclick="toggleSamjhao('${sid}','${cardId}')">❌ Load nahi hua — Tap karke retry karo</div>`;
+    panel.classList.add('show');
+    btn.textContent=s.samjhaoBtn;
+    return;
+  }
+  btn.textContent=s.samjhaoBtn;
+}
+
+// ── SMART GRAPH ENGINE ──────────────────────────────────
+
+// Detect if question needs a graph
+function needsGraph(question){
+  const q=(question||'').toLowerCase();
+  // Patterns that need graphs
+  const graphPatterns=[
+    /\bplot\b/,/\bgraph\b/,/\bsketch\b/,/\bdraw\b.*function/,
+    /y\s*=\s*[a-z0-9^*/+\-.()\s]+x/i,   // y = f(x)
+    /f\s*\(\s*x\s*\)/i,                   // f(x)
+    /parabola/i,/quadratic.*graph/i,/graph.*quadratic/i,
+    /coordinate/i,/x-axis|y-axis/i,
+    /linear.*graph/i,/graph.*linear/i,
+    /cubic.*graph/i,/graph.*cubic/i,
+    /sine|cosine|tan\b.*graph/i,
+    /trigonometric.*graph/i,
+    /exponential.*graph/i,/graph.*exponential/i,
+    /graafi|graph banao|graph dikhao|graph kheencho/i,
+  ];
+  // Patterns that do NOT need graphs (even if they contain math)
+  const noGraphPatterns=[
+    /solve|simplify|expand|factorise|factor|find.*value|value.*find/i,
+    /kya hai|batao|samjhao|define|explain|theorem|law|rule/i,
+    /area of|volume of|perimeter|surface area/i,
+    /probability|statistics|mean|median|mode/i,
+    /simple interest|compound interest/i,
+    /lcm|hcf|gcd|prime/i,
+    /word problem|train|speed|distance|time|age/i,
+  ];
+  for(const re of noGraphPatterns){if(re.test(q)) return false;}
+  for(const re of graphPatterns){if(re.test(q)) return true;}
+  return false;
+}
+
+// Parse function expression from question
+function parseGraphFunction(question){
+  const q=question;
+  // Try to extract "y = ..." or "f(x) = ..."
+  const patterns=[
+    /y\s*=\s*(.+?)(?:\n|$|,|\.(?:\s|$))/i,
+    /f\s*\(\s*x\s*\)\s*=\s*(.+?)(?:\n|$|,|\.(?:\s|$))/i,
+    /plot\s+(.+?)(?:\s+from|\s+between|\n|$)/i,
+    /graph\s+(?:of\s+)?(.+?)(?:\s+from|\s+between|\n|$)/i,
+    /y\s*=\s*(.+)/i,
+    /f\s*\(\s*x\s*\)\s*=\s*(.+)/i,
+  ];
+  for(const re of patterns){
+    const m=q.match(re);
+    if(m){
+      let expr=m[1].trim().replace(/\^\s*(\d+)/g,'**$1'); // x^2 → x**2
+      return expr;
+    }
+  }
+  return null;
+}
+
+// Safe math evaluator using Function
+function safeMathEval(expr, x){
+  try{
+    // Replace common math patterns
+    const e=expr
+      .replace(/\^/g,'**')
+      .replace(/(\d)(x)/g,'$1*x')
+      .replace(/(\))(\s*)(x|\()/g,'$1*$3')
+      .replace(/\bsin\b/g,'Math.sin')
+      .replace(/\bcos\b/g,'Math.cos')
+      .replace(/\btan\b/g,'Math.tan')
+      .replace(/\bsqrt\b/g,'Math.sqrt')
+      .replace(/\babs\b/g,'Math.abs')
+      .replace(/\bexp\b/g,'Math.exp')
+      .replace(/\bln\b/g,'Math.log')
+      .replace(/\blog\b/g,'Math.log10')
+      .replace(/\bpi\b|\bπ\b/g,'Math.PI')
+      .replace(/\be\b/g,'Math.E');
+    return Function('x','return '+e)(x);
+  }catch{return null;}
+}
+
+// Render graph canvas inside a card
+function renderGraph(cardId, question){
+  const bodyEl=document.getElementById(cardId+'-body');
+  if(!bodyEl) return;
+  const expr=parseGraphFunction(question);
+  if(!expr) return;
+
+  // Build the graph container
+  const wrap=document.createElement('div');
+  wrap.className='graph-wrap';
+  wrap.innerHTML=`
+    <div class="graph-header">
+      <span class="graph-header-icon">📈</span>
+      <span class="graph-title">Graph: y = ${expr.replace(/\*\*/g,'^').replace(/\*/g,'·')}</span>
+    </div>
+    <div class="graph-canvas-wrap">
+      <canvas id="gc-${cardId}" height="220"></canvas>
+    </div>`;
+  bodyEl.appendChild(wrap);
+
+  const canvas=document.getElementById('gc-'+cardId);
+  if(!canvas) return;
+
+  // Generate data points
+  const pts=[];
+  const xMin=-10, xMax=10, steps=200;
+  for(let i=0;i<=steps;i++){
+    const x=xMin+(xMax-xMin)*(i/steps);
+    const y=safeMathEval(expr,x);
+    if(y!==null&&isFinite(y)&&Math.abs(y)<1000){
+      pts.push({x:parseFloat(x.toFixed(3)),y:parseFloat(y.toFixed(3))});
+    } else {
+      pts.push({x:parseFloat(x.toFixed(3)),y:null});
+    }
+  }
+
+  if(typeof Chart==='undefined'){
+    // Chart.js not loaded yet — retry
+    setTimeout(()=>renderGraph(cardId,question),600);
+    return;
+  }
+
+  new Chart(canvas,{
+    type:'line',
+    data:{
+      datasets:[{
+        label:'y = '+expr.replace(/\*\*/g,'^').replace(/\*/g,'·'),
+        data:pts,
+        borderColor:'#7eb3ff',
+        borderWidth:2.5,
+        pointRadius:0,
+        tension:0,
+        spanGaps:false,
+        fill:false,
+      }]
+    },
+    options:{
+      responsive:true,
+      animation:{duration:500},
+      plugins:{
+        legend:{labels:{color:'rgba(221,238,255,.6)',font:{size:11,family:'Azeret Mono'}}},
+        tooltip:{
+          backgroundColor:'rgba(13,20,38,.95)',
+          titleColor:'#7eb3ff',
+          bodyColor:'rgba(221,238,255,.8)',
+          borderColor:'rgba(126,179,255,.2)',
+          borderWidth:1,
+          callbacks:{
+            title:items=>'x = '+items[0].raw.x,
+            label:item=>'y = '+item.raw.y
+          }
+        }
+      },
+      scales:{
+        x:{
+          type:'linear',
+          position:'center',
+          grid:{color:'rgba(126,179,255,.08)'},
+          ticks:{color:'rgba(221,238,255,.4)',font:{size:10,family:'Azeret Mono'},maxTicksLimit:10},
+          border:{color:'rgba(126,179,255,.25)'},
+        },
+        y:{
+          type:'linear',
+          position:'center',
+          grid:{color:'rgba(126,179,255,.08)'},
+          ticks:{color:'rgba(221,238,255,.4)',font:{size:10,family:'Azeret Mono'},maxTicksLimit:8},
+          border:{color:'rgba(126,179,255,.25)'},
+        }
+      }
+    }
+  });
+}
+
+function appendChat(id,q,html){
+  const area=document.getElementById('chat-area');
+  const s=S[lang];
+  const enrichedHtml=injectSamjhaoButtons(html, id);
+  const div=document.createElement('div');
+  div.innerHTML=`
+    <div class="user-row"><div class="user-bubble">${esc(q)}</div></div>
+    <div class="ai-card">
+      <div class="ai-card-head">
+        <div class="ai-label"><div class="ai-dot"></div> AI Answer</div>
+        <div class="card-actions">
+          <button class="like-btn" id="like-${id}" onclick="toggleLike('${id}')">♡</button>
+          <button class="cp-btn" id="cp-${id}" onclick="copyAns('${id}','${id}-body')">${s.copy}</button>
+          <button class="sp-btn" onclick="shareAns('${id}-body')">📤</button>
+        </div>
+      </div>
+      <div class="ai-body" id="${id}-body">${enrichedHtml}</div>
+      <div class="feedback-row">
+        <span class="fb-lbl">Helpful tha?</span>
+        <div class="fb-btn" id="fb-up-${id}" onclick="feedback('${id}','up')">👍</div>
+        <div class="fb-btn" id="fb-dn-${id}" onclick="feedback('${id}','down')">👎</div>
+      </div>
+    </div>`;
+  area.insertBefore(div,area.firstChild);
+  setTimeout(()=>div.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  // Smart graph: only render if question needs it
+  if(needsGraph(q)){
+    setTimeout(()=>renderGraph(id,q),200);
+  }
+}
+
+// ── STREAMING CARD — pehle empty card banao, baad mein fill hoga ──
+function appendStreamCard(id, q){
+  const area = document.getElementById('chat-area');
+  const s = S[lang];
+  const div = document.createElement('div');
+  div.id = id + '-wrap';
+  div.innerHTML = `
+    <div class="user-row"><div class="user-bubble">${esc(q)}</div></div>
+    <div class="ai-card" id="${id}-card" style="display:none">
+      <div class="ai-card-head">
+        <div class="ai-label"><div class="ai-dot"></div> AI Answer</div>
+        <div class="card-actions">
+          <button class="like-btn" id="like-${id}" onclick="toggleLike('${id}')">♡</button>
+          <button class="cp-btn" id="cp-${id}" onclick="copyAns('${id}','${id}-body')">${s.copy}</button>
+          <button class="sp-btn" onclick="shareAns('${id}-body')">📤</button>
+        </div>
+      </div>
+      <div class="ai-body" id="${id}-body"></div>
+      <div class="feedback-row">
+        <span class="fb-lbl">Helpful tha?</span>
+        <div class="fb-btn" id="fb-up-${id}" onclick="feedback('${id}','up')">👍</div>
+        <div class="fb-btn" id="fb-dn-${id}" onclick="feedback('${id}','down')">👎</div>
+      </div>
+    </div>`;
+  area.insertBefore(div, area.firstChild);
+  setTimeout(()=>div.scrollIntoView({behavior:'smooth', block:'start'}), 80);
+}
+
+function toggleLike(id){
+  const btn=document.getElementById('like-'+id);
+  const liked=btn.classList.toggle('liked');
+  btn.textContent=liked?'❤️':'♡';
+  if(liked)addXP(2,'Liked!');
+}
+
+function feedback(id,type){
+  document.getElementById('fb-up-'+id).classList.toggle('sel-up',type==='up');
+  document.getElementById('fb-dn-'+id).classList.toggle('sel-down',type==='down');
+  if(type==='up')addXP(1,'Helpful!');
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function copyAns(btnId,bodyId){
+  const body=document.getElementById(bodyId);
+  const tmp=document.createElement('div'); tmp.innerHTML=body.innerHTML;
+  const txt=tmp.innerText||tmp.textContent||'';
+  const btn=document.getElementById('cp-'+btnId);
+  const onDone=()=>{ if(btn){btn.textContent=S[lang].copied;setTimeout(()=>{btn.textContent=S[lang].copy;},2000);} };
+  const fallback=()=>{ try{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);onDone();}catch(e){} };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(onDone).catch(fallback);
+  } else { fallback(); }
+}
+
+function shareAns(bodyId){
+  const body=document.getElementById(bodyId);
+  const tmp=document.createElement('div'); tmp.innerHTML=body.innerHTML;
+  const text='AI Solving Math ka jawab:\n\n'+(tmp.innerText||tmp.textContent||'')+'\n\nApp: AI Solving Math by Harsh';
+  if(navigator.share){
+    navigator.share({title:'AI Solving Math',text}).catch(()=>{});
+  } else {
+    const _copy=()=>{try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert(lang==='hi'?'जवाब कॉपी हो गया!':'Answer copied!');}catch(e){}};
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(()=>alert(lang==='hi'?'जवाब कॉपी हो गया!':'Answer copied!')).catch(_copy); }
+    else { _copy(); }
+  }
+}
+
+// ── QUIZ ──────────────────────────────────────────────
+let quizIdx=0, quizAnswered=false, quizScore=0, quizTotalAnswered=0;
+let quizCurrentSet=[]; // Current 10 questions for this round
+
+async function openQuiz(){
+  quizIdx=0; quizScore=0; quizTotalAnswered=0; quizAnswered=false;
+  const s=S[lang];
+  document.getElementById('quiz-modal').classList.add('open');
+  document.getElementById('quiz-badge').classList.remove('show');
+  document.getElementById('quiz-score-bar').style.display='block';
+  document.getElementById('quiz-modal-title').textContent='🧩 Quick Quiz';
+  document.getElementById('quiz-sub').textContent=s.quizSub;
+  document.getElementById('quiz-opts').innerHTML='';
+  document.getElementById('quiz-next-btn').style.display='none';
+  document.getElementById('quiz-close-btn').textContent=s.quizClose;
+  quizCurrentSet = pick10FromPool();
+  loadQuizQuestion();
+}
+
+function loadQuizQuestion(){
+  quizAnswered=false;
+  const s=S[lang];
+  const q=quizCurrentSet[quizIdx];
+  document.getElementById('quiz-modal-title').textContent='🧩 Quick Quiz';
+  document.getElementById('quiz-sub').textContent=s.quizSub;
+  document.getElementById('quiz-progress-txt').textContent='Q '+(quizIdx+1)+' / 10';
+  document.getElementById('quiz-score-txt').textContent=s.quizScore.replace('score:','').replace('Your','').trim()+' '+quizScore+'/'+quizTotalAnswered;
+  document.getElementById('quiz-q').textContent=q.q;
+  const optsEl=document.getElementById('quiz-opts');
+  optsEl.innerHTML=q.opts.map((o,i)=>
+    `<button class="quiz-opt" onclick="answerQuiz(${i})">${o}</button>`
+  ).join('');
+  const nextBtn=document.getElementById('quiz-next-btn');
+  nextBtn.style.display='none';
+  nextBtn.textContent=s.quizNext;
+  nextBtn.onclick=nextQuizQ;
+  document.getElementById('quiz-close-btn').textContent=s.quizClose;
+}
+
+function answerQuiz(idx){
+  if(quizAnswered)return;
+  quizAnswered=true; quizTotalAnswered++;
+  const s=S[lang];
+  const q=quizCurrentSet[quizIdx];
+  const opts=document.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i)=>{
+    o.disabled=true;
+    if(i===q.ans)o.classList.add('correct');
+    else if(i===idx)o.classList.add('wrong');
+  });
+  if(idx===q.ans){quizScore++;addXP(15,'Quiz correct! 🎯');}
+  else{setSt(s.quizWrong+' '+q.opts[q.ans],true);}
+  document.getElementById('quiz-score-txt').textContent='Score: '+quizScore+'/'+quizTotalAnswered;
+  const isLast=(quizIdx>=9);
+  if(!isLast){
+    document.getElementById('quiz-next-btn').style.display='block';
+  } else {
+    setTimeout(()=>showQuizResult(),600);
+  }
+}
+
+function nextQuizQ(){
+  quizIdx++;
+  if(quizIdx<10){loadQuizQuestion();}
+  else{showQuizResult();}
+}
+
+function showQuizResult(){
+  const s=S[lang];
+  document.getElementById('quiz-next-btn').style.display='none';
+  const poolCount = QUIZ_POOL.length;
+  const emoji = quizScore>=8?'🏆':quizScore>=5?'⭐':'💪';
+  const msg = quizScore>=8?s.quizShabad:quizScore>=5?s.quizAccha:s.quizTry;
+  document.getElementById('quiz-q').innerHTML=`
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:48px;margin-bottom:10px">${emoji}</div>
+      <div style="font-size:1.1rem;font-weight:800;color:var(--c1);margin-bottom:6px">${s.quizComplete}</div>
+      <div style="font-size:.9rem;color:var(--t2)">${s.quizScore}</div>
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:2rem;font-weight:800;color:var(--c3);margin:8px 0">${quizScore}<span style="font-size:1.1rem;color:var(--t3)">/10</span></div>
+      <div style="font-size:.78rem;color:var(--t2);margin-bottom:10px">${msg}</div>
+      <div style="font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace">${poolCount} ${s.quizAvail}</div>
+    </div>`;
+  document.getElementById('quiz-opts').innerHTML='';
+  document.getElementById('quiz-modal-title').textContent=s.quizResults;
+  const nextBtn = document.getElementById('quiz-next-btn');
+  nextBtn.style.display='block';
+  nextBtn.textContent=s.quizAgain;
+  nextBtn.onclick = playAgainQuiz;
+  document.getElementById('quiz-close-btn').textContent=s.quizDone;
+  if(quizScore>=8)addXP(50,'Quiz Master! 🏆');
+  else if(quizScore>=5)addXP(20,'Quiz Done!');
+}
+
+function playAgainQuiz(){
+  quizIdx=0; quizScore=0; quizTotalAnswered=0; quizAnswered=false;
+  const s=S[lang];
+  document.getElementById('quiz-modal-title').textContent='🧩 Quick Quiz';
+  document.getElementById('quiz-sub').textContent=s.quizSub;
+  document.getElementById('quiz-score-bar').style.display='block';
+  const nextBtn = document.getElementById('quiz-next-btn');
+  nextBtn.style.display='none';
+  nextBtn.onclick = nextQuizQ;
+  quizCurrentSet = pick10FromPool();
+  loadQuizQuestion();
+}
+
+function closeQuiz(){document.getElementById('quiz-modal').classList.remove('open');}
+
+// ── LEADERBOARD (REAL STUDENTS, SHARED) ──────────────────
+async function lbFetchAll(){
+  if(!JSONBIN_BIN_ID || JSONBIN_BIN_ID==='') return null;
+  try{
+    const res=await fetch(`${JSONBIN_URL}/latest`,{
+      headers:{'X-Master-Key':JSONBIN_API_KEY,'X-Bin-Meta':'false'}
+    });
+    if(!res.ok) throw new Error('fetch fail');
+    const data=await res.json();
+    return Array.isArray(data)?data:[];
+  }catch(e){
+    console.warn('LB fetch failed:',e.message);
+    return null;
+  }
+}
+
+async function lbSaveAll(list){
+  try{
+    await fetch(JSONBIN_URL,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_API_KEY},
+      body:JSON.stringify(list)
+    });
+  }catch(e){ console.warn('LB save failed:',e.message); }
+}
+
+// Call this whenever the user's XP changes (e.g. inside addXP)
+async function lbSyncMe(){
+  if(!userName) return;
+  let all=await lbFetchAll();
+  if(all===null) return;
+  const myId=userName.trim().toLowerCase();
+  const idx=all.findIndex(e=>e.id===myId);
+  const entry={id:myId,name:userName,avatar:AVATAR_IMAGES[userAvatar]||AVATAR_IMAGES[0],score:xp,updated:Date.now()};
+  if(idx>=0) all[idx]=entry; else all.push(entry);
+  await lbSaveAll(all);
+}
+
+async function openLb(){
+  document.getElementById('lb-modal').classList.add('open');
+  document.getElementById('lb-list').innerHTML='<div style="text-align:center;padding:20px;color:var(--t3)">⏳ Loading real students ranking...</div>';
+
+  let all=await lbFetchAll();
+
+  if(all===null){
+    document.getElementById('lb-list').innerHTML=`<div style="text-align:center;padding:20px;color:var(--t3)">⚠️ Leaderboard server not configured.<br>Set JSONBIN_BIN_ID & JSONBIN_API_KEY in code.</div>`;
+    return;
+  }
+
+  // Make sure current user is included
+  const myId=(userName||'').trim().toLowerCase();
+  if(myId && !all.some(e=>e.id===myId)){
+    all.push({id:myId,name:userName,avatar:AVATAR_IMAGES[userAvatar]||AVATAR_IMAGES[0],score:xp,updated:Date.now()});
+  } else if(myId){
+    const me=all.find(e=>e.id===myId);
+    if(me) me.score=xp; // show live xp for self
+  }
+
+  all.sort((a,b)=>b.score-a.score);
+  const top=all.slice(0,20);
+  const medals=['🥇','🥈','🥉'];
+  const rankClass=['gold','silver','bronze'];
+
+  if(top.length===0){
+    document.getElementById('lb-list').innerHTML='<div style="text-align:center;padding:20px;color:var(--t3)">Abhi koi student nahi hai. Pehle bano! 🚀</div>';
+    return;
+  }
+
+  document.getElementById('lb-list').innerHTML=top.map((e,i)=>`
+    <div class="lb-item" style="${e.id===myId?'border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.1)':''}">
+      <div class="lb-rank ${rankClass[i]||''}">${i<3?medals[i]:'#'+(i+1)}</div>
+      <div class="lb-name" style="display:flex;align-items:center;gap:8px"><img src="${e.avatar||AVATAR_IMAGES[0]}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ${e.name}${e.id===myId?' (Aap)':''}</div>
+      <div class="lb-score">${e.score} XP</div>
+    </div>`).join('');
+
+  // Sync my latest score in background
+  lbSyncMe();
+}
+function closeLb(){document.getElementById('lb-modal').classList.remove('open');}
+
+// ── HISTORY ──────────────────────────────────────────────
+function renderHistory(){
+  const s=S[lang];
+  const list=document.getElementById('sp-list');
+  const cnt=history.length;
+  const txt=cnt>9?'9+':String(cnt);
+  ['hist-badge','nb-badge'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(cnt>0){el.textContent=txt;el.classList.add('show');}
+    else{el.classList.remove('show');}
+  });
+  if(!cnt){list.innerHTML=`<div class="sp-empty"><div class="sp-empty-icon">📭</div><div class="sp-empty-txt">${s.hemp}</div></div>`;return;}
+  list.innerHTML=history.map(h=>`
+    <div class="sp-item" onclick="loadHistItem('${h.id}')">
+      <div class="sp-q">${esc(h.q)}</div>
+      <div class="sp-t">${fmtTime(h.t)}</div>
+    </div>`).join('');
+}
+
+function loadHistItem(id){
+  const item=history.find(h=>h.id===id); if(!item)return;
+  document.getElementById('qt').value=item.q;
+  switchMode('text'); closePanel(); updateProgress();
+}
+
+function clearHistory(){history=[];lsSet('sm_hist',[]);renderHistory();}
+function fmtTime(iso){try{const d=new Date(iso);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' • '+d.toLocaleDateString([],{day:'numeric',month:'short'});}catch{return'';}}
+function openPanel(){document.getElementById('panel').classList.add('open');document.getElementById('scrim').classList.add('open');renderHistory();}
+function closePanel(){document.getElementById('panel').classList.remove('open');document.getElementById('scrim').classList.remove('open');}
+
+// ── ONBOARDING ────────────────────────────────────────────
+// AVATAR_IMAGES defined above (30 cartoon kid avatars)
+let selectedOnboardAvatar = 0;
+
+function buildOnboardAvatars(){
+  const row = document.getElementById('onboard-avatars');
+  if(!row || row.dataset.built) return;
+  row.innerHTML = AVATAR_IMAGES.map((src,i)=>
+    `<button class="oa-btn${i===0?' sel':''}" onclick="pickOnboardAvatar(${i},this)"><img src="${src}" alt="avatar ${i+1}"></button>`
+  ).join('');
+  row.dataset.built='1';
+}
+
+function pickOnboardAvatar(i, btn){
+  selectedOnboardAvatar = i;
+  document.querySelectorAll('.oa-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function onboardNameCheck(){
+  const v = document.getElementById('onboard-name').value.trim();
+  document.getElementById('onboard-btn').disabled = v.length < 2;
+}
+
+function finishOnboard(){
+  const name = document.getElementById('onboard-name').value.trim();
+  if(name.length < 2) return;
+  userName = name;
+  userAvatar = selectedOnboardAvatar;
+  lsSet('sm_username', userName);
+  lsSet('sm_avatar', userAvatar);
+  updateHeaderName();
+  const ov = document.getElementById('onboard-overlay');
+  ov.style.opacity='0';ov.style.transition='opacity .3s';
+  setTimeout(()=>{ ov.style.display='none'; }, 320);
+  checkUrlGuildJoin();
+  showGuildToast(`Swagat hai ${userName}! +20 XP`);
+  addXP(20,'Welcome!');
+}
+
+function pickStartLang(chosen){
+  lang = chosen;
+  lsSet('sm_lang', lang);
+  lsSet('sm_lang_chosen', true);
+  applyLang();
+  const ov = document.getElementById('lang-select-overlay');
+  ov.style.opacity='0'; ov.style.transition='opacity .25s';
+  setTimeout(()=>{
+    ov.style.display='none';
+    showNameOnboardIfNeeded();
+  }, 260);
+}
+
+function showNameOnboardIfNeeded(){
+  if(!userName){
+    buildOnboardAvatars();
+    document.getElementById('onboard-overlay').style.display='flex';
+  } else {
+    checkUrlGuildJoin();
+  }
+}
+
+function checkOnboarding(){
+  const langChosen = lsGet('sm_lang_chosen', false);
+  if(!langChosen){
+    document.getElementById('lang-select-overlay').style.display='flex';
+    return;
+  }
+  showNameOnboardIfNeeded();
+}
+
+// ── URL GUILD AUTO-JOIN ────────────────────────────────────
+function checkUrlGuildJoin(){
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('guild');
+  const gname = params.get('gname') || 'Study Squad';
+  const gemoji = params.get('gemoji') || '🎒';
+  if(!code) return;
+
+  if(myGuild){
+    showGuildToast('Pehle apni guild chhodo, phir join karo.');
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+
+  // Auto join immediately
+  joinGuildWithData(code.toUpperCase(), gname, gemoji);
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+// ── STUDY GUILD ──────────────────────────────────────────
+// Curated set of bold, recognizable emoji that look great as guild/team badges
+// Curated set of squad/team-badge style cartoon avatars (DiceBear "bottts" - MIT licensed)
+const GUILD_AVATARS = ['Phoenix','Tiger','Comet','Falcon','Nova','Storm','Atlas','Blaze','Orbit','Titan',
+  'Echo','Vortex','Drift','Spark','Zenith','Rover','Quantum','Pulse','Cipher','Flux',
+  'Nimbus','Apex','Glitch','Vector','Surge','Cosmo','Bolt','Helix','Rocket','Mecha']
+  .map(s=>`https://api.dicebear.com/9.x/bottts/svg?seed=${s}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`);
+let myGuild = lsGet('sm_guild', null);
+// Migration: older guilds didn't store isLeader. If 'created' exists (guild was made by user), treat as leader.
+if(myGuild && myGuild.isLeader===undefined){
+  myGuild.isLeader = !!myGuild.created;
+  lsSet('sm_guild', myGuild);
+}
+let selectedEmoji = GUILD_AVATARS[0];
+
+function openGuild(){
+  renderGuildModal();
+  document.getElementById('guild-modal').classList.add('open');
+}
+function closeGuild(){document.getElementById('guild-modal').classList.remove('open');}
+
+function switchGuildTab(tab){
+  // Bottom tabs (myguild, create)
+  ['myguild','create'].forEach(t=>{
+    const btn = document.getElementById('gt-'+t);
+    if(btn) btn.classList.toggle('act', t===tab);
+    const sec = document.getElementById('gs-'+t);
+    if(sec) sec.classList.toggle('act', t===tab);
+  });
+  // Top buttons (join, rankings) - highlight with active style
+  ['join','rankings'].forEach(t=>{
+    const btn = document.getElementById('gt-'+t);
+    const sec = document.getElementById('gs-'+t);
+    if(btn){
+      if(t===tab){
+        btn.style.background='linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.25))';
+        btn.style.color='var(--c1)';
+        btn.style.borderColor='rgba(126,179,255,.3)';
+      } else {
+        btn.style.background='var(--s2)';
+        btn.style.color='var(--t2)';
+        btn.style.borderColor='var(--b)';
+      }
+    }
+    if(sec) sec.classList.toggle('act', t===tab);
+  });
+  if(tab==='rankings') renderGuildRankings();
+  if(tab==='myguild') renderMyGuild();
+  // Hide/show Create tab based on guild status
+  updateCreateTabVisibility();
+}
+
+function updateCreateTabVisibility(){
+  const createTab = document.getElementById('gt-create');
+  const createSec = document.getElementById('gs-create');
+  if(!createTab) return;
+  if(myGuild){
+    createTab.style.display='none';
+    // If currently on create tab, switch to myguild
+    if(createSec && createSec.classList.contains('act')){
+      switchGuildTab('myguild');
+    }
+  } else {
+    createTab.style.display='';
+  }
+}
+
+function renderGuildModal(){
+  const picker = document.getElementById('emoji-picker');
+  if(picker && !picker.dataset.built){
+    picker.innerHTML = GUILD_AVATARS.map((src,i)=>
+      `<button class="ep-btn${i===0?' sel':''}" onclick="selectEmoji('${src}',this)"><img src="${src}" alt="guild avatar ${i+1}"></button>`
+    ).join('');
+    picker.dataset.built='1';
+  }
+  renderMyGuild();
+  updateCreateTabVisibility();
+}
+
+function selectEmoji(emoji, btn){
+  selectedEmoji = emoji;
+  document.querySelectorAll('.ep-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+async function renderMyGuild(){
+  const hasGuild = !!myGuild;
+  document.getElementById('guild-has-guild').style.display = hasGuild ? 'block' : 'none';
+  document.getElementById('guild-no-guild').style.display = hasGuild ? 'none' : 'block';
+  if(!hasGuild) return;
+
+  document.getElementById('g-emoji').innerHTML = `<img src="${myGuild.emoji}" alt="guild avatar">`;
+  document.getElementById('g-name').textContent = myGuild.name;
+  document.getElementById('g-code').textContent = myGuild.code;
+  document.getElementById('g-invite-code').textContent = myGuild.code;
+  const editBtn = document.getElementById('g-edit-btn');
+  if(editBtn) editBtn.style.display = myGuild.isLeader ? '' : 'none';
+
+  document.getElementById('g-members-list').innerHTML = '<div style="text-align:center;padding:14px;color:var(--t3);font-size:.75rem">⏳ Loading members...</div>';
+
+  // Sync my latest info to shared roster
+  await rosterSyncMe();
+  // Fetch full roster (including me) to check leader status changes
+  let fullRoster = [];
+  if(rosterEnabled()){
+    const rosters = await rosterFetchAll();
+    if(rosters) fullRoster = rosters[myGuild.code] || [];
+  }
+  const myId = getMyId();
+  const myRosterEntry = fullRoster.find(m=>m.id===myId);
+  if(myRosterEntry && myRosterEntry.isLeader && !myGuild.isLeader){
+    myGuild.isLeader = true;
+    lsSet('sm_guild', myGuild);
+    if(editBtn) editBtn.style.display = '';
+    showGuildToast('👑 Aap ab guild ke leader ho!');
+  }
+  const otherMembers = fullRoster.filter(m=>m.id!==myId);
+
+  // Self = real user
+  const me = {id:myId, name: userName||'Aap', emoji: AVATAR_IMAGES[userAvatar]||AVATAR_IMAGES[0], xp, isMe:true, isLeader: !!myGuild.isLeader};
+  let allMembers = [...otherMembers, me].sort((a,b)=>b.xp-a.xp);
+  // Cap guild at 40 members max (display + logic)
+  allMembers = allMembers.slice(0, 40);
+  const totalXP = allMembers.reduce((s,m)=>s+m.xp, 0);
+
+  document.getElementById('g-total-xp').textContent = totalXP.toLocaleString();
+  const pct = Math.min((totalXP / 10000)*100, 100).toFixed(0);
+  document.getElementById('g-xp-pct').textContent = pct+'%';
+  document.getElementById('g-xp-fill').style.width = pct+'%';
+  const myRank = Math.max(1, 6 - Math.floor(totalXP / 1000));
+  document.getElementById('g-rank').textContent = '#'+myRank;
+
+  const colors=['rgba(79,70,229,.3)','rgba(124,58,237,.25)','rgba(8,145,178,.25)','rgba(52,211,153,.2)','rgba(251,146,60,.2)'];
+  document.getElementById('g-members-list').innerHTML = allMembers.map((m,i)=>`
+    <div class="guild-member">
+      <div class="gm-avatar" style="background:${colors[i%5]};overflow:hidden"><img src="${m.emoji}" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="gm-name">${esc(m.name)}${m.isMe?' <span class="gm-you">YOU</span>':''}${m.isLeader?' <span class="gm-leader">LEADER</span>':''}</div>
+      <div class="gm-xp">${m.xp.toLocaleString()} XP</div>
+      ${(myGuild.isLeader && !m.isMe && !m.isLeader) ? `<button class="gm-make-leader" onclick="makeLeader('${m.id}')" title="Leader banao">👑</button>` : ''}
+    </div>`).join('');
+
+  if(!rosterEnabled()){
+    document.getElementById('g-members-list').insertAdjacentHTML('beforeend',
+      '<div style="text-align:center;padding:8px;color:var(--t3);font-size:.65rem">⚠️ Sirf aap dikh rahe ho. Real members ke liye JSONBIN_ROSTER_BIN_ID set karo.</div>');
+  }
+}
+
+async function makeLeader(memberId){
+  if(!myGuild || !myGuild.isLeader) return;
+  if(!confirm('Isko guild leader banana hai? Aap leader nahi rahoge.')) return;
+  myGuild.isLeader = false;
+  lsSet('sm_guild', myGuild);
+  await rosterMakeLeader(memberId);
+  renderMyGuild();
+  showGuildToast('👑 Naya leader assign ho gaya!');
+}
+
+async function renderGuildRankings(){
+  const listEl = document.getElementById('guild-rankings-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3)">⏳ Loading real guilds...</div>';
+
+  const me = {name: userName||'Aap', emoji: AVATAR_IMAGES[userAvatar]||AVATAR_IMAGES[0], xp};
+  const myTotalXP = myGuild ? [...(myGuild.members||[]), me].reduce((s,m)=>s+m.xp,0) : 0;
+  const myMemberCount = myGuild ? (myGuild.members||[]).length+1 : 0;
+
+  // Sync my guild's latest stats to shared storage
+  if(myGuild){
+    await guildSyncMine(myTotalXP, myMemberCount);
+  }
+
+  let all = await guildFetchAll();
+  if(all===null){
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3)">⚠️ Guild rankings server not configured.<br>Set JSONBIN_GUILDS_BIN_ID in code.</div>';
+    return;
+  }
+
+  if(all.length===0){
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3)">Abhi koi guild nahi hai. Pehle bano! 🎒</div>';
+    return;
+  }
+
+  all.sort((a,b)=>b.xp-a.xp);
+  const medals=['🥇','🥈','🥉'];
+  const myCode = myGuild ? myGuild.code : null;
+  listEl.innerHTML = all.slice(0,15).map((g,i)=>`
+    <div class="guild-lb-item" style="${g.code===myCode?'border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.08)':''}">
+      <div class="glb-rank">${i<3?medals[i]:'#'+(i+1)}</div>
+      <img src="${g.emoji}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0">
+      <div class="glb-info">
+        <div class="glb-name">${esc(g.name)}${g.code===myCode?' <span style="font-size:.55rem;padding:2px 5px;border-radius:4px;background:rgba(79,70,229,.3);color:var(--c1);font-family:monospace">YOU</span>':''}</div>
+        <div class="glb-members">👥 ${g.members} members</div>
+      </div>
+      <div class="glb-xp">${g.xp.toLocaleString()} XP<span>Guild Total</span></div>
+    </div>`).join('');
+}
+
+// ── SHARED GUILD RANKINGS (JSONBin) ──────────────────────
+const JSONBIN_GUILDS_BIN_ID = '__JSONBIN_GUILDS_BIN_ID__';
+const JSONBIN_GUILDS_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_GUILDS_BIN_ID}`;
+
+async function guildFetchAll(){
+  if(JSONBIN_GUILDS_BIN_ID==='') return null;
+  try{
+    const res=await fetch(`${JSONBIN_GUILDS_URL}/latest`,{
+      headers:{'X-Master-Key':JSONBIN_API_KEY,'X-Bin-Meta':'false'}
+    });
+    if(!res.ok) throw new Error('fetch fail');
+    const data=await res.json();
+    return Array.isArray(data)?data:[];
+  }catch(e){
+    console.warn('Guild LB fetch failed:',e.message);
+    return null;
+  }
+}
+
+async function guildSaveAll(list){
+  if(JSONBIN_GUILDS_BIN_ID==='') return;
+  try{
+    await fetch(JSONBIN_GUILDS_URL,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_API_KEY},
+      body:JSON.stringify(list)
+    });
+  }catch(e){ console.warn('Guild LB save failed:',e.message); }
+}
+
+async function guildSyncMine(totalXP, memberCount){
+  if(!myGuild) return;
+  let all = await guildFetchAll();
+  if(all===null) return;
+  const idx = all.findIndex(g=>g.code===myGuild.code);
+  const entry = {code:myGuild.code, name:myGuild.name, emoji:myGuild.emoji, members:memberCount, xp:totalXP, updated:Date.now()};
+  if(idx>=0) all[idx]=entry; else all.push(entry);
+  await guildSaveAll(all);
+}
+
+// ── SHARED MEMBER ROSTER (per guild) ─────────────────────
+const JSONBIN_ROSTER_BIN_ID = '';
+const JSONBIN_ROSTER_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ROSTER_BIN_ID}`;
+
+function rosterEnabled(){ return JSONBIN_ROSTER_BIN_ID!==''; }
+
+// rosters shape: { GUILDCODE: [ {id,name,emoji,xp,isLeader}, ... ], ... }
+async function rosterFetchAll(){
+  if(!rosterEnabled()) return null;
+  try{
+    const res=await fetch(`${JSONBIN_ROSTER_URL}/latest`,{
+      headers:{'X-Master-Key':JSONBIN_API_KEY,'X-Bin-Meta':'false'}
+    });
+    if(!res.ok) throw new Error('fetch fail');
+    const data=await res.json();
+    return (data && typeof data==='object') ? data : {};
+  }catch(e){
+    console.warn('Roster fetch failed:',e.message);
+    return null;
+  }
+}
+async function rosterSaveAll(rosters){
+  if(!rosterEnabled()) return;
+  try{
+    await fetch(JSONBIN_ROSTER_URL,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_API_KEY},
+      body:JSON.stringify(rosters)
+    });
+  }catch(e){ console.warn('Roster save failed:',e.message); }
+}
+
+// Get my stable device/user id (used as roster member id)
+function getMyId(){
+  let id = lsGet('sm_myid', null);
+  if(!id){
+    id = 'u_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+    lsSet('sm_myid', id);
+  }
+  return id;
+}
+
+// Add/update me in my guild's roster
+async function rosterSyncMe(){
+  if(!myGuild || !rosterEnabled()) return;
+  const rosters = await rosterFetchAll();
+  if(rosters===null) return;
+  const list = rosters[myGuild.code] || [];
+  const myId = getMyId();
+  const meEntry = {
+    id: myId,
+    name: userName || 'Aap',
+    emoji: AVATAR_IMAGES[userAvatar] || AVATAR_IMAGES[0],
+    xp: xp,
+    isLeader: !!myGuild.isLeader
+  };
+  const idx = list.findIndex(m=>m.id===myId);
+  if(idx>=0) list[idx]=meEntry; else list.push(meEntry);
+  rosters[myGuild.code] = list.slice(0,40); // cap 40
+  await rosterSaveAll(rosters);
+}
+
+// Remove me from roster (on leave)
+async function rosterRemoveMe(){
+  if(!myGuild || !rosterEnabled()) return;
+  const rosters = await rosterFetchAll();
+  if(rosters===null) return;
+  const myId = getMyId();
+  if(rosters[myGuild.code]){
+    rosters[myGuild.code] = rosters[myGuild.code].filter(m=>m.id!==myId);
+    if(rosters[myGuild.code].length===0) delete rosters[myGuild.code];
+    await rosterSaveAll(rosters);
+  }
+}
+
+// Remove entire guild roster (when leader leaves/disbands)
+async function rosterRemoveGuild(code){
+  if(!rosterEnabled()) return;
+  const rosters = await rosterFetchAll();
+  if(rosters===null) return;
+  delete rosters[code];
+  await rosterSaveAll(rosters);
+}
+
+// Promote another member to leader, demote self
+async function rosterMakeLeader(memberId){
+  if(!myGuild || !rosterEnabled()) return;
+  const rosters = await rosterFetchAll();
+  if(rosters===null) return;
+  const list = rosters[myGuild.code] || [];
+  const myId = getMyId();
+  list.forEach(m=>{
+    if(m.id===memberId) m.isLeader = true;
+    if(m.id===myId) m.isLeader = false;
+  });
+  rosters[myGuild.code] = list;
+  await rosterSaveAll(rosters);
+}
+
+function generateCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+function createGuild(){
+  const name = document.getElementById('gi-name').value.trim();
+  if(!name){
+    document.getElementById('gi-name').style.borderColor='#f87171';
+    setTimeout(()=>document.getElementById('gi-name').style.borderColor='',1500);
+    return;
+  }
+  if(myGuild){showGuildToast('Pehle current guild chhodo!');return;}
+  myGuild = {name, emoji:selectedEmoji, code:generateCode(), created:new Date().toISOString(), members:[], isLeader:true};
+  lsSet('sm_guild', myGuild);
+  addXP(50,'Guild Created! 🎒');
+  document.getElementById('gi-name').value='';
+  updateCreateTabVisibility();
+  switchGuildTab('myguild');
+  showGuildToast(`🎒 "${name}" guild bana diya! Doston ko invite karo!`);
+}
+
+function joinGuild(){
+  const code = document.getElementById('gi-join-code').value.trim().toUpperCase();
+  if(code.length !== 6){
+    document.getElementById('gi-join-code').style.borderColor='#f87171';
+    setTimeout(()=>document.getElementById('gi-join-code').style.borderColor='',1500);
+    return;
+  }
+  joinGuildWithData(code, null, null);
+}
+
+async function joinGuildWithData(code, gname, gemoji){
+  if(myGuild){showGuildToast('Pehle current guild chhodo!');return;}
+
+  // Check member cap (40) before joining
+  if(rosterEnabled()){
+    const rosters = await rosterFetchAll();
+    if(rosters && rosters[code] && rosters[code].length>=40){
+      showGuildToast('❌ Yeh guild full hai (40/40 members). Doosri guild try karo!');
+      return;
+    }
+  }
+
+  myGuild = {name:gname||('Guild '+code), emoji:gemoji||GUILD_AVATARS[0], code, joined:new Date().toISOString(), members:[], isLeader:false};
+  lsSet('sm_guild', myGuild);
+  addXP(25,'Guild Joined! 🎒');
+  if(document.getElementById('gi-join-code')) document.getElementById('gi-join-code').value='';
+  if(document.getElementById('autojoin-banner')) document.getElementById('autojoin-banner').style.display='none';
+  // Open modal to show they joined
+  openGuild();
+  switchGuildTab('myguild');
+  showGuildToast(`🎉 "${myGuild.name}" join kar liya!`);
+}
+
+function leaveGuild(){
+  if(!confirm('Sach mein guild chhodni hai?')) return;
+  if(myGuild && myGuild.isLeader){
+    guildRemove(myGuild.code);
+    rosterRemoveGuild(myGuild.code);
+  } else if(myGuild){
+    rosterRemoveMe();
+  }
+  myGuild = null;
+  lsSet('sm_guild', null);
+  updateCreateTabVisibility();
+  renderMyGuild();
+  showGuildToast('Guild chhod di.');
+}
+
+async function guildRemove(code){
+  let all = await guildFetchAll();
+  if(all===null) return;
+  all = all.filter(g=>g.code!==code);
+  await guildSaveAll(all);
+}
+
+// ── PROFILE MENU (Change Name / Avatar) ──────────────────
+function openProfileMenu(){
+  document.getElementById('profile-menu-modal').classList.add('open');
+}
+function closeProfileMenu(){
+  document.getElementById('profile-menu-modal').classList.remove('open');
+}
+
+function openChangeName(){
+  closeProfileMenu();
+  document.getElementById('cn-name-input').value = userName||'';
+  document.getElementById('change-name-modal').classList.add('open');
+}
+function closeChangeName(){
+  document.getElementById('change-name-modal').classList.remove('open');
+}
+function saveChangedName(){
+  const name = document.getElementById('cn-name-input').value.trim();
+  if(name.length < 2){
+    const inp=document.getElementById('cn-name-input');
+    inp.style.borderColor='#f87171';
+    setTimeout(()=>inp.style.borderColor='',1500);
+    return;
+  }
+  userName = name;
+  lsSet('sm_username', userName);
+  updateHeaderName();
+  lbSyncMe();
+  closeChangeName();
+  showGuildToast(`✏️ Naam badal kar "${userName}" ho gaya!`);
+}
+
+function openChangeAvatar(){
+  closeProfileMenu();
+  pendingAvatarIdx = userAvatar; // Pre-select current avatar
+  const row = document.getElementById('change-avatar-row');
+  row.innerHTML = AVATAR_IMAGES.map((src,i)=>
+    `<button class="oa-btn${i===userAvatar?' sel':''}" onclick="pickChangeAvatar(${i},this)"><img src="${src}" alt="avatar ${i+1}"></button>`
+  ).join('');
+  document.getElementById('change-avatar-modal').classList.add('open');
+}
+function closeChangeAvatar(){
+  document.getElementById('change-avatar-modal').classList.remove('open');
+}
+let pendingAvatarIdx = null;
+function pickChangeAvatar(i, btn){
+  pendingAvatarIdx = i;
+  document.querySelectorAll('#change-avatar-row .oa-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function saveChangedAvatar(){
+  if(pendingAvatarIdx !== null) userAvatar = pendingAvatarIdx;
+  lsSet('sm_avatar', userAvatar);
+  updateHeaderName();
+  lbSyncMe();
+  closeChangeAvatar();
+  showGuildToast('🖼️ Avatar badal diya!');
+}
+
+// ── EDIT GUILD (leader only) ─────────────────────────────
+let selectedEditEmoji = GUILD_AVATARS[0];
+function openEditGuild(){
+  if(!myGuild || !myGuild.isLeader){
+    showGuildToast('❌ Sirf guild leader edit kar sakta hai!');
+    return;
+  }
+  document.getElementById('eg-name-input').value = myGuild.name;
+  selectedEditEmoji = myGuild.emoji;
+  const picker = document.getElementById('eg-emoji-picker');
+  picker.innerHTML = GUILD_AVATARS.map((src,i)=>
+    `<button class="ep-btn${src===selectedEditEmoji?' sel':''}" onclick="selectEditEmoji('${src}',this)"><img src="${src}" alt="guild avatar ${i+1}"></button>`
+  ).join('');
+  document.getElementById('edit-guild-modal').classList.add('open');
+}
+function closeEditGuild(){
+  document.getElementById('edit-guild-modal').classList.remove('open');
+}
+function selectEditEmoji(emoji, btn){
+  selectedEditEmoji = emoji;
+  document.querySelectorAll('#eg-emoji-picker .ep-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function saveEditedGuild(){
+  const name = document.getElementById('eg-name-input').value.trim();
+  if(!name){
+    const inp=document.getElementById('eg-name-input');
+    inp.style.borderColor='#f87171';
+    setTimeout(()=>inp.style.borderColor='',1500);
+    return;
+  }
+  myGuild.name = name;
+  myGuild.emoji = selectedEditEmoji;
+  lsSet('sm_guild', myGuild);
+  renderMyGuild();
+  closeEditGuild();
+  showGuildToast(`✅ Guild update ho gayi: ${myGuild.name}`);
+  const me = {xp};
+  const totalXP = [...(myGuild.members||[]), me].reduce((s,m)=>s+m.xp,0);
+  guildSyncMine(totalXP, (myGuild.members||[]).length+1);
+}
+
+function copyInviteCode(){
+  if(!myGuild) return;
+  navigator.clipboard.writeText(myGuild.code).then(()=>{
+    const btn = document.querySelector('.invite-copy');
+    if(btn){btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='📋 Copy',2000);}
+  });
+}
+
+function shareGuild(){
+  if(!myGuild) return;
+  const base = window.location.href.split('?')[0];
+  const link = `${base}?guild=${myGuild.code}&gname=${encodeURIComponent(myGuild.name)}&gemoji=${encodeURIComponent(myGuild.emoji)}`;
+  const text = `🎒 *${myGuild.name}* Study Guild mein join karo!\n\n🔗 Link:\n${link}\n\nYa code: *${myGuild.code}*\n\n📚 AI Solving Math pe milke padho!`;
+
+  // Show link popup in modal
+  showShareLinkPopup(link, text);
+}
+
+function showShareLinkPopup(link, text){
+  // Remove old popup if exists
+  const old = document.getElementById('share-link-popup');
+  if(old) old.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'share-link-popup';
+  popup.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:3000;display:flex;
+    align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);
+    animation:fadeIn .2s ease;
+  `;
+  popup.innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--b);border-radius:20px;padding:22px 18px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">📤 Invite Link</div>
+        <button onclick="document.getElementById('share-link-popup').remove()" style="width:28px;height:28px;border-radius:8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;cursor:pointer;font-size:13px">✕</button>
+      </div>
+      <div style="font-size:.68rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:7px;letter-spacing:.5px">INVITE LINK — CLICK TO OPEN</div>
+      <a href="${link}" target="_blank" style="display:block;word-break:break-all;font-size:.75rem;color:#7eb3ff;text-decoration:underline;padding:10px 12px;background:rgba(79,70,229,.08);border:1px solid rgba(126,179,255,.2);border-radius:10px;margin-bottom:14px;line-height:1.6">${link}</a>
+      <div style="display:flex;gap:8px">
+        <button onclick="copyShareLink('${link}')" style="flex:1;padding:11px;border-radius:10px;background:rgba(126,179,255,.1);border:1px solid rgba(126,179,255,.25);color:var(--c1);font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s" id="copy-share-btn">📋 Link Copy Karo</button>
+        ${navigator.share ? `<button onclick="nativeShare('${encodeURIComponent(link)}','${encodeURIComponent(text)}')" style="flex:1;padding:11px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">📤 Share</button>` : ''}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  // Close on backdrop click
+  popup.addEventListener('click', e => { if(e.target === popup) popup.remove(); });
+}
+
+function copyShareLink(link){
+  navigator.clipboard.writeText(link).then(()=>{
+    const btn = document.getElementById('copy-share-btn');
+    if(btn){btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='📋 Link Copy Karo',2000);}
+  });
+}
+
+function nativeShare(encodedLink, encodedText){
+  const link = decodeURIComponent(encodedLink);
+  const text = decodeURIComponent(encodedText);
+  navigator.share({title:'Guild Invite', text, url:link}).catch(()=>{});
+}
+
+function showGuildToast(msg){
+  const t = document.getElementById('xp-toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+// ── THIN CARET — fake 1px cursor on mobile ──────────────
+['qt','qc'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+
+});
+
+// ── KEYBOARD SHORTCUT ──────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&!loading){solve();}
+  if(e.key==='Escape'){
+    ['quiz-modal','lb-modal','profile-menu-modal','change-name-modal','change-avatar-modal','edit-guild-modal','guild-modal'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&el.classList.contains('open'))el.classList.remove('open');
+    });
+    closePanel();
+  }
+});
+
+// ── BOOT ──────────────────────────────────────════════
+loadState();
+applyLang();
+updateProgress();
+checkOnboarding();
+setTimeout(()=>preloadQuizPool(), 3000); // Background mein AI quiz pool load karo
+</script>
+</body>
+</html>
