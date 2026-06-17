@@ -142,9 +142,8 @@ html,body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;mi
 .mode-tab.act .dot{display:block}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
 .inp-body{padding:14px 14px 8px}
-textarea{width:100%;background:transparent;border:none;resize:none;font-size:.9rem;outline:none;line-height:1.75;color:var(--t);font-family:'Outfit',sans-serif;font-weight:400;caret-color:transparent;}
+textarea{width:100%;background:transparent;border:none;resize:none;font-size:.9rem;outline:none;line-height:1.75;color:var(--t);font-family:'Outfit',sans-serif;font-weight:400;}
 textarea::placeholder{color:var(--t3)}
-#qt,#qc{caret-color:transparent;}
 #qt{height:100px}
 #qc{height:50px;margin-bottom:10px}
 .inp-footer{display:flex;align-items:center;gap:8px;padding:8px 14px 12px;border-top:1px solid var(--b2)}
@@ -320,9 +319,6 @@ textarea::placeholder{color:var(--t3)}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
 .modal-bg.open{display:flex;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes thinCaret{0%,100%{opacity:1}50%{opacity:0}}
-.thin-caret-active{caret-color:transparent!important;position:relative;}
-.thin-caret-active::after{content:'';position:absolute;width:1px;height:1.1em;background:#06b6d4;animation:thinCaret 1s step-end infinite;pointer-events:none;margin-left:0;}
 .modal{background:var(--s1);border:1px solid var(--b);border-radius:20px;padding:24px 20px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.5);animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
 @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:6px;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -1963,10 +1959,27 @@ Now solve EVERY question visible in the image:`;
   thinkEl.id = thinkId;
   thinkEl.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--s1);border:1px solid var(--b2);margin-bottom:10px;animation:fadeUp .3s ease">
     <div class="orbit-logo" style="width:32px;height:32px;flex-shrink:0"><div class="orbit-ring"></div><div class="orbit-dot od1"></div><div class="orbit-dot od2"></div><div class="orbit-dot od3"></div></div>
-    <div class="typing-label">Thinking...</div>
+    <div class="typing-label" id="${thinkId}-label">Thinking...</div>
   </div>`;
   const _wrap = document.getElementById(id+'-wrap');
   if(_wrap) _wrap.insertBefore(thinkEl, _wrap.firstChild);
+
+  // ── Gemini-style cycling status text while waiting ──
+  const statusSteps = lang==='hi'
+    ? (mode==='image'
+        ? ['फोटो पढ़ रहा हूँ...','सवाल समझ रहा हूँ...','हल निकाल रहा हूँ...','जवाब तैयार कर रहा हूँ...']
+        : ['सवाल समझ रहा हूँ...','हल सोच रहा हूँ...','जवाब तैयार कर रहा हूँ...'])
+    : (mode==='image'
+        ? ['Reading image...','Understanding question...','Solving...','Preparing answer...']
+        : ['Understanding question...','Solving...','Preparing answer...']);
+  let statusIdx = 0;
+  const statusLabelEl = document.getElementById(thinkId+'-label');
+  if(statusLabelEl) statusLabelEl.textContent = statusSteps[0];
+  const statusTimer = setInterval(()=>{
+    statusIdx = (statusIdx + 1) % statusSteps.length;
+    const el = document.getElementById(thinkId+'-label');
+    if(el) el.textContent = statusSteps[statusIdx];
+  }, 1400);
 
   // ── Raw text buffer collect karo streaming chunks se ──
   let rawBuffer = '';
@@ -1988,6 +2001,7 @@ Now solve EVERY question visible in the image:`;
     // Show card + remove thinking on first chunk
     if(!cardShown){
       cardShown = true;
+      clearInterval(statusTimer);
       const card = document.getElementById(id+'-card');
       if(card) card.style.display = '';
       const think = document.getElementById(id+'-think');
@@ -2043,6 +2057,7 @@ Now solve EVERY question visible in the image:`;
     setSt('', false);
   }finally{
     // Always show card (even on error)
+    clearInterval(statusTimer);
     const _card = document.getElementById(id+'-card');
     if(_card) _card.style.display = '';
     // Remove thinking indicator
