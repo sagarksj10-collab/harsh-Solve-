@@ -1712,7 +1712,7 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
     body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, temperature:0.3, stream: streaming})
-  }, 6000);
+  }, 10000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -1747,7 +1747,7 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'X-Title':'AI Solving Math'
         },
         body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, stream: streaming})
-      }, 6000);
+      }, 10000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
@@ -1787,7 +1787,7 @@ async function callGeminiModel(userContent, model, onChunk=null){
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens:3000, temperature:0.3}})
-  }, 15000);
+  }, 20000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -1829,6 +1829,7 @@ async function callGeminiModel(userContent, model, onChunk=null){
 //  NVIDIA → OpenRouter → Gemini (sabse cheap aakhri try)
 // ══════════════════════════════════════════════════════
 async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
+  const errLog = [];
 
   // ── TIER 1: NVIDIA NIM ──────────────────────────────
   const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
@@ -1837,7 +1838,7 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
       console.log('[T1] NVIDIA:', model);
       const r = await callNvidiaNIM(userContent, model, onChunk);
       if(r && r.trim()){ console.log('[T1] ✅ NVIDIA success'); return r; }
-    } catch(e){ console.warn('[T1] NVIDIA failed:', model, e.message); }
+    } catch(e){ console.warn('[T1] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); }
   }
 
   // ── TIER 2: OPENROUTER ──────────────────────────────
@@ -1848,7 +1849,7 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
       console.log('[T2] OpenRouter:', model);
       const r = await callOpenRouterModel(userContent, model, onChunk);
       if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); return r; }
-    } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); }
+    } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); }
   }
 
   // ── TIER 3: GEMINI (cheapest, aakhri try) ───────────
@@ -1860,10 +1861,12 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
       console.log('[T3] Gemini:', model);
       const r = await callGeminiModel(userContent, model, onChunk);
       if(r && r.trim()){ console.log('[T3] ✅ Gemini success'); return r; }
-    } catch(e){ console.warn('[T3] Gemini failed:', model, e.message); lastErr = e; }
+    } catch(e){ console.warn('[T3] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; }
   }
 
-  throw lastErr || new Error('ALL_3_TIERS_FAILED');
+  const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
+  finalErr.detailLog = errLog.join(' | ');
+  throw finalErr;
 }
 
 // ── Legacy aliases ─────────────────────────────────────
@@ -2041,11 +2044,12 @@ Now solve EVERY question visible in the image:`;
   }catch(e){
     console.error('All APIs failed:',e);
     const _errQ = document.getElementById('qt') ? document.getElementById('qt').value.trim() : '';
+    const _detail = e && e.detailLog ? `<div style="font-size:.7rem;color:#94a3b8;margin-top:8px;word-break:break-all">${e.detailLog}</div>` : '';
     if(bodyEl) bodyEl.innerHTML = lang==='hi'
-      ? `<div style="color:#f87171">❌ जवाब नहीं मिला — इंटरनेट चेक करें या फिर से कोशिश करें</div>
+      ? `<div style="color:#f87171">❌ जवाब नहीं मिला — इंटरनेट चेक करें या फिर से कोशिश करें</div>${_detail}
          <button onclick="document.getElementById('qt').value='${_errQ.replace(/'/g,"\'")}';this.closest('.ai-card').style.display='none';solve();" 
            style="margin-top:10px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">🔄 फिर से कोशिश करें</button>`
-      : `<div style="color:#f87171">❌ Could not get answer — Check internet & try again</div>
+      : `<div style="color:#f87171">❌ Could not get answer — Check internet & try again</div>${_detail}
          <button onclick="document.getElementById('qt').value='${_errQ.replace(/'/g,"\'")}';this.closest('.ai-card').style.display='none';solve();" 
            style="margin-top:10px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">🔄 Try Again</button>`;
     setSt('', false);
@@ -2411,7 +2415,6 @@ function appendChat(id,q,html){
   const enrichedHtml=injectSamjhaoButtons(html, id);
   const div=document.createElement('div');
   div.innerHTML=`
-    <div class="user-row"><div class="user-bubble">${esc(q)}</div></div>
     <div class="ai-card">
       <div class="ai-card-head">
         <div class="ai-label"><div class="ai-dot"></div> AI Answer</div>
@@ -2443,7 +2446,6 @@ function appendStreamCard(id, q){
   const div = document.createElement('div');
   div.id = id + '-wrap';
   div.innerHTML = `
-    <div class="user-row"><div class="user-bubble">${esc(q)}</div></div>
     <div class="ai-card" id="${id}-card" style="display:none">
       <div class="ai-card-head">
         <div class="ai-label"><div class="ai-dot"></div> AI Answer</div>
@@ -2671,7 +2673,7 @@ async function openLb(){
   }
 
   all.sort((a,b)=>b.score-a.score);
-  const top=all.slice(0,20);
+  const top=all.slice(0,50);
   const medals=['🥇','🥈','🥉'];
   const rankClass=['gold','silver','bronze'];
 
@@ -2941,8 +2943,19 @@ async function renderMyGuild(){
   const pct = Math.min((totalXP / 10000)*100, 100).toFixed(0);
   document.getElementById('g-xp-pct').textContent = pct+'%';
   document.getElementById('g-xp-fill').style.width = pct+'%';
-  const myRank = Math.max(1, 6 - Math.floor(totalXP / 1000));
-  document.getElementById('g-rank').textContent = '#'+myRank;
+
+  // ── Real rank: sync my guild's total XP, then fetch all guilds and find my position ──
+  document.getElementById('g-rank').textContent = '...';
+  await guildSyncMine(totalXP, allMembers.length);
+  const allGuilds = await guildFetchAll();
+  if(allGuilds && allGuilds.length){
+    allGuilds.sort((a,b)=>b.xp-a.xp);
+    const myIdx = allGuilds.findIndex(g=>g.code===myGuild.code);
+    const myRank = myIdx>=0 ? myIdx+1 : allGuilds.length+1;
+    document.getElementById('g-rank').textContent = '#'+myRank;
+  } else {
+    document.getElementById('g-rank').textContent = '#1';
+  }
 
   const colors=['rgba(79,70,229,.3)','rgba(124,58,237,.25)','rgba(8,145,178,.25)','rgba(52,211,153,.2)','rgba(251,146,60,.2)'];
   document.getElementById('g-members-list').innerHTML = allMembers.map((m,i)=>`
@@ -2996,7 +3009,7 @@ async function renderGuildRankings(){
   all.sort((a,b)=>b.xp-a.xp);
   const medals=['🥇','🥈','🥉'];
   const myCode = myGuild ? myGuild.code : null;
-  listEl.innerHTML = all.slice(0,15).map((g,i)=>`
+  listEl.innerHTML = all.slice(0,50).map((g,i)=>`
     <div class="guild-lb-item" style="${g.code===myCode?'border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.08)':''}">
       <div class="glb-rank">${i<3?medals[i]:'#'+(i+1)}</div>
       <img src="${g.emoji}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0">
