@@ -24,9 +24,6 @@ jobs:
           sed -i "s|__GEMINI_KEY__|${{ secrets.GEMINI_KEY }}|g" index.html
           sed -i "s|__NVIDIA_KEY__|${{ secrets.NVIDIA_KEY }}|g" index.html
           sed -i "s|__OPENROUTER_KEY__|${{ secrets.OPENROUTER_KEY }}|g" index.html
-          sed -i "s|__JSONBIN_BIN_ID__|${{ secrets.JSONBIN_BIN_ID }}|g" index.html
-          sed -i "s|__JSONBIN_API_KEY__|${{ secrets.JSONBIN_API_KEY }}|g" index.html
-          sed -i "s|__JSONBIN_GUILDS_BIN_ID__|${{ secrets.JSONBIN_GUILDS_BIN_ID }}|g" index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
