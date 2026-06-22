@@ -98,6 +98,18 @@ html,body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;mi
 .sp-empty-icon{font-size:34px;margin-bottom:10px;opacity:.5}
 .sp-empty-txt{font-size:.83rem;font-weight:600}
 .sp-foot{padding:10px;border-top:1px solid var(--b2)}
+/* History answer expand */
+.sp-item{cursor:default!important}
+.sp-item-head{display:flex;align-items:flex-start;justify-content:space-between;cursor:pointer;gap:6px}
+.sp-chevron{font-size:.7rem;color:var(--t3);flex-shrink:0;margin-top:2px;transition:transform .2s}
+.sp-chevron.open{transform:rotate(180deg)}
+.sp-answer{display:none;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(126,179,255,.04);border:1px solid rgba(126,179,255,.08);font-size:.78rem;color:var(--t2);line-height:1.6;max-height:260px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.sp-answer.show{display:block}
+.sp-answer .step{padding:4px 0;border-bottom:1px solid rgba(126,179,255,.06)}
+.sp-answer .step:last-child{border-bottom:none}
+.sp-item-foot{display:flex;justify-content:flex-end;margin-top:8px}
+.sp-load-btn{padding:4px 12px;border-radius:7px;background:rgba(126,179,255,.08);border:1px solid rgba(126,179,255,.15);color:var(--c1);font-size:.65rem;font-weight:700;cursor:pointer;font-family:'Azeret Mono',monospace;transition:.2s}
+.sp-load-btn:active{transform:scale(.93)}
 .del-all{width:100%;padding:11px;border-radius:var(--r2);border:1px solid rgba(248,113,113,.2);background:rgba(248,113,113,.05);color:#f87171;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
 .del-all:hover{background:rgba(248,113,113,.1)}
 
@@ -256,6 +268,12 @@ textarea::placeholder{color:var(--t3)}
 .st-msg.show{display:flex}
 .st-msg.err{background:rgba(248,113,113,.07);border-color:rgba(248,113,113,.2);color:#f87171}
 
+/* ANSWER MODE TOGGLE */
+.ans-mode-wrap{display:flex;gap:6px;margin-bottom:10px;background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:4px}
+.ans-mode-btn{flex:1;padding:7px 6px;border-radius:9px;border:none;background:transparent;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;color:var(--t3);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.ans-mode-btn.act{background:linear-gradient(135deg,rgba(79,70,229,.35),rgba(124,58,237,.25));color:var(--c1);border:1px solid rgba(126,179,255,.25);box-shadow:0 2px 8px rgba(79,70,229,.2)}
+.ans-mode-btn:active{transform:scale(.94)}
+
 /* CHAT */
 .chat-area{display:flex;flex-direction:column;gap:14px}
 .user-row{display:flex;justify-content:flex-end;animation:fadeUp .3s ease}
@@ -276,6 +294,10 @@ textarea::placeholder{color:var(--t3)}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
+/* Emoji bullet list */
+.ai-body ul.ai-bullets{padding-left:0;list-style:none;margin:6px 0 10px}
+.ai-body ul.ai-bullets li{margin-bottom:7px;padding:8px 12px 8px 14px;background:rgba(17,29,53,.7);border-radius:10px;border:1px solid rgba(126,179,255,.08);border-left:2px solid rgba(167,139,250,.4);font-size:.86rem;line-height:1.7;display:flex;align-items:flex-start;gap:8px}
+.ai-body ul.ai-bullets li::before{content:none}
 .ai-body p{margin-bottom:9px}
 .ai-body strong{color:#c4b5fd;font-weight:700}
 .ai-body em{color:var(--c3);font-style:normal;font-weight:600}
@@ -641,8 +663,8 @@ textarea::placeholder{color:var(--t3)}
           <button onclick="closeGuild()" style="width:28px;height:28px;border-radius:8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;cursor:pointer;font-size:13px">✕</button>
         </div>
 
-        <!-- JOIN BUTTON — sirf tab dikhaye jab guild mein nahi ho -->
-        <div style="margin-bottom:10px" id="gt-join-wrap">
+        <!-- JOIN BUTTON -->
+        <div style="margin-bottom:10px">
           <button id="gt-join" onclick="switchGuildTab('join')" style="width:100%;padding:9px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px">🔗 Join Guild</button>
         </div>
 
@@ -666,7 +688,7 @@ textarea::placeholder{color:var(--t3)}
               </div>
               <div class="guild-rank-badge">✨ <span id="g-total-xp">0</span> Guild XP</div>
               <div class="guild-xp-bar-wrap">
-                <div class="guild-xp-label"><span>Guild Progress</span><span id="g-xp-pct">0%</span></div>
+                <div class="guild-xp-label"><span>Guild Members</span><span id="g-xp-pct">0/100</span></div>
                 <div class="guild-xp-track"><div class="guild-xp-fill" id="g-xp-fill" style="width:0%"></div></div>
               </div>
               <div style="font-size:.68rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:10px">👥 MEMBERS</div>
@@ -677,7 +699,6 @@ textarea::placeholder{color:var(--t3)}
                 <div style="font-size:.6rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:3px">INVITE CODE</div>
                 <div class="invite-code" id="g-invite-code">------</div>
               </div>
-              <button class="invite-copy" onclick="copyInviteCode()">📋 Copy</button>
             </div>
             <div class="guild-actions">
               <button class="guild-act-btn" id="g-edit-btn" style="display:none" onclick="openEditGuild()">⚙️ Edit Guild</button>
@@ -720,14 +741,6 @@ textarea::placeholder{color:var(--t3)}
             <div style="text-align:center;padding:28px 10px;color:var(--t3)">
               <div style="font-size:28px;margin-bottom:8px">⏳</div>
               <div style="font-size:.78rem;font-weight:600">Rankings load ho rahi hain...</div>
-            </div>
-          </div>
-          <!-- Ranking page ke neeche Join/Create buttons — sirf tab dikhein jab guild nahi ho -->
-          <div id="rankings-noguild-actions" style="display:none;margin-top:14px">
-            <div style="text-align:center;font-size:.72rem;color:var(--t3);margin-bottom:10px;font-family:'Azeret Mono',monospace">APNI GUILD BANAO YA JOIN KARO</div>
-            <div style="display:flex;gap:8px">
-              <button class="guild-act-btn primary" style="flex:1" onclick="switchGuildTab('create')">➕ Create Guild</button>
-              <button class="guild-act-btn" style="flex:1" onclick="switchGuildTab('join')">🔗 Join Guild</button>
             </div>
           </div>
         </div>
@@ -838,6 +851,16 @@ textarea::placeholder{color:var(--t3)}
           <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
           <div class="voice-btn" id="mic-btn" onclick="openQuiz()" title="Quick Quiz" style="font-size:16px">🧩</div>
         </div>
+      </div>
+
+      <!-- ANSWER MODE TOGGLE -->
+      <div class="ans-mode-wrap">
+        <button class="ans-mode-btn act" id="amBtn-standard" onclick="setAnswerMode('standard')">
+          ⚡ Standard
+        </button>
+        <button class="ans-mode-btn" id="amBtn-extended" onclick="setAnswerMode('extended')">
+          📖 Extended
+        </button>
       </div>
 
       <button class="go-btn" id="go-btn" onclick="solve()">
@@ -962,6 +985,13 @@ let lang='hi', mode='text', img64=null, loading=false;
 let history=[], activeChip=0;
 let xp=0, streak=0, solved=0, lastDate='';
 let recognition=null, isListening=false;
+let answerMode='standard'; // 'standard' | 'extended'
+
+function setAnswerMode(m){
+  answerMode=m;
+  document.getElementById('amBtn-standard').classList.toggle('act', m==='standard');
+  document.getElementById('amBtn-extended').classList.toggle('act', m==='extended');
+}
 const AVATAR_IMAGES = [
 "https://api.dicebear.com/9.x/adventurer/svg?seed=Aarav&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
 "https://api.dicebear.com/9.x/adventurer/svg?seed=Ananya&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
@@ -2042,19 +2072,50 @@ async function solve(){
   const displayQ=mode==='image'?(qc||'📷 Image Question'):qt;
   const subject=activeChip>0?S[lang].pills[activeChip]:'';
 
+  // ── Harmful / cheating intent detection ──────────────
+  const harmPatterns=[
+    /test.*kharab|exam.*kharab|paper.*leak|cheating|answer.*leak|naqal|nakal/i,
+    /wrong.*answer.*dedo|galat.*answer|fail.*kardo|exam.*fail/i,
+    /cheat.*sheet|paper.*solve.*karo.*exam/i,
+  ];
+  if(harmPatterns.some(re=>re.test(qt+' '+qc))){
+    loading=false;
+    document.getElementById('go-btn').disabled=false;
+    const id='id-'+Date.now();
+    appendStreamCard(id, displayQ);
+    const bodyEl=document.getElementById(id+'-body');
+    document.getElementById(id+'-card').style.display='';
+    if(bodyEl) bodyEl.innerHTML=lang==='hi'
+      ?`<div class="step">❌ <strong>माफ़ करना!</strong> मैं परीक्षा खराब करने, नकल करने, या गलत उत्तर देने में मदद नहीं कर सकता। मैं एक पढ़ाई का साथी हूँ — सही तरीके से सीखने में मदद करना मेरा काम है। कोई और सवाल हो तो पूछो! 😊</div>`
+      :`<div class="step">❌ <strong>Sorry!</strong> I can't help with cheating, leaking answers, or spoiling exams. I'm a study buddy — my job is to help you learn the right way. Ask me any genuine question! 😊</div>`;
+    setSt('', false);
+    return;
+  }
+
+  // ── Answer mode suffix for extended ──────────────────
+  const extendedRule = answerMode==='extended'
+    ? (lang==='hi'
+        ? `\nEXTENDED MODE (विस्तृत उत्तर): हर concept को पूरी तरह explain करो। Steps के साथ कारण (why) भी बताओ। Real-life examples दो। Important terms को define करो। जितना हो सके उतना detail में लिखो — student को पूरी समझ आनी चाहिए।`
+        : `\nEXTENDED MODE (Detailed answer): Explain every concept fully. For each step, also explain WHY it is done. Give real-life examples. Define important terms. Be as detailed as possible — the student should understand completely.`)
+    : '';
+
   // ── System prompt (text + image common) ───────────────
   const sys=`You are AI Solving Math, a smart tutor made by Harsh.
 If asked your name or identity: say only "Main hoon AI Solving Math, made by Harsh."
 Language rule: ${lang==='hi' ? 'Reply ONLY in pure Hindi using Devanagari script (शुद्ध हिंदी). Do NOT use Hinglish or Roman/English script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay in English/numerals, but all sentences and explanations must be written in Devanagari script.' : 'Reply in English.'}
 ${subject?`Subject context: ${subject}`:''}
+${extendedRule}
 
 RESPONSE FORMAT RULES (follow strictly):
 - NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
-- ANY math/calculation → show each step on new line, final answer bold. EXACTLY like this example:
-<div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
-- For algebra/equation → same format, each line one operation, last line is Answer bold.
-- LANGUAGE/GRAMMAR/THEORY/CONCEPT/GK → ONLY: <div class="step">Full explanation in flowing sentences. No bullets. No numbered steps. One paragraph.</div>
-- Be FAST. Give answer directly. No intro text. No explanation unless asked.
+- USE EMOJIS smartly: Start key steps or sections with a relevant emoji (e.g. 📌 for important point, ✅ for answer/result, 💡 for tip/concept, 🔢 for math step, 📖 for definition, ⚠️ for warning/note, 🎯 for final answer). Use emojis naturally — not on every line, only where they add clarity.
+- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features. Each <li> should start with a relevant emoji.
+- ANY math/calculation → show each step on new line in <div class="step">, final answer bold with ✅. EXACTLY like:
+<div class="step">🔢 2 - 3 = -1<br>-1 - 4 = ✅ <strong>-5</strong></div>
+- For algebra/equation → same format, each line one operation, last line Answer bold with ✅.
+- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>📖 [Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
+- LANGUAGE/GRAMMAR → <div class="step">📌 explanation</div> with examples as bullets.
+${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block with emoji. Include 💡 Tip, 📌 Key Point, and 🌍 Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
 - OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
 
   // ── Image-specific prompt (sabhi questions solve karo) ──
@@ -2177,6 +2238,7 @@ Now solve EVERY question visible in the image:`;
     setSt('');
 
     if(needsGraph(displayQ)) setTimeout(()=>renderGraph(id, displayQ), 200);
+    if(needsDiagram(displayQ)) setTimeout(()=>generateDiagram(id, displayQ), 500);
     if(window.MathJax?.typesetPromise) setTimeout(()=>window.MathJax.typesetPromise([bodyEl]), 100);
     setTimeout(()=>document.getElementById(id+'-wrap')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
 
@@ -2215,9 +2277,27 @@ function cleanHtml(text){
   // Remove remaining single stars
   text=text.replace(/\*([^*]+)\*/g,'$1');
 
-  // Already valid HTML — return as-is (handles Q1/Q2 multi-answer divs)
-  if(text.includes('<div class="step">')||text.includes('<ol>')||text.includes('<li>')){
+  // Already valid HTML — return as-is (handles Q1/Q2 multi-answer divs, ai-bullets)
+  if(text.includes('<div class="step">')||text.includes('<ol>')||text.includes('<ul')||text.includes('<li>')){
     return text;
+  }
+
+  // ── Markdown bullet list (- item or • item) → ai-bullets ──
+  if(/^[\-•]\s.+/m.test(text)){
+    const lines=text.split(/\n+/).filter(l=>l.trim());
+    let html='';
+    let inBullets=false;
+    lines.forEach(line=>{
+      if(/^[\-•]\s/.test(line.trim())){
+        if(!inBullets){html+='<ul class="ai-bullets">';inBullets=true;}
+        html+=`<li>${line.replace(/^[\-•]\s*/,'')}</li>`;
+      } else {
+        if(inBullets){html+='</ul>';inBullets=false;}
+        if(line.trim()) html+=`<div class="step">${line}</div>`;
+      }
+    });
+    if(inBullets)html+='</ul>';
+    if(html) return html;
   }
 
   // ── Markdown Q1./Q2. style → numbered question blocks ──
@@ -2380,6 +2460,81 @@ JSON format (no markdown, no extra text):
 // ── SMART GRAPH ENGINE ──────────────────────────────────
 
 // Detect if question needs a graph
+// ── DIAGRAM DETECTION ──────────────────────────────────
+function needsDiagram(question){
+  const q=(question||'').toLowerCase();
+  // Science/Biology/Physics topics that need labeled diagrams
+  const diagramPatterns=[
+    /\b(diagram|draw|label|sketch|structure|parts of|anatomy)\b/i,
+    /\b(cell|plant cell|animal cell|nucleus|mitochondria|chloroplast)\b/i,
+    /\b(heart|lungs|kidney|liver|brain|eye|ear|digestive|respiratory|circulatory|nervous)\b/i,
+    /\b(atom|molecule|electron|proton|neutron|orbital|bond)\b/i,
+    /\b(circuit|resistor|capacitor|battery|bulb|wire)\b/i,
+    /\b(triangle|quadrilateral|polygon|angle|parallel|perpendicular)\b.*\b(diagram|figure|show)\b/i,
+    /\b(force|pressure|velocity|acceleration)\b.*\b(diagram|vector|arrow)\b/i,
+    /\b(photosynthesis|respiration|digestion|blood flow|ecosystem)\b/i,
+    /\b(dna|rna|chromosome|gene|cell division|mitosis|meiosis)\b/i,
+    /\b(magnet|magnetic field|electric field|wave|ray|refraction|reflection)\b/i,
+    /\bdikhao\b|\bbanao\b.*\b(figure|diagram)\b|\b(figure|diagram)\b.*\bbanao\b/i,
+    /\b(figure|label|part)\b.*\b(show|mark|indicate)\b/i,
+  ];
+  // Don't generate diagram for pure math/text
+  const noDiagram=[
+    /\bsolve\b|\bcalculate\b|\bfind.*value\b|\bsimplify\b/i,
+    /\bgrammar\b|\btranslate\b|\bmeaning\b|\bdefine\b|\bspell\b/i,
+    /\bgraph\b|\bplot\b|\bcoordinate\b/i, // graph is handled by renderGraph
+  ];
+  for(const re of noDiagram){if(re.test(q)) return false;}
+  for(const re of diagramPatterns){if(re.test(q)) return true;}
+  return false;
+}
+
+// Generate a labeled SVG diagram using AI (OpenRouter free model)
+async function generateDiagram(cardId, question){
+  const bodyEl=document.getElementById(cardId+'-body');
+  if(!bodyEl) return;
+
+  // Placeholder dikhao
+  const wrap=document.createElement('div');
+  wrap.id='diag-'+cardId;
+  wrap.style.cssText='margin-top:12px;padding:10px;border-radius:12px;background:rgba(126,179,255,.04);border:1px solid rgba(126,179,255,.1)';
+  wrap.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;color:var(--t3);font-size:.75rem;font-family:'Azeret Mono',monospace"><div class="ld-spinner" style="width:14px;height:14px;border-width:2px"></div>Diagram generate ho raha hai...</div>`;
+  bodyEl.appendChild(wrap);
+
+  const prompt=`You are a scientific diagram generator. Create a labeled SVG diagram for:
+"${question}"
+
+STRICT RULES:
+1. Return ONLY a valid <svg> tag — nothing else, no explanation, no markdown.
+2. SVG must be: width="100%" viewBox="0 0 400 300"
+3. Style: BLACK & WHITE only. Use stroke="black" fill="white" or fill="none". NO colors.
+4. All parts must be labeled with <text> tags in English. Labels should have lines pointing to parts.
+5. Include a <text> title at top showing what the diagram is.
+6. Draw clear shapes for each part using <rect>, <circle>, <ellipse>, <path>, <line>, <polygon>.
+7. Label EVERY major part with its name and a short 1-2 word function in brackets.
+8. Make it clean, educational, and easy to understand for a student.
+9. Font: font-family="Arial" font-size="11"
+10. Output: ONLY the <svg>...</svg> block. Absolutely nothing else.`;
+
+  try{
+    // Use OpenRouter free text model for SVG generation
+    const svgRaw = await callWithAutoFallback(prompt, false);
+    // Extract svg block
+    const svgMatch = svgRaw.match(/<svg[\s\S]*?<\/svg>/i);
+    if(!svgMatch) throw new Error('NO_SVG');
+    const svgClean = svgMatch[0]
+      .replace(/width="[^"]*"/, 'width="100%"')
+      .replace(/style="[^"]*background[^"]*"/gi,'');
+
+    wrap.innerHTML=`
+      <div style="font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;letter-spacing:1px;margin-bottom:8px">📐 DIAGRAM</div>
+      <div style="background:#fff;border-radius:8px;padding:8px;overflow:hidden">${svgClean}</div>`;
+  }catch(e){
+    console.warn('Diagram generation failed:',e.message);
+    wrap.remove(); // silently remove if failed
+  }
+}
+
 function needsGraph(question){
   const q=(question||'').toLowerCase();
   // Patterns that need graphs
@@ -2575,6 +2730,10 @@ function appendChat(id,q,html){
   // Smart graph: only render if question needs it
   if(needsGraph(q)){
     setTimeout(()=>renderGraph(id,q),200);
+  }
+  // Smart diagram: science/bio/physics topics ke liye
+  if(needsDiagram(q)){
+    setTimeout(()=>generateDiagram(id,q),400);
   }
 }
 
@@ -2812,7 +2971,8 @@ async function openLb(){
   }
 
   all.sort((a,b)=>b.score-a.score);
-  const top=all.slice(0,50);
+  const top=all.slice(0,200);
+  const myRankIdx = all.findIndex(e=>e.id===myId);
   const medals=['🥇','🥈','🥉'];
   const rankClass=['gold','silver','bronze'];
 
@@ -2821,7 +2981,7 @@ async function openLb(){
     return;
   }
 
-  document.getElementById('lb-list').innerHTML=top.map((e,i)=>`
+  let html = top.map((e,i)=>`
     <div class="lb-item" style="${e.id===myId?'border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.1)':''}">
       <div class="lb-rank ${rankClass[i]||''}">${i<3?medals[i]:'#'+(i+1)}</div>
       <div class="lb-name" style="display:flex;align-items:center;gap:6px;flex-direction:column;align-items:flex-start">
@@ -2829,6 +2989,22 @@ async function openLb(){
       </div>
       <div class="lb-score">${e.score} XP</div>
     </div>`).join('');
+
+  // Agar user top 200 mein nahi hai, uski apni rank alag se niche dikhao
+  if(myId && myRankIdx>=200){
+    const me = all[myRankIdx];
+    html += `
+    <div style="text-align:center;padding:6px 0;color:var(--t3);font-size:.7rem;font-family:'Azeret Mono',monospace">• • •</div>
+    <div class="lb-item" style="border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.1)">
+      <div class="lb-rank">#${myRankIdx+1}</div>
+      <div class="lb-name" style="display:flex;align-items:center;gap:6px;flex-direction:column;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:6px"><img src="${me.avatar||AVATAR_IMAGES[0]}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ${me.name} (Aap)</div>
+      </div>
+      <div class="lb-score">${me.score} XP</div>
+    </div>`;
+  }
+
+  document.getElementById('lb-list').innerHTML = html;
 
   // Sync my latest score in background
   lbSyncMe();
@@ -2848,10 +3024,34 @@ function renderHistory(){
   });
   if(!cnt){list.innerHTML=`<div class="sp-empty"><div class="sp-empty-icon">📭</div><div class="sp-empty-txt">${s.hemp}</div></div>`;return;}
   list.innerHTML=history.map(h=>`
-    <div class="sp-item" onclick="loadHistItem('${h.id}')">
-      <div class="sp-q">${esc(h.q)}</div>
-      <div class="sp-t">${fmtTime(h.t)}</div>
+    <div class="sp-item">
+      <div class="sp-item-head" onclick="toggleHistAnswer('${h.id}')">
+        <div style="flex:1;min-width:0">
+          <div class="sp-q">${esc(h.q)}</div>
+          <div class="sp-t">${fmtTime(h.t)}</div>
+        </div>
+        <div class="sp-chevron" id="chev-${h.id}">▼</div>
+      </div>
+      <div class="sp-answer" id="ans-${h.id}">
+        ${h.html ? h.html : `<span style="color:var(--t3);font-size:.75rem">Answer available nahi</span>`}
+      </div>
+      <div class="sp-item-foot" id="foot-${h.id}" style="display:none">
+        <button class="sp-load-btn" onclick="loadHistItem('${h.id}')">📋 Re-solve</button>
+      </div>
     </div>`).join('');
+}
+
+function toggleHistAnswer(id){
+  const ansEl=document.getElementById('ans-'+id);
+  const chevEl=document.getElementById('chev-'+id);
+  const footEl=document.getElementById('foot-'+id);
+  if(!ansEl)return;
+  const isOpen=ansEl.classList.contains('show');
+  ansEl.classList.toggle('show',!isOpen);
+  if(chevEl) chevEl.classList.toggle('open',!isOpen);
+  if(footEl) footEl.style.display=isOpen?'none':'flex';
+  // MathJax re-render if needed
+  if(!isOpen && window.MathJax?.typesetPromise) setTimeout(()=>window.MathJax.typesetPromise([ansEl]),80);
 }
 
 function loadHistItem(id){
@@ -3008,27 +3208,19 @@ function switchGuildTab(tab){
 function updateCreateTabVisibility(){
   const createTab = document.getElementById('gt-create');
   const createSec = document.getElementById('gs-create');
-  const joinWrap = document.getElementById('gt-join-wrap');
-  const rankingsActions = document.getElementById('rankings-noguild-actions');
+  const joinBtn = document.getElementById('gt-join');
+  const joinSec = document.getElementById('gs-join');
   if(!createTab) return;
   if(myGuild){
-    // Guild mein hoon — Create aur Join dono hide karo
     createTab.style.display='none';
-    if(joinWrap) joinWrap.style.display='none';
-    if(rankingsActions) rankingsActions.style.display='none';
+    if(joinBtn) joinBtn.style.display='none';
     // If currently on create or join tab, switch to myguild
-    if(createSec && createSec.classList.contains('act')){
-      switchGuildTab('myguild');
-    }
-    const joinSec = document.getElementById('gs-join');
-    if(joinSec && joinSec.classList.contains('act')){
+    if((createSec && createSec.classList.contains('act')) || (joinSec && joinSec.classList.contains('act'))){
       switchGuildTab('myguild');
     }
   } else {
-    // Guild mein nahi — Create aur Join dono dikhao
     createTab.style.display='';
-    if(joinWrap) joinWrap.style.display='';
-    if(rankingsActions) rankingsActions.style.display='';
+    if(joinBtn) joinBtn.style.display='';
   }
 }
 
@@ -3086,13 +3278,14 @@ async function renderMyGuild(){
   // Self = real user
   const me = {id:myId, name: userName||'Aap', emoji: AVATAR_IMAGES[userAvatar]||AVATAR_IMAGES[0], xp, isMe:true, isLeader: !!myGuild.isLeader};
   let allMembers = [...otherMembers, me].sort((a,b)=>b.xp-a.xp);
-  // Cap guild at 40 members max (display + logic)
-  allMembers = allMembers.slice(0, 40);
+  // Cap guild at 100 members max (display + logic)
+  allMembers = allMembers.slice(0, 100);
   const totalXP = allMembers.reduce((s,m)=>s+m.xp, 0);
+  const memberCount = allMembers.length;
 
   document.getElementById('g-total-xp').textContent = totalXP.toLocaleString();
-  const pct = Math.min((totalXP / 10000)*100, 100).toFixed(0);
-  document.getElementById('g-xp-pct').textContent = pct+'%';
+  const pct = Math.min((memberCount / 100)*100, 100).toFixed(0);
+  document.getElementById('g-xp-pct').textContent = memberCount+'/100';
   document.getElementById('g-xp-fill').style.width = pct+'%';
 
   await guildSyncMine(totalXP, allMembers.length);
@@ -3106,10 +3299,6 @@ async function renderMyGuild(){
       ${(myGuild.isLeader && !m.isMe && !m.isLeader) ? `<button class="gm-make-leader" onclick="makeLeader('${m.id}')" title="Leader banao">👑</button>` : ''}
     </div>`).join('');
 
-  if(!rosterEnabled()){
-    document.getElementById('g-members-list').insertAdjacentHTML('beforeend',
-      '<div style="text-align:center;padding:8px;color:var(--t3);font-size:.65rem">⚠️ Sirf aap dikh rahe ho. Real members ke liye JSONBIN_ROSTER_BIN_ID set karo.</div>');
-  }
 }
 
 async function makeLeader(memberId){
@@ -3186,15 +3375,17 @@ async function loadGuildRankings(){
   // Sort by XP descending
   const sorted = [...all].sort((a,b)=>(b.xp||0)-(a.xp||0));
   const myCode = myGuild ? myGuild.code : null;
+  const myGuildIdx = myCode ? sorted.findIndex(g=>g.code===myCode) : -1;
 
   const rankColors = ['#fbbf24','#94a3b8','#cd7c42'];
   const rankEmojis = ['🥇','🥈','🥉'];
+  const top = sorted.slice(0,200);
 
-  listEl.innerHTML = sorted.map((g, i)=>{
-    const rank = i + 1;
+  const renderRow = (g, idx) => {
+    const rank = idx + 1;
     const isMe = g.code === myCode;
     const rankLabel = rank <= 3
-      ? `<span style="font-size:1.1rem">${rankEmojis[i]}</span>`
+      ? `<span style="font-size:1.1rem">${rankEmojis[idx]}</span>`
       : `<span class="glb-rank" style="color:${isMe?'var(--c1)':'var(--t3)'}">#${rank}</span>`;
 
     const border = isMe ? 'border:1px solid rgba(126,179,255,.4);background:rgba(79,70,229,.1)' : 'border:1px solid var(--b2);background:var(--s2)';
@@ -3218,7 +3409,17 @@ async function loadGuildRankings(){
       </div>
       <div class="glb-xp">${(g.xp||0).toLocaleString()} XP<span>total</span></div>
     </div>`;
-  }).join('');
+  };
+
+  let html = top.map((g,i)=>renderRow(g,i)).join('');
+
+  // Agar meri guild top 200 mein nahi hai, uski rank alag se niche dikhao
+  if(myGuildIdx>=200){
+    html += `<div style="text-align:center;padding:6px 0;color:var(--t3);font-size:.7rem;font-family:'Azeret Mono',monospace">• • •</div>`
+      + renderRow(sorted[myGuildIdx], myGuildIdx);
+  }
+
+  listEl.innerHTML = html;
 }
 
 // ── SHARED MEMBER ROSTER (per guild) ─────────────────────
@@ -3279,7 +3480,7 @@ async function rosterSyncMe(){
   };
   const idx = list.findIndex(m=>m.id===myId);
   if(idx>=0) list[idx]=meEntry; else list.push(meEntry);
-  rosters[myGuild.code] = list.slice(0,40); // cap 40
+  rosters[myGuild.code] = list.slice(0,100); // cap 100
   await rosterSaveAll(rosters);
 }
 
@@ -3355,11 +3556,11 @@ function joinGuild(){
 async function joinGuildWithData(code, gname, gemoji){
   if(myGuild){showGuildToast('Pehle current guild chhodo!');return;}
 
-  // Check member cap (40) before joining
+  // Check member cap (100) before joining
   if(rosterEnabled()){
     const rosters = await rosterFetchAll();
-    if(rosters && rosters[code] && rosters[code].length>=40){
-      showGuildToast('❌ Yeh guild full hai (40/40 members). Doosri guild try karo!');
+    if(rosters && rosters[code] && rosters[code].length>=100){
+      showGuildToast('❌ Yeh guild full hai (100/100 members). Doosri guild try karo!');
       return;
     }
   }
@@ -3587,7 +3788,7 @@ document.addEventListener('keydown',e=>{
 
 // ── BOOT ──────────────────────────────────────════════
 loadState();
-applyLang()
+applyLang();
 updateProgress();
 checkOnboarding();
 setTimeout(()=>preloadQuizPool(), 3000); // Background mein AI quiz pool load karo
