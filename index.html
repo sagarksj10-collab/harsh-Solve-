@@ -641,15 +641,15 @@ textarea::placeholder{color:var(--t3)}
           <button onclick="closeGuild()" style="width:28px;height:28px;border-radius:8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;cursor:pointer;font-size:13px">✕</button>
         </div>
 
-        <!-- TOP ACTION BUTTONS: Rankings & Join (always visible) -->
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button id="gt-rankings" onclick="switchGuildTab('rankings')" style="flex:1;padding:9px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px">🏆 Rankings</button>
-          <button id="gt-join" onclick="switchGuildTab('join')" style="flex:1;padding:9px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px">🔗 Join Guild</button>
+        <!-- JOIN BUTTON — sirf tab dikhaye jab guild mein nahi ho -->
+        <div style="margin-bottom:10px" id="gt-join-wrap">
+          <button id="gt-join" onclick="switchGuildTab('join')" style="width:100%;padding:9px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--t2);font-family:'Outfit',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px">🔗 Join Guild</button>
         </div>
 
-        <!-- BOTTOM TABS: My Guild + Create (Create hidden when in guild) -->
+        <!-- BOTTOM TABS: My Guild + Create + Rankings -->
         <div class="guild-tabs" style="margin-bottom:14px">
           <button class="guild-tab act" id="gt-myguild" onclick="switchGuildTab('myguild')">🏠 My Guild</button>
+          <button class="guild-tab" id="gt-rankings" onclick="switchGuildTab('rankings')">🏆 Rankings</button>
           <button class="guild-tab" id="gt-create" onclick="switchGuildTab('create')">➕ Create</button>
         </div>
 
@@ -664,7 +664,7 @@ textarea::placeholder{color:var(--t3)}
                   <div class="guild-info-code">CODE: <span id="g-code">------</span></div>
                 </div>
               </div>
-              <div class="guild-rank-badge">🏅 Rank <span id="g-rank">#1</span> • <span id="g-total-xp">0</span> Guild XP</div>
+              <div class="guild-rank-badge">✨ <span id="g-total-xp">0</span> Guild XP</div>
               <div class="guild-xp-bar-wrap">
                 <div class="guild-xp-label"><span>Guild Progress</span><span id="g-xp-pct">0%</span></div>
                 <div class="guild-xp-track"><div class="guild-xp-fill" id="g-xp-fill" style="width:0%"></div></div>
@@ -710,6 +710,28 @@ textarea::placeholder{color:var(--t3)}
           <button class="guild-act-btn primary" style="width:100%;margin-top:4px" onclick="createGuild()">🚀 Guild Banao!</button>
         </div>
 
+        <!-- RANKINGS -->
+        <div class="guild-section" id="gs-rankings">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;font-weight:700;letter-spacing:1px">TOP GUILDS — GLOBAL</div>
+            <button onclick="loadGuildRankings()" style="padding:4px 10px;border-radius:8px;background:rgba(126,179,255,.08);border:1px solid rgba(126,179,255,.18);color:var(--c1);font-size:.65rem;font-weight:700;cursor:pointer;font-family:'Azeret Mono',monospace;transition:.2s">🔄 Refresh</button>
+          </div>
+          <div id="guild-rankings-list">
+            <div style="text-align:center;padding:28px 10px;color:var(--t3)">
+              <div style="font-size:28px;margin-bottom:8px">⏳</div>
+              <div style="font-size:.78rem;font-weight:600">Rankings load ho rahi hain...</div>
+            </div>
+          </div>
+          <!-- Ranking page ke neeche Join/Create buttons — sirf tab dikhein jab guild nahi ho -->
+          <div id="rankings-noguild-actions" style="display:none;margin-top:14px">
+            <div style="text-align:center;font-size:.72rem;color:var(--t3);margin-bottom:10px;font-family:'Azeret Mono',monospace">APNI GUILD BANAO YA JOIN KARO</div>
+            <div style="display:flex;gap:8px">
+              <button class="guild-act-btn primary" style="flex:1" onclick="switchGuildTab('create')">➕ Create Guild</button>
+              <button class="guild-act-btn" style="flex:1" onclick="switchGuildTab('join')">🔗 Join Guild</button>
+            </div>
+          </div>
+        </div>
+
         <!-- JOIN GUILD -->
         <div class="guild-section" id="gs-join">
           <div id="autojoin-banner" style="display:none" class="autojoin-banner">
@@ -724,11 +746,6 @@ textarea::placeholder{color:var(--t3)}
           <button class="guild-act-btn primary" style="width:100%" onclick="joinGuild()">🔗 Guild Join Karo!</button>
         </div>
 
-        <!-- RANKINGS -->
-        <div class="guild-section" id="gs-rankings">
-          <div style="font-size:.65rem;color:var(--t3);font-family:'Azeret Mono',monospace;margin-bottom:10px;letter-spacing:.5px">TOP GUILDS THIS WEEK</div>
-          <div id="guild-rankings-list"></div>
-        </div>
       </div>
     </div>
 
@@ -857,11 +874,14 @@ textarea::placeholder{color:var(--t3)}
       <button class="nb" onclick="openGuild()">
         <div class="nb-icon">🎒</div><div class="nb-lbl">Guild</div>
       </button>
+
       <button class="nb" onclick="openPanel()">
         <div class="nb-icon" style="position:relative">📜<div class="nb-badge" id="nb-badge"></div></div>
         <div class="nb-lbl" id="nb-h-lbl">History</div>
       </button>
     </div>
+
+</div>
   </div>
 </div>
 <canvas id="cv" style="display:none"></canvas>
@@ -899,11 +919,10 @@ let _GEMINI_KEY = GEMINI_KEY;
 let _keysFetched = true;
 async function fetchRuntimeKeys(){ return; }
 
-// ══════════════════════════════════════════════════════
-// 🏆 JSONBIN.IO — SHARED LEADERBOARD
-// ══════════════════════════════════════════════════════
-const JSONBIN_BIN_ID = '__JSONBIN_BIN_ID__';
-const JSONBIN_API_KEY = '__JSONBIN_API_KEY__';
+
+
+const JSONBIN_BIN_ID = '6a321380f5f4af5e29ff431c';
+const JSONBIN_API_KEY = '$2a$10$GxVE60opc81.3NfHULD9cuxnvgeL6K4bWU2itA3zjrpB0Z0o5Xfoi';
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 // ── TIER 1 NVIDIA: Free text models ──────────────────
@@ -1220,41 +1239,160 @@ Return JSON array ONLY, no markdown, no explanation:
   return [];
 }
 
-// Background mein 100 aur questions — Anthropic + NVIDIA parallel
+// Ek language ke liye batch fetch karo (forceLang parameter se)
+async function fetchQuizBatchBilingual(count, offset, forceLang) {
+  const subjects = [];
+  for (let i = 0; i < count; i++) {
+    subjects.push(QUIZ_SUBJECTS[(offset + i) % QUIZ_SUBJECTS.length]);
+  }
+
+  const langInstruction = forceLang === 'en'
+    ? 'Generate questions and ALL options fully in English (no Hindi/Devanagari words at all).'
+    : 'Generate questions and ALL options in pure Hindi using Devanagari script only. Do NOT use Hinglish or Roman script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay as English/numerals, but everything else must be in Devanagari.';
+
+  const prompt = `Quiz master for Indian students. Generate exactly ${count} MCQ. Medium difficulty.
+
+Topics: ${subjects.join(', ')}
+
+Rules: 4 options, 1 correct, max 12 words/question, ans: 0=A 1=B 2=C 3=D
+${langInstruction}
+${forceLang !== 'en' ? `IMPORTANT: If an option is a full-form/definition/technical term that has a common Hindi translation (e.g. abbreviations like WWW, CPU, RAM, DNA, GDP), write the option in Hindi (Devanagari) instead of English. Numbers, units, formulas, proper nouns (names of people/places) can stay as-is.` : ''}
+
+JSON only, no markdown:
+[{"q":"...","opts":["A","B","C","D"],"ans":0},...]`;
+
+  const resp = await callGemini(prompt);
+  const text = resp || '';
+  const clean = text.replace(/```json|```/g, '').trim();
+  try {
+    const jsonArr = clean.match(/\[[\s\S]*\]/);
+    if (!jsonArr) return [];
+    const parsed = JSON.parse(jsonArr[0]);
+    if (Array.isArray(parsed)) return parsed.slice(0, count);
+  } catch(e) { console.warn('Bilingual quiz JSON parse error:', e.message); }
+  return [];
+}
+
+// NVIDIA se bilingual quiz questions fetch karo
+async function fetchQuizBatchNvidiaLang(count, offset, forceLang) {
+  const subjects = [];
+  for (let i = 0; i < count; i++) {
+    subjects.push(QUIZ_SUBJECTS[(offset + i) % QUIZ_SUBJECTS.length]);
+  }
+  const langInstruction = forceLang === 'en'
+    ? 'Generate questions and ALL options fully in English (no Hindi/Devanagari words at all).'
+    : 'Generate questions and ALL options in pure Hindi using Devanagari script only. Do NOT use Hinglish or Roman script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay as English/numerals, but everything else must be in Devanagari.';
+
+  const prompt = `Generate exactly ${count} MCQ for Indian students. Medium difficulty.
+Topics: ${subjects.join(', ')}
+Rules: 4 options, 1 correct, max 12 words/question, ans: 0=A 1=B 2=C 3=D
+${langInstruction}
+${forceLang !== 'en' ? `IMPORTANT: If an option is a full-form/definition/technical term that has a common Hindi translation (e.g. abbreviations like WWW, CPU, RAM, DNA, GDP), write the option in Hindi (Devanagari) instead of English. Numbers, units, formulas, proper nouns (names of people/places) can stay as-is.` : ''}
+Return JSON array ONLY, no markdown, no explanation:
+[{"q":"...","opts":["A","B","C","D"],"ans":0},...]`;
+
+  for(const model of NVIDIA_MODELS){
+    try{
+      const text = await callNvidiaNIM(prompt, model);
+      if(!text || !text.trim()) continue;
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if(!jsonMatch) continue;
+      const parsed = JSON.parse(jsonMatch[0]);
+      if(Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, count);
+    }catch(e){
+      console.warn('NVIDIA bilingual quiz batch failed:', model, e.message);
+    }
+  }
+  return [];
+}
+
+// Background mein 200 questions — 100 Hindi + 100 English — parallel fetch
 async function fetchAndAppendMore() {
   if (quizPoolLoading) return;
   quizPoolLoading = true;
-  console.log('Fetching 100 more quiz questions in background...');
+  console.log('Fetching 200 more quiz questions in background (100 Hindi + 100 English)...');
+
+  // Bilingual QUIZ_POOL: dono language store hogi
+  // Current lang wale dikhenge, dusri bhi pool mein rahegi for lang switch
+  if (!window.QUIZ_POOL_BILINGUAL) window.QUIZ_POOL_BILINGUAL = { hi: [], en: [] };
+
+  const offset = QUIZ_POOL.length;
+
   try {
-    // Anthropic: 2 batches × 50 = 100 questions
-    // NVIDIA: 2 batches × 50 = 100 questions
-    // Dono parallel chalao — jo pehle aaye woh pool mein add karo
-    const anthropicFetch = (async () => {
+    // ── 100 HINDI questions (Gemini 2×25 + NVIDIA 2×25) ──
+    const hindiFetch = (async () => {
       let count = 0;
+      // Gemini: 2 batches × 25 = 50 Hindi
       for (let b = 0; b < 2; b++) {
         try {
-          const qs = await fetchQuizBatch(50, QUIZ_POOL.length + count);
-          if (qs && qs.length > 0) { QUIZ_POOL.push(...qs); count += qs.length; }
-          if (b < 1) await new Promise(r => setTimeout(r, 500));
-        } catch(e) { console.warn('Anthropic quiz batch failed:', e.message); }
+          const qs = await fetchQuizBatchBilingual(25, offset + count, 'hi');
+          if (qs && qs.length > 0) {
+            window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
+            count += qs.length;
+            console.log(`[Hindi] Gemini batch ${b+1}: +${qs.length} questions`);
+          }
+          if (b < 1) await new Promise(r => setTimeout(r, 400));
+        } catch(e) { console.warn('Hindi Gemini batch failed:', e.message); }
+      }
+      // NVIDIA: 2 batches × 25 = 50 Hindi
+      for (let b = 0; b < 2; b++) {
+        try {
+          const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'hi');
+          if (qs && qs.length > 0) {
+            window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
+            count += qs.length;
+            console.log(`[Hindi] NVIDIA batch ${b+1}: +${qs.length} questions`);
+          }
+          if (b < 1) await new Promise(r => setTimeout(r, 400));
+        } catch(e) { console.warn('Hindi NVIDIA batch failed:', e.message); }
       }
       return count;
     })();
 
-    const nvidiaFetch = (async () => {
+    // ── 100 ENGLISH questions (Gemini 2×25 + NVIDIA 2×25) ──
+    const englishFetch = (async () => {
       let count = 0;
+      // Gemini: 2 batches × 25 = 50 English
       for (let b = 0; b < 2; b++) {
         try {
-          const qs = await fetchQuizBatchNvidia(50, QUIZ_POOL.length + count);
-          if (qs && qs.length > 0) { QUIZ_POOL.push(...qs); count += qs.length; }
-          if (b < 1) await new Promise(r => setTimeout(r, 500));
-        } catch(e) { console.warn('NVIDIA quiz batch failed:', e.message); }
+          const qs = await fetchQuizBatchBilingual(25, offset + count, 'en');
+          if (qs && qs.length > 0) {
+            window.QUIZ_POOL_BILINGUAL.en.push(...qs);
+            count += qs.length;
+            console.log(`[English] Gemini batch ${b+1}: +${qs.length} questions`);
+          }
+          if (b < 1) await new Promise(r => setTimeout(r, 400));
+        } catch(e) { console.warn('English Gemini batch failed:', e.message); }
+      }
+      // NVIDIA: 2 batches × 25 = 50 English
+      for (let b = 0; b < 2; b++) {
+        try {
+          const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'en');
+          if (qs && qs.length > 0) {
+            window.QUIZ_POOL_BILINGUAL.en.push(...qs);
+            count += qs.length;
+            console.log(`[English] NVIDIA batch ${b+1}: +${qs.length} questions`);
+          }
+          if (b < 1) await new Promise(r => setTimeout(r, 400));
+        } catch(e) { console.warn('English NVIDIA batch failed:', e.message); }
       }
       return count;
     })();
 
-    const [aCount, nCount] = await Promise.all([anthropicFetch, nvidiaFetch]);
-    console.log(`Pool refreshed: +${aCount} Anthropic, +${nCount} NVIDIA. Total: ${QUIZ_POOL.length}`);
+    // Dono parallel chalao
+    const [hiCount, enCount] = await Promise.all([hindiFetch, englishFetch]);
+
+    // Current lang ke questions QUIZ_POOL mein add karo
+    const currentLangPool = lang === 'hi'
+      ? window.QUIZ_POOL_BILINGUAL.hi
+      : window.QUIZ_POOL_BILINGUAL.en;
+    QUIZ_POOL.push(...currentLangPool);
+
+    console.log(`✅ Pool refreshed: +${hiCount} Hindi, +${enCount} English. Current lang pool: ${QUIZ_POOL.length} total`);
+
+    // QUIZ_POOL_BILINGUAL reset karo (next refresh ke liye fresh start)
+    window.QUIZ_POOL_BILINGUAL = { hi: [], en: [] };
+
   } catch(e) {
     console.warn('Pool refresh failed:', e.message);
   }
@@ -1516,6 +1654,7 @@ function updateStatsUI(){
   document.getElementById('stat-xp').textContent=xp;
   document.getElementById('stat-streak').textContent=streak+'🔥';
   document.getElementById('streak-val').textContent=streak;
+
 }
 
 function updateXpBar(){
@@ -2685,7 +2824,9 @@ async function openLb(){
   document.getElementById('lb-list').innerHTML=top.map((e,i)=>`
     <div class="lb-item" style="${e.id===myId?'border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.1)':''}">
       <div class="lb-rank ${rankClass[i]||''}">${i<3?medals[i]:'#'+(i+1)}</div>
-      <div class="lb-name" style="display:flex;align-items:center;gap:8px"><img src="${e.avatar||AVATAR_IMAGES[0]}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ${e.name}${e.id===myId?' (Aap)':''}</div>
+      <div class="lb-name" style="display:flex;align-items:center;gap:6px;flex-direction:column;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:6px"><img src="${e.avatar||AVATAR_IMAGES[0]}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ${e.name}${e.id===myId?' (Aap)':''}</div>
+      </div>
       <div class="lb-score">${e.score} XP</div>
     </div>`).join('');
 
@@ -2836,32 +2977,30 @@ function openGuild(){
 function closeGuild(){document.getElementById('guild-modal').classList.remove('open');}
 
 function switchGuildTab(tab){
-  // Bottom tabs (myguild, create)
-  ['myguild','create'].forEach(t=>{
+  // Bottom tabs (myguild, create, rankings)
+  ['myguild','create','rankings'].forEach(t=>{
     const btn = document.getElementById('gt-'+t);
     if(btn) btn.classList.toggle('act', t===tab);
     const sec = document.getElementById('gs-'+t);
     if(sec) sec.classList.toggle('act', t===tab);
   });
-  // Top buttons (join, rankings) - highlight with active style
-  ['join','rankings'].forEach(t=>{
-    const btn = document.getElementById('gt-'+t);
-    const sec = document.getElementById('gs-'+t);
-    if(btn){
-      if(t===tab){
-        btn.style.background='linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.25))';
-        btn.style.color='var(--c1)';
-        btn.style.borderColor='rgba(126,179,255,.3)';
-      } else {
-        btn.style.background='var(--s2)';
-        btn.style.color='var(--t2)';
-        btn.style.borderColor='var(--b)';
-      }
+  // Join button highlight
+  const joinBtn = document.getElementById('gt-join');
+  const joinSec = document.getElementById('gs-join');
+  if(joinBtn){
+    if(tab==='join'){
+      joinBtn.style.background='linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.25))';
+      joinBtn.style.color='var(--c1)';
+      joinBtn.style.borderColor='rgba(126,179,255,.3)';
+    } else {
+      joinBtn.style.background='var(--s2)';
+      joinBtn.style.color='var(--t2)';
+      joinBtn.style.borderColor='var(--b)';
     }
-    if(sec) sec.classList.toggle('act', t===tab);
-  });
-  if(tab==='rankings') renderGuildRankings();
+  }
+  if(joinSec) joinSec.classList.toggle('act', tab==='join');
   if(tab==='myguild') renderMyGuild();
+  if(tab==='rankings') loadGuildRankings();
   // Hide/show Create tab based on guild status
   updateCreateTabVisibility();
 }
@@ -2869,15 +3008,27 @@ function switchGuildTab(tab){
 function updateCreateTabVisibility(){
   const createTab = document.getElementById('gt-create');
   const createSec = document.getElementById('gs-create');
+  const joinWrap = document.getElementById('gt-join-wrap');
+  const rankingsActions = document.getElementById('rankings-noguild-actions');
   if(!createTab) return;
   if(myGuild){
+    // Guild mein hoon — Create aur Join dono hide karo
     createTab.style.display='none';
-    // If currently on create tab, switch to myguild
+    if(joinWrap) joinWrap.style.display='none';
+    if(rankingsActions) rankingsActions.style.display='none';
+    // If currently on create or join tab, switch to myguild
     if(createSec && createSec.classList.contains('act')){
       switchGuildTab('myguild');
     }
+    const joinSec = document.getElementById('gs-join');
+    if(joinSec && joinSec.classList.contains('act')){
+      switchGuildTab('myguild');
+    }
   } else {
+    // Guild mein nahi — Create aur Join dono dikhao
     createTab.style.display='';
+    if(joinWrap) joinWrap.style.display='';
+    if(rankingsActions) rankingsActions.style.display='';
   }
 }
 
@@ -2944,18 +3095,7 @@ async function renderMyGuild(){
   document.getElementById('g-xp-pct').textContent = pct+'%';
   document.getElementById('g-xp-fill').style.width = pct+'%';
 
-  // ── Real rank: sync my guild's total XP, then fetch all guilds and find my position ──
-  document.getElementById('g-rank').textContent = '...';
   await guildSyncMine(totalXP, allMembers.length);
-  const allGuilds = await guildFetchAll();
-  if(allGuilds && allGuilds.length){
-    allGuilds.sort((a,b)=>b.xp-a.xp);
-    const myIdx = allGuilds.findIndex(g=>g.code===myGuild.code);
-    const myRank = myIdx>=0 ? myIdx+1 : allGuilds.length+1;
-    document.getElementById('g-rank').textContent = '#'+myRank;
-  } else {
-    document.getElementById('g-rank').textContent = '#1';
-  }
 
   const colors=['rgba(79,70,229,.3)','rgba(124,58,237,.25)','rgba(8,145,178,.25)','rgba(52,211,153,.2)','rgba(251,146,60,.2)'];
   document.getElementById('g-members-list').innerHTML = allMembers.map((m,i)=>`
@@ -2982,47 +3122,10 @@ async function makeLeader(memberId){
   showGuildToast('👑 Naya leader assign ho gaya!');
 }
 
-async function renderGuildRankings(){
-  const listEl = document.getElementById('guild-rankings-list');
-  listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3)">⏳ Loading real guilds...</div>';
 
-  const me = {name: userName||'Aap', emoji: AVATAR_IMAGES[userAvatar]||AVATAR_IMAGES[0], xp};
-  const myTotalXP = myGuild ? [...(myGuild.members||[]), me].reduce((s,m)=>s+m.xp,0) : 0;
-  const myMemberCount = myGuild ? (myGuild.members||[]).length+1 : 0;
-
-  // Sync my guild's latest stats to shared storage
-  if(myGuild){
-    await guildSyncMine(myTotalXP, myMemberCount);
-  }
-
-  let all = await guildFetchAll();
-  if(all===null){
-    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3)">⚠️ Guild rankings server not configured.<br>Set JSONBIN_GUILDS_BIN_ID in code.</div>';
-    return;
-  }
-
-  if(all.length===0){
-    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3)">Abhi koi guild nahi hai. Pehle bano! 🎒</div>';
-    return;
-  }
-
-  all.sort((a,b)=>b.xp-a.xp);
-  const medals=['🥇','🥈','🥉'];
-  const myCode = myGuild ? myGuild.code : null;
-  listEl.innerHTML = all.slice(0,50).map((g,i)=>`
-    <div class="guild-lb-item" style="${g.code===myCode?'border-color:rgba(126,179,255,.3);background:rgba(79,70,229,.08)':''}">
-      <div class="glb-rank">${i<3?medals[i]:'#'+(i+1)}</div>
-      <img src="${g.emoji}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0">
-      <div class="glb-info">
-        <div class="glb-name">${esc(g.name)}${g.code===myCode?' <span style="font-size:.55rem;padding:2px 5px;border-radius:4px;background:rgba(79,70,229,.3);color:var(--c1);font-family:monospace">YOU</span>':''}</div>
-        <div class="glb-members">👥 ${g.members} members</div>
-      </div>
-      <div class="glb-xp">${g.xp.toLocaleString()} XP<span>Guild Total</span></div>
-    </div>`).join('');
-}
 
 // ── SHARED GUILD RANKINGS (JSONBin) ──────────────────────
-const JSONBIN_GUILDS_BIN_ID = '__JSONBIN_GUILDS_BIN_ID__';
+const JSONBIN_GUILDS_BIN_ID = '6a321369f5f4af5e29ff42e1';
 const JSONBIN_GUILDS_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_GUILDS_BIN_ID}`;
 
 async function guildFetchAll(){
@@ -3059,6 +3162,63 @@ async function guildSyncMine(totalXP, memberCount){
   const entry = {code:myGuild.code, name:myGuild.name, emoji:myGuild.emoji, members:memberCount, xp:totalXP, updated:Date.now()};
   if(idx>=0) all[idx]=entry; else all.push(entry);
   await guildSaveAll(all);
+}
+
+async function loadGuildRankings(){
+  const listEl = document.getElementById('guild-rankings-list');
+  if(!listEl) return;
+  listEl.innerHTML = `<div style="text-align:center;padding:28px 10px;color:var(--t3)">
+    <div style="font-size:28px;margin-bottom:8px">⏳</div>
+    <div style="font-size:.78rem;font-weight:600">Rankings load ho rahi hain...</div>
+  </div>`;
+
+  const all = await guildFetchAll();
+
+  if(!all || all.length === 0){
+    listEl.innerHTML = `<div style="text-align:center;padding:28px 10px;color:var(--t3)">
+      <div style="font-size:34px;margin-bottom:10px">🏜️</div>
+      <div style="font-size:.82rem;font-weight:600;color:var(--t2)">Abhi koi Guild registered nahi hai</div>
+      <div style="font-size:.72rem;margin-top:5px">Guild banao ya join karo aur ranking mein aao!</div>
+    </div>`;
+    return;
+  }
+
+  // Sort by XP descending
+  const sorted = [...all].sort((a,b)=>(b.xp||0)-(a.xp||0));
+  const myCode = myGuild ? myGuild.code : null;
+
+  const rankColors = ['#fbbf24','#94a3b8','#cd7c42'];
+  const rankEmojis = ['🥇','🥈','🥉'];
+
+  listEl.innerHTML = sorted.map((g, i)=>{
+    const rank = i + 1;
+    const isMe = g.code === myCode;
+    const rankLabel = rank <= 3
+      ? `<span style="font-size:1.1rem">${rankEmojis[i]}</span>`
+      : `<span class="glb-rank" style="color:${isMe?'var(--c1)':'var(--t3)'}">#${rank}</span>`;
+
+    const border = isMe ? 'border:1px solid rgba(126,179,255,.4);background:rgba(79,70,229,.1)' : 'border:1px solid var(--b2);background:var(--s2)';
+    const nameSuffix = isMe ? ' <span style="font-size:.55rem;padding:2px 6px;border-radius:4px;background:rgba(79,70,229,.3);color:var(--c1);font-family:\'Azeret Mono\',monospace;font-weight:800">YOU</span>' : '';
+
+    // XP bar relative to top guild
+    const maxXP = sorted[0].xp || 1;
+    const pct = Math.max(4, Math.round(((g.xp||0)/maxXP)*100));
+
+    return `<div class="guild-lb-item" style="${border};position:relative;overflow:hidden">
+      <div style="width:28px;text-align:center;flex-shrink:0">${rankLabel}</div>
+      <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--s3)">
+        <img src="${g.emoji}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+      </div>
+      <div class="glb-info">
+        <div class="glb-name">${esc(g.name)}${nameSuffix}</div>
+        <div style="margin-top:5px;height:3px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--c3),var(--c1));border-radius:3px;transition:width .5s ease"></div>
+        </div>
+        <div class="glb-members">👥 ${g.members||1} members</div>
+      </div>
+      <div class="glb-xp">${(g.xp||0).toLocaleString()} XP<span>total</span></div>
+    </div>`;
+  }).join('');
 }
 
 // ── SHARED MEMBER ROSTER (per guild) ─────────────────────
@@ -3412,7 +3572,8 @@ function showGuildToast(msg){
 
 });
 
-// ── KEYBOARD SHORTCUT ──────────────────────────────────
+
+
 document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&!loading){solve();}
   if(e.key==='Escape'){
@@ -3426,7 +3587,7 @@ document.addEventListener('keydown',e=>{
 
 // ── BOOT ──────────────────────────────────────════════
 loadState();
-applyLang();
+applyLang()
 updateProgress();
 checkOnboarding();
 setTimeout(()=>preloadQuizPool(), 3000); // Background mein AI quiz pool load karo
