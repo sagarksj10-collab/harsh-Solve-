@@ -2224,18 +2224,19 @@ Now solve EVERY question visible in the image:`;
   }
 
   let cardShown = false;
+  function showCardNow(){
+    if(cardShown) return;
+    cardShown = true;
+    const lbl = document.getElementById(thinkId+'-label');
+    if(lbl) lbl.textContent = lang==='hi' ? 'जवाब लिख रहा है...' : 'Writing answer...';
+    const card = document.getElementById(id+'-card');
+    if(card) card.style.display = '';
+    const think = document.getElementById(id+'-think');
+    if(think) think.remove();
+  }
   function onChunk(chunk){
     rawBuffer += chunk;
-    if(!cardShown){
-      cardShown = true;
-      // Pehla chunk aaya — ab likh raha hai
-      const lbl = document.getElementById(thinkId+'-label');
-      if(lbl) lbl.textContent = lang==='hi' ? 'जवाब लिख रहा है...' : 'Writing answer...';
-      const card = document.getElementById(id+'-card');
-      if(card) card.style.display = '';
-      const think = document.getElementById(id+'-think');
-      if(think) think.remove();
-    }
+    showCardNow();
     if(!renderTimer){
       renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(); }, 80);
     }
@@ -2246,6 +2247,7 @@ Now solve EVERY question visible in the image:`;
 
     // ── Final render — cursor hatao, samjhao buttons lagao ──
     if(renderTimer){ clearTimeout(renderTimer); renderTimer=null; }
+    showCardNow(); // non-streaming (e.g. image mode) ke liye card guarantee show karo
     const finalHtml = cleanHtml(rawText || rawBuffer);
     if(!finalHtml.trim()){
       bodyEl.innerHTML = lang==='hi' ? '❌ खाली जवाब मिला, फिर से कोशिश करें' : '❌ Empty response, try again';
@@ -2269,7 +2271,7 @@ Now solve EVERY question visible in the image:`;
     setSt('');
 
     if(needsGraph(displayQ)) setTimeout(()=>renderGraph(id, displayQ), 200);
-    if(needsDiagram(displayQ)) setTimeout(()=>generateDiagram(id, displayQ), 500);
+    if(needsDiagram(displayQ)) setTimeout(()=>generateDiagram(id, displayQ), 800);
     if(window.MathJax?.typesetPromise) setTimeout(()=>window.MathJax.typesetPromise([bodyEl]), 100);
     setTimeout(()=>document.getElementById(id+'-wrap')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
 
