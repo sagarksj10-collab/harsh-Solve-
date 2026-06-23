@@ -844,9 +844,7 @@ textarea::placeholder{color:var(--t3)}
               <button class="cam-btn" onclick="openCamera()">📷 Camera</button>
             </div>
           </div>
-        </div>
 
-        <div class="inp-footer">
           <div class="wc-badge" id="wc-badge">0 words</div>
           <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
           <div class="voice-btn" id="mic-btn" onclick="openQuiz()" title="Quick Quiz" style="font-size:16px">🧩</div>
@@ -975,6 +973,54 @@ const OR_IMAGE_MODELS = [
 // ── ONLY MODEL: Gemini 2.5 Flash-Lite (cheapest/fastest) ──
 const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];
 const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash-lite'];
+
+// ══════════════════════════════════════════════════════
+// 🎨 IMAGE GENERATION — OpenRouter FLUX (Free)
+// ══════════════════════════════════════════════════════
+async function generateImage(prompt){
+  const res = await fetchWithTimeout('https://openrouter.ai/api/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + OPENROUTER_KEY,
+      'HTTP-Referer': 'https://ai-solving-math.app',
+      'X-Title': 'AI Solving Math'
+    },
+    body: JSON.stringify({
+      model: 'black-forest-labs/FLUX-1-schnell-Free',
+      prompt: prompt,
+      n: 1,
+      size: '1024x1024'
+    })
+  }, 30000);
+  if(!res.ok){
+    const d = await res.json().catch(()=>({}));
+    throw new Error('IMG:' + (d.error?.message || res.status));
+  }
+  const data = await res.json();
+  if(data.data?.[0]?.b64_json) return 'data:image/png;base64,' + data.data[0].b64_json;
+  const url = data.data?.[0]?.url;
+  if(!url) throw new Error('IMG_EMPTY');
+  return url;
+}
+
+async function generateAndShowImage(prompt, cardId){
+  const bodyEl = document.getElementById(cardId + '-body');
+  if(!bodyEl) return;
+  const loaderHtml = '<div id="' + cardId + '-imgloader" style="display:flex;align-items:center;gap:10px;padding:10px 0;font-size:.78rem;color:var(--t2);font-family:Azeret Mono,monospace"><div class="ld-spinner"></div>Image generate ho rahi hai...</div>';
+  bodyEl.insertAdjacentHTML('beforeend', loaderHtml);
+  try{
+    const imgUrl = await generateImage(prompt);
+    const loader = document.getElementById(cardId + '-imgloader');
+    if(loader) loader.remove();
+    const imgHtml = '<div style="margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--b)"><img src="' + imgUrl + '" style="width:100%;display:block;border-radius:12px" loading="lazy"/></div>';
+    bodyEl.insertAdjacentHTML('beforeend', imgHtml);
+  }catch(e){
+    const loader = document.getElementById(cardId + '-imgloader');
+    if(loader) loader.remove();
+    console.warn('Image generation failed:', e.message);
+  }
+}
 
 // Compat aliases
 const MODEL_TEXT   = 'meta/llama-4-scout-17b-16e-instruct';
@@ -2108,14 +2154,14 @@ ${extendedRule}
 
 RESPONSE FORMAT RULES (follow strictly):
 - NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
-- USE EMOJIS smartly: Start key steps or sections with a relevant emoji (e.g. 📌 for important point, ✅ for answer/result, 💡 for tip/concept, 🔢 for math step, 📖 for definition, ⚠️ for warning/note, 🎯 for final answer). Use emojis naturally — not on every line, only where they add clarity.
-- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features. Each <li> should start with a relevant emoji.
-- ANY math/calculation → show each step on new line in <div class="step">, final answer bold with ✅. EXACTLY like:
-<div class="step">🔢 2 - 3 = -1<br>-1 - 4 = ✅ <strong>-5</strong></div>
-- For algebra/equation → same format, each line one operation, last line Answer bold with ✅.
-- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>📖 [Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
-- LANGUAGE/GRAMMAR → <div class="step">📌 explanation</div> with examples as bullets.
-${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block with emoji. Include 💡 Tip, 📌 Key Point, and 🌍 Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
+- DO NOT use any emojis anywhere in your response. No emojis at all.
+- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features.
+- ANY math/calculation → show each step on new line in <div class="step">, final answer bold. EXACTLY like:
+<div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
+- For algebra/equation → same format, each line one operation, last line Answer bold.
+- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>[Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
+- LANGUAGE/GRAMMAR → <div class="step">explanation</div> with examples as bullets.
+${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
 - OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
 
   // ── Image-specific prompt (sabhi questions solve karo) ──
@@ -2161,22 +2207,9 @@ Now solve EVERY question visible in the image:`;
   const _wrap = document.getElementById(id+'-wrap');
   if(_wrap) _wrap.insertBefore(thinkEl, _wrap.firstChild);
 
-  // ── Gemini-style cycling status text while waiting ──
-  const statusSteps = lang==='hi'
-    ? (mode==='image'
-        ? ['फोटो पढ़ रहा हूँ...','सवाल समझ रहा हूँ...','हल निकाल रहा हूँ...','जवाब तैयार कर रहा हूँ...']
-        : ['सवाल समझ रहा हूँ...','हल सोच रहा हूँ...','जवाब तैयार कर रहा हूँ...'])
-    : (mode==='image'
-        ? ['Reading image...','Understanding question...','Solving...','Preparing answer...']
-        : ['Understanding question...','Solving...','Preparing answer...']);
-  let statusIdx = 0;
+  // ── Real status: Thinking → Writing answer ──
   const statusLabelEl = document.getElementById(thinkId+'-label');
-  if(statusLabelEl) statusLabelEl.textContent = statusSteps[0];
-  const statusTimer = setInterval(()=>{
-    statusIdx = (statusIdx + 1) % statusSteps.length;
-    const el = document.getElementById(thinkId+'-label');
-    if(el) el.textContent = statusSteps[statusIdx];
-  }, 1400);
+  if(statusLabelEl) statusLabelEl.textContent = lang==='hi' ? 'सोच रहा है...' : 'Thinking...';
 
   // ── Raw text buffer collect karo streaming chunks se ──
   let rawBuffer = '';
@@ -2187,24 +2220,22 @@ Now solve EVERY question visible in the image:`;
     if(!bodyEl) return;
     const html = cleanHtml(rawBuffer);
     bodyEl.innerHTML = html;
-    // Typing cursor show karo
-    // stream-cursor removed
     if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
   }
 
   let cardShown = false;
   function onChunk(chunk){
     rawBuffer += chunk;
-    // Show card + remove thinking on first chunk
     if(!cardShown){
       cardShown = true;
-      clearInterval(statusTimer);
+      // Pehla chunk aaya — ab likh raha hai
+      const lbl = document.getElementById(thinkId+'-label');
+      if(lbl) lbl.textContent = lang==='hi' ? 'जवाब लिख रहा है...' : 'Writing answer...';
       const card = document.getElementById(id+'-card');
       if(card) card.style.display = '';
       const think = document.getElementById(id+'-think');
       if(think) think.remove();
     }
-    // Throttle: har 80ms render karo
     if(!renderTimer){
       renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(); }, 80);
     }
@@ -2256,7 +2287,6 @@ Now solve EVERY question visible in the image:`;
     setSt('', false);
   }finally{
     // Always show card (even on error)
-    clearInterval(statusTimer);
     const _card = document.getElementById(id+'-card');
     if(_card) _card.style.display = '';
     // Remove thinking indicator
