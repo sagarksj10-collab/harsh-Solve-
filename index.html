@@ -949,8 +949,7 @@ const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 // ── TIER 1 NVIDIA: Free text models ──────────────────
 const NVIDIA_MODELS = [
-  'meta/llama-3.1-8b-instruct',
-  'meta/llama-3.3-70b-instruct',
+  'meta/llama-3.1-8b-instruct',  // fastest & lightest
 ];
 
 // ── TIER 1 NVIDIA: Free vision/image models ──────────
@@ -961,8 +960,9 @@ const NVIDIA_IMAGE_MODELS = [
 
 // ── TIER 2 OPENROUTER: Free text models ──────────────
 const OR_TEXT_MODELS = [
+  'google/gemini-2.5-flash-lite-preview-05-20:free',  // fastest
   'meta-llama/llama-3.1-8b-instruct:free',
-  'google/gemini-2.5-flash-lite-preview',
+  'mistralai/mistral-7b-instruct:free',
 ];
 
 // ── TIER 2 OPENROUTER: Free image models ─────────────
@@ -1912,7 +1912,7 @@ async function readSSEStream(response, onChunk){
 // 🟢 TIER 1 — NVIDIA NIM STREAMING
 // ══════════════════════════════════════════════════════
 // ── Timeout-wrapped fetch: agar response na aaye to abort karke turant next tier try ho ──
-async function fetchWithTimeout(url, options, timeoutMs=8000){
+async function fetchWithTimeout(url, options, timeoutMs=3000){
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
   try{
