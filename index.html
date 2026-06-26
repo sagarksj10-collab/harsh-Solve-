@@ -971,9 +971,9 @@ const OR_IMAGE_MODELS = [
   'meta-llama/llama-3.2-11b-vision-instruct:free',
 ];
 
-// ── ONLY MODEL: Gemini 2.5 Flash-Lite (cheapest/fastest) ──
-const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];
-const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash-lite'];
+// ── Gemini Models ──
+const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];       // text: fast & free
+const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash'];            // image: flash-lite vision support nahi karta
 
 // ══════════════════════════════════════════════════════
 // 🎨 IMAGE GENERATION — OpenRouter FLUX (Free)
@@ -1924,11 +1924,12 @@ async function fetchWithTimeout(url, options, timeoutMs=3000){
 
 async function callNvidiaNIM(userContent, model, onChunk=null){
   const streaming = !!onChunk;
+  const isImg = Array.isArray(userContent);
   const res = await fetchWithTimeout(NVIDIA_BASE + '/chat/completions', {
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
     body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, temperature:0.3, stream: streaming})
-  }, 10000);
+  }, isImg ? 15000 : 3000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -1954,6 +1955,7 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
   let lastErr = null;
   for(const key of keys){
     try{
+      const isImgOR = Array.isArray(userContent);
       const res = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -1963,7 +1965,7 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'X-Title':'AI Solving Math'
         },
         body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, stream: streaming})
-      }, 10000);
+      }, isImgOR ? 15000 : 5000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
