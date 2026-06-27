@@ -933,8 +933,20 @@ const NVIDIA_BASE = 'https://integrate.api.nvidia.com/v1';
 const OPENROUTER_KEY  = '__OPENROUTER_KEY__';
 const OPENROUTER_KEY2 = '';
 
-// ── TIER 3: GEMINI DIRECT ────────────────────────────
-const GEMINI_KEY = '__GEMINI_KEY__';
+// ── TIER 1: GEMINI DIRECT (multiple keys for rotation) ──
+const GEMINI_KEY  = '__GEMINI_KEY__';
+const GEMINI_KEY2 = '__GEMINI_KEY2__';
+const GEMINI_KEY3 = '__GEMINI_KEY3__';
+
+// All valid keys pool — auto rotate on quota exceed
+const _GEMINI_KEYS = [GEMINI_KEY, GEMINI_KEY2, GEMINI_KEY3].filter(k => k && !k.startsWith('__') && k.length > 10);
+let _geminiKeyIdx = 0;
+function getNextGeminiKey(){
+  if(_GEMINI_KEYS.length === 0) return '';
+  const key = _GEMINI_KEYS[_geminiKeyIdx % _GEMINI_KEYS.length];
+  _geminiKeyIdx++;
+  return key;
+}
 
 // Internal aliases
 let _GEMINI_KEY = GEMINI_KEY;
@@ -958,17 +970,18 @@ const NVIDIA_IMAGE_MODELS = [
   'meta/llama-4-scout-17b-16e-instruct',
 ];
 
-// ── TIER 2 OPENROUTER: Free text models ──────────────
+// ── TIER 2 OPENROUTER: Auto free router (always valid) ──
 const OR_TEXT_MODELS = [
-  'google/gemini-2.5-flash-lite-preview-05-20:free',  // fastest
-  'meta-llama/llama-3.1-8b-instruct:free',
-  'mistralai/mistral-7b-instruct:free',
+  'openrouter/free',              // auto best free model (text + image)
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'deepseek/deepseek-r1:free',
 ];
 
 // ── TIER 2 OPENROUTER: Free image models ─────────────
 const OR_IMAGE_MODELS = [
-  'google/gemini-2.5-flash-lite-preview',
-  'meta-llama/llama-3.2-11b-vision-instruct:free',
+  'openrouter/free',                               // auto selects best free vision model
+  'meta-llama/llama-3.2-11b-vision-instruct:free', // fallback vision model
+  'nvidia/nemotron-nano-12b-v2-vl:free',           // NVIDIA vision model (free)
 ];
 
 // ── Gemini Models ──
@@ -1987,7 +2000,8 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
 // 🔵 TIER 3 — GEMINI STREAMING (SSE)
 // ══════════════════════════════════════════════════════
 async function callGeminiModel(userContent, model, onChunk=null){
-  if(!GEMINI_KEY) throw new Error('NO_GEMINI_KEY');
+  const activeKey = getNextGeminiKey();
+  if(!activeKey) throw new Error('NO_GEMINI_KEY');
   const streaming = !!onChunk;
   let parts;
   if(typeof userContent === 'string'){
@@ -2000,12 +2014,12 @@ async function callGeminiModel(userContent, model, onChunk=null){
     }).filter(Boolean);
   }
   const endpoint = streaming ? 'streamGenerateContent?alt=sse' : 'generateContent';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}${endpoint.includes('?') ? '&' : '?'}key=${GEMINI_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}${endpoint.includes('?') ? '&' : '?'}key=${activeKey}`;
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens:3000, temperature:0.3}})
-  }, 20000);
+  }, typeof userContent === 'string' ? 10000 : 20000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -2049,18 +2063,19 @@ async function callGeminiModel(userContent, model, onChunk=null){
 async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
   const errLog = [];
 
-  // ── TIER 1: NVIDIA NIM ──────────────────────────────
-  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
-  for(const model of nvModels){
+  // ── TIER 1: GEMINI (fastest, direct, free) ──────────
+  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
+  let lastErr;
+  for(const model of gmModels){
     try{
-      console.log('[T1] NVIDIA:', model);
-      const r = await callNvidiaNIM(userContent, model, onChunk);
-      if(r && r.trim()){ console.log('[T1] ✅ NVIDIA success'); return r; }
-    } catch(e){ console.warn('[T1] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); }
+      console.log('[T1] Gemini:', model);
+      const r = await callGeminiModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); return r; }
+    } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; }
   }
 
-  // ── TIER 2: OPENROUTER ──────────────────────────────
-  console.warn('[T2] NVIDIA failed → OpenRouter...');
+  // ── TIER 2: OPENROUTER (free auto router) ───────────
+  console.warn('[T2] Gemini failed → OpenRouter...');
   const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
   for(const model of orModels){
     try{
@@ -2070,16 +2085,15 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
     } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); }
   }
 
-  // ── TIER 3: GEMINI (cheapest, aakhri try) ───────────
-  console.warn('[T3] OpenRouter failed → Gemini...');
-  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
-  let lastErr;
-  for(const model of gmModels){
+  // ── TIER 3: NVIDIA (last resort) ────────────────────
+  console.warn('[T3] OpenRouter failed → NVIDIA...');
+  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
+  for(const model of nvModels){
     try{
-      console.log('[T3] Gemini:', model);
-      const r = await callGeminiModel(userContent, model, onChunk);
-      if(r && r.trim()){ console.log('[T3] ✅ Gemini success'); return r; }
-    } catch(e){ console.warn('[T3] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; }
+      console.log('[T3] NVIDIA:', model);
+      const r = await callNvidiaNIM(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); return r; }
+    } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; }
   }
 
   const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
