@@ -1789,14 +1789,14 @@ function handleImg(input){
     const im=new Image();
     im.onload=()=>{
       const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-      let max=1100,w=im.width,h=im.height;
+      let max=800,w=im.width,h=im.height;
       if(w>h&&w>max){h=Math.round(h*max/w);w=max;}
       else if(h>max){w=Math.round(w*max/h);h=max;}
       cv.width=w;cv.height=h;
       ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
       ctx.drawImage(im,0,0,w,h);
-      let q=0.88,url=cv.toDataURL('image/jpeg',q);
-      while(url.length>1400000&&q>0.15){q-=0.1;url=cv.toDataURL('image/jpeg',q);}
+      let q=0.82,url=cv.toDataURL('image/jpeg',q);
+      while(url.length>500000&&q>0.15){q-=0.08;url=cv.toDataURL('image/jpeg',q);}
       img64=url.split(',')[1];
       document.getElementById('preview-img').src=url;
       document.getElementById('img-ld').classList.remove('on');
@@ -1941,8 +1941,8 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(NVIDIA_BASE + '/chat/completions', {
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
-    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, temperature:0.3, stream: streaming})
-  }, isImg ? 15000 : 3000);
+    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 8000 : 3000, temperature:0.3, stream: streaming})
+  }, isImg ? 25000 : 3000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -1977,8 +1977,8 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'HTTP-Referer':'https://ai-solving-math.app',
           'X-Title':'AI Solving Math'
         },
-        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens:3000, stream: streaming})
-      }, isImgOR ? 15000 : 5000);
+        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 8000 : 3000, stream: true})
+      }, isImgOR ? 25000 : 5000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
@@ -2018,8 +2018,8 @@ async function callGeminiModel(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens:3000, temperature:0.3}})
-  }, typeof userContent === 'string' ? 10000 : 20000);
+    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0.3}})
+  }, typeof userContent === 'string' ? 10000 : 30000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -2182,22 +2182,26 @@ ${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, writ
 - OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
 
   // ── Image-specific prompt (sabhi questions solve karo) ──
+  const userInstruction = qc && qc.trim() ? qc.trim() : '';
   const imgPrompt=`${sys}
+
+USER INSTRUCTION (HIGHEST PRIORITY — follow this EXACTLY):
+${userInstruction ? `"${userInstruction}"
+→ If user said to solve only specific questions (e.g. "solve Q3 and Q5" or "only 8 questions"), do EXACTLY that. Do NOT solve more or less.
+→ If user asked to explain, translate, or do something specific — do that.` : 'Solve ALL questions visible in the image.'}
 
 IMAGE ANALYSIS RULES — FOLLOW STRICTLY:
 1. SCAN the ENTIRE image carefully from top to bottom, left to right.
-2. FIND every single question, problem, exercise, or sub-part visible — even if they are numbered (Q1, Q2, 1., 2., a), b) etc.).
-3. SOLVE EACH AND EVERY question one by one. DO NOT skip any question. DO NOT solve only the first one.
+2. ${userInstruction ? 'Follow the user instruction above — solve only what user asked for.' : 'FIND every single question, problem, exercise, or sub-part visible — even if numbered (Q1, Q2, 1., 2., a), b) etc.).'}
+3. SOLVE EACH requested question one by one. DO NOT skip any. DO NOT solve only the first one.
 4. For EACH question, wrap its answer in a separate numbered heading like:
    <div class="step"><strong>Q1.</strong> [question text here]<br>[step-by-step solution]<br><strong>Answer: [final answer]</strong></div>
 5. If multiple subjects/topics are in the image (Math + Science + English etc.), solve ALL of them.
 6. If a question has sub-parts (a, b, c), solve EVERY sub-part separately.
-7. NEVER say "I can only see one question" — look harder and list every visible text/problem.
+7. Give COMPLETE answers — do not cut short, do not say "and so on". Finish every question fully.
 8. OUTPUT: Only raw HTML. No markdown. No extra explanation outside HTML tags.
 
-Context from user: ${qc||'Solve all questions in this image'}
-
-Now solve EVERY question visible in the image:`;
+Now begin:`;
 
   let userContent;
   if(mode==='image'){
