@@ -34,7 +34,7 @@ html,body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;mi
 .grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(126,179,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(126,179,255,.03) 1px,transparent 1px);background-size:50px 50px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent)}
 
 .page{display:flex;justify-content:center;min-height:100vh}
-.wrap{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+.wrap{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1;overflow-x:hidden}
 
 /* HEADER */
 .hdr{position:sticky;top:0;z-index:100;background:rgba(6,9,20,.85);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--b)}
@@ -275,10 +275,10 @@ textarea::placeholder{color:var(--t3)}
 .ans-mode-btn:active{transform:scale(.94)}
 
 /* CHAT */
-.chat-area{display:flex;flex-direction:column;gap:14px}
+.chat-area{display:flex;flex-direction:column;gap:14px;width:100%;box-sizing:border-box}
 .user-row{display:flex;justify-content:flex-end;animation:fadeUp .3s ease}
 .user-bubble{background:linear-gradient(135deg,rgba(79,70,229,.25),rgba(124,58,237,.2));border:1px solid rgba(126,179,255,.2);padding:11px 15px;border-radius:16px 16px 4px 16px;font-size:.87rem;max-width:84%;word-break:break-word;line-height:1.65;color:var(--t);box-shadow:0 4px 16px rgba(0,0,0,.2)}
-.ai-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;animation:fadeUp .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.ai-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;animation:fadeUp .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 8px 32px rgba(0,0,0,.25);box-sizing:border-box;width:100%;max-width:100%}
 .ai-card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b2);background:linear-gradient(90deg,rgba(79,70,229,.08),transparent)}
 .ai-label{display:flex;align-items:center;gap:7px;font-family:'Azeret Mono',monospace;font-size:.7rem;font-weight:600;color:var(--c1);letter-spacing:.5px}
 .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--c3);box-shadow:0 0 8px var(--c3);animation:pulse 2.5s ease infinite}
@@ -287,7 +287,7 @@ textarea::placeholder{color:var(--t3)}
 .cp-btn:hover,.sp-btn:hover{border-color:rgba(126,179,255,.3);color:var(--c1)}
 .like-btn:hover{border-color:rgba(244,114,182,.3);color:var(--c5)}
 .like-btn.liked{background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.3);color:var(--c5)}
-.ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t)}
+.ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t);word-break:break-word;box-sizing:border-box}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
 .ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
@@ -372,6 +372,10 @@ textarea::placeholder{color:var(--t3)}
 @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scanBar{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes brainPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 8px rgba(99,102,241,0)}}
+@keyframes ripplePing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-3px);opacity:1}}
 .ld-spinner{width:28px;height:28px;border:2.5px solid rgba(255,255,255,.08);border-top-color:var(--c1);border-radius:50%;animation:spin .8s linear infinite}
 .ld-label{font-size:.75rem;color:var(--t2);font-weight:600;font-family:'Azeret Mono',monospace}
 
@@ -2217,16 +2221,235 @@ Now begin:`;
   const id = 'id-' + Date.now();
   appendStreamCard(id, displayQ);
 
-  // ── Thinking indicator chat mein dikhao (card ke upar) ──
+  // ── Thinking indicator ──
   const thinkId = id + '-think';
   const thinkEl = document.createElement('div');
   thinkEl.id = thinkId;
-  thinkEl.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--s1);border:1px solid var(--b2);margin-bottom:10px;animation:fadeUp .3s ease">
+
+  const isImgMode = mode === 'image';
+
+  // Fun facts for image mode
+  const funFacts = lang==='hi' ? [
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,    text:'गणित में हर समस्या का हल होता है — बस सही तरीका चाहिए!'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>`,   text:'पढ़ाई करने से दिमाग की नई connections बनती हैं!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,     text:'Albert Einstein ने भी school में struggle किया था!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,  text:'रोज़ 20 मिनट Math practice से marks double हो सकते हैं!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,    text:'हर expert पहले beginner था — हार मत मानो!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`, text:'Pythagoras theorem 2500 साल पुराना है — आज भी काम आता है!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v11l3.5 6a1 1 0 0 1-.87 1.5H6.37A1 1 0 0 1 5.5 20L9 14V3z"/><line x1="6" y1="3" x2="18" y2="3"/></svg>`,   text:'Science हर चीज़ में है — खाना, खेल, संगीत सब में!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,    text:'गलती करना सीखने का सबसे तेज़ तरीका है!'},
+  ] : [
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,    text:'Every problem has a solution — just find the right approach!'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>`,   text:'Studying builds new neural connections in your brain!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,     text:'Even Einstein struggled in school at first!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,  text:'Just 20 min of daily Math practice can double your marks!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,    text:'Every expert was once a beginner — keep going!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`, text:'Pythagorean theorem is 2500 years old and still works!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v11l3.5 6a1 1 0 0 1-.87 1.5H6.37A1 1 0 0 1 5.5 20L9 14V3z"/><line x1="6" y1="3" x2="18" y2="3"/></svg>`,   text:'Science is everywhere — food, sports, music!'},
+    {icon:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,    text:'Making mistakes is the fastest way to learn!'},
+  ];
+
+  // Steps: {icon, text} objects
+  const steps_img = lang==='hi' ? [
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10M12 7v10"/><circle cx="12" cy="12" r="3"/></svg>`,   text:'Image scan kar raha hoon...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,   text:'Questions dhundh raha hoon...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>`,   text:'Solve kar raha hoon...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,    text:'Answer likh raha hoon...'},
+  ] : [
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10M12 7v10"/><circle cx="12" cy="12" r="3"/></svg>`,   text:'Scanning image...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,   text:'Finding questions...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>`,   text:'Solving step by step...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,    text:'Writing answer...'},
+  ];
+
+  const steps_text = lang==='hi' ? [
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>`,  text:'Sawaal samajh raha hoon...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`, text:'Solution dhundh raha hoon...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,    text:'Jawab likh raha hoon...'},
+  ] : [
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>`,  text:'Understanding question...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`, text:'Finding solution...'},
+    {icon:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,    text:'Writing answer...'},
+  ];
+
+  const steps = isImgMode ? steps_img : steps_text;
+  const randomFactObj = funFacts[Math.floor(Math.random() * funFacts.length)];
+
+  thinkEl.innerHTML = isImgMode ? `
+  <div style="border-radius:20px;background:linear-gradient(135deg,rgba(10,15,35,.97),rgba(15,20,50,.97));border:1px solid rgba(99,102,241,.25);margin-bottom:12px;overflow:hidden;animation:fadeUp .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(99,102,241,.1),inset 0 1px 0 rgba(255,255,255,.05)">
+
+    <!-- Top glow bar -->
+    <div style="height:2px;background:linear-gradient(90deg,transparent 0%,#4f46e5 20%,#7c3aed 50%,#06b6d4 80%,transparent 100%);animation:scanBar 2s ease-in-out infinite"></div>
+
+    <!-- Header -->
+    <div style="padding:16px 18px 0;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <!-- Pulsing AI brain icon -->
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.3));border:1px solid rgba(99,102,241,.4);display:flex;align-items:center;justify-content:center;position:relative;animation:brainPulse 2s ease infinite">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#brainGrad)" stroke-width="1.5" stroke-linecap="round">
+            <defs><linearGradient id="brainGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+            <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+            <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+            <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/>
+            <path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/>
+            <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
+            <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/>
+            <path d="M19.938 10.5a4 4 0 0 1 .585.396"/>
+          </svg>
+          <div style="position:absolute;inset:-4px;border-radius:14px;border:1px solid rgba(99,102,241,.2);animation:ripplePing 2s ease infinite"></div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:800;letter-spacing:1.5px;color:#818cf8;font-family:'Azeret Mono',monospace;text-transform:uppercase">${lang==='hi'?'विश्लेषण हो रहा है':'Analyzing'}</div>
+          <div style="font-size:.62rem;color:rgba(148,163,184,.5);font-family:'Azeret Mono',monospace;margin-top:1px">${lang==='hi'?'AI प्रोसेसिंग...':'AI processing...'}</div>
+        </div>
+      </div>
+      <!-- Live badge -->
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10b981;animation:pulse 1s ease infinite"></div>
+        <span style="font-size:.58rem;font-weight:700;letter-spacing:1px;color:#10b981;font-family:'Azeret Mono',monospace">LIVE</span>
+      </div>
+    </div>
+
+    <!-- Neural network canvas -->
+    <div style="padding:14px 18px 10px;position:relative">
+      <canvas id="${thinkId}-neural" width="320" height="54" style="width:100%;height:54px;opacity:.7;border-radius:8px"></canvas>
+    </div>
+
+    <!-- Steps with glass morphism -->
+    <div style="padding:0 18px 14px;display:flex;flex-direction:column;gap:6px">
+      ${steps.map((s,i)=>`
+      <div id="${thinkId}-step-${i}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:${i===0?'rgba(79,70,229,.15)':'rgba(255,255,255,.02)'};border:1px solid ${i===0?'rgba(99,102,241,.35)':'rgba(255,255,255,.04)'};transition:all .5s cubic-bezier(.2,.8,.2,1)">
+        <div id="${thinkId}-dot-${i}" style="width:22px;height:22px;border-radius:6px;background:${i===0?'linear-gradient(135deg,#4f46e5,#7c3aed)':'rgba(255,255,255,.05)'};border:1px solid ${i===0?'rgba(99,102,241,.6)':'rgba(255,255,255,.08)'};display:flex;align-items:center;justify-content:center;font-size:.58rem;flex-shrink:0;transition:all .5s;color:${i===0?'#fff':'rgba(148,163,184,.4)'};font-weight:800;font-family:'Azeret Mono',monospace">${i===0?'▶':'0'+(i+1)}</div>
+        <span style="font-size:.78rem;font-family:'Outfit',sans-serif;color:${i===0?'rgba(226,232,240,.9)':'rgba(148,163,184,.4)'};font-weight:${i===0?'600':'400'};transition:all .5s;letter-spacing:.2px">${s}</span>
+        ${i===0?`<div style="margin-left:auto;display:flex;gap:3px">${[0,1,2].map(j=>`<div style="width:3px;height:3px;border-radius:50%;background:#818cf8;animation:dotBounce 1.2s ease infinite;animation-delay:${j*0.2}s"></div>`).join('')}</div>`:''}
+      </div>`).join('')}
+    </div>
+
+    <!-- Progress section -->
+    <div style="padding:0 18px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:.6rem;letter-spacing:1px;color:rgba(148,163,184,.4);font-family:'Azeret Mono',monospace;text-transform:uppercase">Processing</span>
+        <span id="${thinkId}-pct" style="font-size:.6rem;letter-spacing:1px;color:#818cf8;font-family:'Azeret Mono',monospace">5%</span>
+      </div>
+      <div style="height:3px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+        <div id="${thinkId}-bar" style="height:100%;width:5%;background:linear-gradient(90deg,#4f46e5,#7c3aed,#06b6d4);border-radius:3px;transition:width 1s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 8px rgba(99,102,241,.6)"></div>
+      </div>
+    </div>
+
+    <!-- Fun fact card -->
+    <div style="margin:0 18px 18px;padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(6,182,212,.06),rgba(79,70,229,.06));border:1px solid rgba(6,182,212,.15);position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(6,182,212,.4),transparent)"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="color:#06b6d4;display:flex;align-items:center">${randomFactObj.icon}</span>
+        <span style="font-size:.6rem;font-weight:800;letter-spacing:1.5px;color:#06b6d4;font-family:'Azeret Mono',monospace;text-transform:uppercase">DID YOU KNOW</span>
+      </div>
+      <div style="font-size:.76rem;color:rgba(203,213,225,.75);font-family:'Outfit',sans-serif;line-height:1.6">${randomFactObj.text}</div>
+    </div>
+
+    <!-- Bottom glow bar -->
+    <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(99,102,241,.3),rgba(6,182,212,.3),transparent)"></div>
+  </div>` : `
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--s1);border:1px solid var(--b2);margin-bottom:10px;animation:fadeUp .3s ease">
     <div class="orbit-logo" style="width:32px;height:32px;flex-shrink:0"><div class="orbit-ring"></div><div class="orbit-dot od1"></div><div class="orbit-dot od2"></div><div class="orbit-dot od3"></div></div>
-    <div class="typing-label" id="${thinkId}-label">Thinking...</div>
+    <div class="typing-label" id="${thinkId}-label">${lang==='hi'?'सोच रहा है...':'Thinking...'}</div>
   </div>`;
+
   const _wrap = document.getElementById(id+'-wrap');
   if(_wrap) _wrap.insertBefore(thinkEl, _wrap.firstChild);
+
+  // ── Image mode: animate steps + progress bar ──
+  let stepTimer = null;
+  if(isImgMode){
+    let currentStep = 0;
+    const totalSteps = steps.length;
+    const stepDuration = 4000; // 4s per step
+    function advanceStep(){
+      if(currentStep < totalSteps - 1){
+        // Done old step - tick + dim
+        const oldDot = document.getElementById(thinkId+'-dot-'+currentStep);
+        const oldStepEl = document.getElementById(thinkId+'-step-'+currentStep);
+        if(oldDot){ oldDot.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`; oldDot.style.background='linear-gradient(135deg,#10b981,#059669)'; oldDot.style.border='1px solid rgba(16,185,129,.6)'; oldDot.style.color='#fff'; }
+        if(oldStepEl){ oldStepEl.style.background='rgba(16,185,129,.06)'; oldStepEl.style.border='1px solid rgba(16,185,129,.15)'; }
+        currentStep++;
+        // Highlight new step
+        const newDot = document.getElementById(thinkId+'-dot-'+currentStep);
+        const newStepEl = document.getElementById(thinkId+'-step-'+currentStep);
+        if(newDot){ newDot.innerHTML=steps[currentStep].icon; newDot.style.background='linear-gradient(135deg,#4f46e5,#7c3aed)'; newDot.style.border='1px solid rgba(99,102,241,.6)'; newDot.style.color='rgba(167,139,250,1)'; }
+        if(newStepEl){ newStepEl.style.background='rgba(79,70,229,.15)'; newStepEl.style.border='1px solid rgba(99,102,241,.35)'; const sp=newStepEl.querySelector('span'); if(sp){sp.style.color='rgba(226,232,240,.9)';sp.style.fontWeight='600';} }
+        // Progress bar + pct
+        const pct = Math.min(88, Math.round((currentStep/totalSteps)*85+5));
+        const bar = document.getElementById(thinkId+'-bar');
+        const pctEl = document.getElementById(thinkId+'-pct');
+        if(bar) bar.style.width = pct+'%';
+        if(pctEl) pctEl.textContent = pct+'%';
+        stepTimer = setTimeout(advanceStep, stepDuration);
+      }
+    }
+    stepTimer = setTimeout(advanceStep, stepDuration);
+
+    // Neural network canvas animation
+    const neuralCanvas = document.getElementById(thinkId+'-neural');
+    if(neuralCanvas){
+      const ctx2 = neuralCanvas.getContext('2d');
+      const W = 320, H = 54;
+      const nodes = [];
+      // Create nodes grid
+      for(let col=0;col<8;col++){
+        for(let row=0;row<3;row++){
+          nodes.push({x:20+col*42,y:10+row*17,r:2.5,phase:Math.random()*Math.PI*2,speed:0.04+Math.random()*0.03});
+        }
+      }
+      let nFrame=0;
+      function drawNeural(){
+        ctx2.clearRect(0,0,W,H);
+        nFrame++;
+        // Draw connections
+        for(let i=0;i<nodes.length;i++){
+          for(let j=i+1;j<nodes.length;j++){
+            const dx=nodes[j].x-nodes[i].x, dy=nodes[j].y-nodes[i].y;
+            const dist=Math.sqrt(dx*dx+dy*dy);
+            if(dist<55){
+              const alpha=(1-dist/55)*0.25;
+              ctx2.strokeStyle=`rgba(99,102,241,${alpha})`;
+              ctx2.lineWidth=0.8;
+              ctx2.beginPath();ctx2.moveTo(nodes[i].x,nodes[i].y);ctx2.lineTo(nodes[j].x,nodes[j].y);ctx2.stroke();
+            }
+          }
+        }
+        // Draw nodes
+        nodes.forEach((n,i)=>{
+          n.phase+=n.speed;
+          const pulse=Math.sin(n.phase)*0.5+0.5;
+          const r=n.r*(0.7+pulse*0.6);
+          // Glow
+          const grd=ctx2.createRadialGradient(n.x,n.y,0,n.x,n.y,r*4);
+          grd.addColorStop(0,`rgba(99,102,241,${0.5*pulse})`);
+          grd.addColorStop(1,'rgba(99,102,241,0)');
+          ctx2.fillStyle=grd;
+          ctx2.beginPath();ctx2.arc(n.x,n.y,r*4,0,Math.PI*2);ctx2.fill();
+          // Core
+          const cGrd=ctx2.createRadialGradient(n.x,n.y,0,n.x,n.y,r);
+          cGrd.addColorStop(0,'rgba(167,139,250,1)');
+          cGrd.addColorStop(1,'rgba(79,70,229,.6)');
+          ctx2.fillStyle=cGrd;
+          ctx2.beginPath();ctx2.arc(n.x,n.y,r,0,Math.PI*2);ctx2.fill();
+          // Travelling signal along edges
+          if(nFrame%40===i%40){
+            const target=nodes[(i+1)%nodes.length];
+            const dx=target.x-n.x,dy=target.y-n.y,dist=Math.sqrt(dx*dx+dy*dy);
+            if(dist<55){
+              const t=(nFrame%40)/40;
+              const sx=n.x+dx*t,sy=n.y+dy*t;
+              ctx2.fillStyle='rgba(6,182,212,.9)';
+              ctx2.beginPath();ctx2.arc(sx,sy,2,0,Math.PI*2);ctx2.fill();
+            }
+          }
+        });
+        if(document.getElementById(thinkId+'-neural')) requestAnimationFrame(drawNeural);
+      }
+      drawNeural();
+    }
+  }
 
   // ── Real status: Thinking → Writing answer ──
   const statusLabelEl = document.getElementById(thinkId+'-label');
@@ -2248,6 +2471,7 @@ Now begin:`;
   function showCardNow(){
     if(cardShown) return;
     cardShown = true;
+    if(stepTimer){ clearTimeout(stepTimer); stepTimer=null; }
     const lbl = document.getElementById(thinkId+'-label');
     if(lbl) lbl.textContent = lang==='hi' ? 'जवाब लिख रहा है...' : 'Writing answer...';
     const card = document.getElementById(id+'-card');
