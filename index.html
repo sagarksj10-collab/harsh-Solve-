@@ -142,7 +142,7 @@ html,body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;mi
 .chip:active{transform:scale(.92)}
 .chip.act{background:linear-gradient(135deg,rgba(79,70,229,.25),rgba(124,58,237,.25));border-color:rgba(126,179,255,.35);color:var(--c1);box-shadow:0 0 20px rgba(79,70,229,.12)}
 
-/* ── ORIGINAL INPUT BOX ── */
+/* INPUT BOX */
 .inp-wrap{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);margin-bottom:12px;overflow:hidden;transition:border-color .3s,box-shadow .3s}
 .inp-wrap:focus-within{border-color:rgba(126,179,255,.3);box-shadow:0 0 0 4px rgba(79,70,229,.08),0 4px 24px rgba(0,0,0,.3)}
 .mode-tabs{display:flex;border-bottom:1px solid var(--b2);background:rgba(13,20,38,.5)}
@@ -166,22 +166,6 @@ textarea::placeholder{color:var(--t3)}
 .voice-btn:hover{background:var(--s3);border-color:rgba(126,179,255,.25)}
 .voice-btn.listening{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.4);animation:voicePulse 1s ease infinite}
 @keyframes voicePulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 6px rgba(248,113,113,0)}}
-
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:50;padding:7px 10px 18px;background:rgba(6,9,20,.92);backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--b);display:flex;gap:4px}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:11px;background:transparent;border:1px solid transparent;color:var(--t3);transition:all .22s;font-family:'Outfit',sans-serif;cursor:pointer}
-.nb:hover{color:var(--t2)}
-.nb:active{transform:scale(.88)}
-.nb.act{background:rgba(79,70,229,.15);border-color:rgba(126,179,255,.2);color:var(--c1)}
-.nb-icon{font-size:1.25rem;line-height:1;position:relative}
-.nb-badge{position:absolute;top:-5px;right:-7px;width:13px;height:13px;border-radius:50%;background:var(--c2);color:#fff;font-size:.52rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--bg);font-family:'Azeret Mono',monospace}
-.nb-badge.show{display:flex}
-.nb-lbl{font-size:.56rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
-
-/* hidden classes kept for JS compat */
-.claude-input-bar{display:none!important}
-.mode-pill{display:none}
-.send-btn{display:none}
 
 /* IMAGE ZONE */
 .img-zone{border:1.5px dashed rgba(126,179,255,.18);border-radius:var(--r2);padding:28px 20px;text-align:center;position:relative;cursor:pointer;background:rgba(79,70,229,.03);transition:all .25s}
@@ -303,14 +287,10 @@ textarea::placeholder{color:var(--t3)}
 .cp-btn:hover,.sp-btn:hover{border-color:rgba(126,179,255,.3);color:var(--c1)}
 .like-btn:hover{border-color:rgba(244,114,182,.3);color:var(--c5)}
 .like-btn.liked{background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.3);color:var(--c5)}
-.ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow:hidden;color:var(--t);word-break:break-word;overflow-wrap:break-word;box-sizing:border-box;width:100%}
-.ai-body *{max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:break-word}
-.ai-body table{width:100%!important;table-layout:fixed;border-collapse:collapse;display:block;overflow-x:hidden}
-.ai-body td,.ai-body th{white-space:normal!important;word-break:break-word;padding:5px 8px;vertical-align:top}
+.ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t);word-break:break-word;box-sizing:border-box}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
-.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8;word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;width:100%;display:block;overflow:hidden}
-.ai-body .step strong,.ai-body .step b{font-weight:700}
+.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
@@ -346,13 +326,13 @@ textarea::placeholder{color:var(--t3)}
 .ch-q{font-size:.87rem;font-weight:600;color:var(--t);line-height:1.5;margin-bottom:6px}
 .ch-hint{font-size:.72rem;color:var(--t3)}
 
-/* BOTTOM NAV - hidden, replaced by claude input bar */
-.bnav{display:none!important}
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:50;padding:7px 10px 18px;background:rgba(6,9,20,.92);backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--b);display:flex;gap:4px}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:11px;background:transparent;border:1px solid transparent;color:var(--t3);transition:all .22s;font-family:'Outfit',sans-serif;cursor:pointer}
 .nb:hover{color:var(--t2)}
 .nb:active{transform:scale(.88)}
 .nb.act{background:rgba(79,70,229,.15);border-color:rgba(126,179,255,.2);color:var(--c1)}
-.nb-icon{font-size:1.25rem;line-height:1;position:relative}
+.nb-icon{width:22px;height:22px;line-height:1;position:relative;display:flex;align-items:center;justify-content:center}
 .nb-badge{position:absolute;top:-5px;right:-7px;width:13px;height:13px;border-radius:50%;background:var(--c2);color:#fff;font-size:.52rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--bg);font-family:'Azeret Mono',monospace}
 .nb-badge.show{display:flex}
 .nb-lbl{font-size:.56rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
@@ -869,9 +849,7 @@ textarea::placeholder{color:var(--t3)}
               <button class="cam-btn" onclick="openCamera()">📷 Camera</button>
             </div>
           </div>
-        </div>
 
-        <div class="inp-footer">
           <div class="wc-badge" id="wc-badge">0 words</div>
           <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
           <div class="voice-btn" id="mic-btn" onclick="openQuiz()" title="Quick Quiz" style="font-size:16px">🧩</div>
@@ -880,8 +858,12 @@ textarea::placeholder{color:var(--t3)}
 
       <!-- ANSWER MODE TOGGLE -->
       <div class="ans-mode-wrap">
-        <button class="ans-mode-btn act" id="amBtn-standard" onclick="setAnswerMode('standard')">⚡ Standard</button>
-        <button class="ans-mode-btn" id="amBtn-extended" onclick="setAnswerMode('extended')">📖 Extended</button>
+        <button class="ans-mode-btn act" id="amBtn-standard" onclick="setAnswerMode('standard')">
+          ⚡ Standard
+        </button>
+        <button class="ans-mode-btn" id="amBtn-extended" onclick="setAnswerMode('extended')">
+          📖 Extended
+        </button>
       </div>
 
       <button class="go-btn" id="go-btn" onclick="solve()">
@@ -907,19 +889,34 @@ textarea::placeholder{color:var(--t3)}
     <!-- BOTTOM NAV -->
     <div class="bnav">
       <button class="nb act" id="nb-text" onclick="switchMode('text')">
-        <div class="nb-icon">📝</div><div class="nb-lbl" id="nb-t-lbl">Text</div>
+        <div class="nb-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </div>
+        <div class="nb-lbl" id="nb-t-lbl">Text</div>
       </button>
       <button class="nb" id="nb-image" onclick="switchMode('image')">
-        <div class="nb-icon">📷</div><div class="nb-lbl" id="nb-i-lbl">Image</div>
+        <div class="nb-icon" style="color:#22d3ee">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="nb-lbl" id="nb-i-lbl">Image</div>
       </button>
       <button class="nb" id="nb-quiz" onclick="openQuiz()">
-        <div class="nb-icon">🧩</div><div class="nb-lbl">Quiz</div>
+        <div class="nb-icon" style="color:#a78bfa">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="nb-lbl">Quiz</div>
       </button>
       <button class="nb" onclick="openGuild()">
-        <div class="nb-icon">🎒</div><div class="nb-lbl">Guild</div>
+        <div class="nb-icon" style="color:#34d399">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="nb-lbl">Guild</div>
       </button>
       <button class="nb" onclick="openPanel()">
-        <div class="nb-icon" style="position:relative">📜<div class="nb-badge" id="nb-badge"></div></div>
+        <div class="nb-icon" style="position:relative;color:#fb923c">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+          <div class="nb-badge" id="nb-badge"></div>
+        </div>
         <div class="nb-lbl" id="nb-h-lbl">History</div>
       </button>
     </div>
@@ -1307,7 +1304,7 @@ function pick10FromPool() {
     if (idx >= 0) QUIZ_USED.add(idx);
   });
 
-  // Last 30 questions bache to background mein 100 aur fetch karo
+  // Last 30 questions bache to background mein 150 aur fetch karo (75 Hindi + 75 English)
   const remaining = QUIZ_POOL.length - QUIZ_USED.size;
   if (remaining < 30 && !quizPoolLoading) {
     setTimeout(() => fetchAndAppendMore(), 300);
@@ -1417,20 +1414,18 @@ Return JSON array ONLY, no markdown, no explanation:
   return [];
 }
 
-// Background mein 200 questions — 100 Hindi + 100 English — parallel fetch
+// Background mein 150 questions — 75 Hindi + 75 English — parallel fetch
 async function fetchAndAppendMore() {
   if (quizPoolLoading) return;
   quizPoolLoading = true;
-  console.log('Fetching 200 more quiz questions in background (100 Hindi + 100 English)...');
+  console.log('Fetching 150 more quiz questions in background (75 Hindi + 75 English)...');
 
-  // Bilingual QUIZ_POOL: dono language store hogi
-  // Current lang wale dikhenge, dusri bhi pool mein rahegi for lang switch
   if (!window.QUIZ_POOL_BILINGUAL) window.QUIZ_POOL_BILINGUAL = { hi: [], en: [] };
 
   const offset = QUIZ_POOL.length;
 
   try {
-    // ── 100 HINDI questions (Gemini 2×25 + NVIDIA 2×25) ──
+    // ── 75 HINDI questions: 3 batches × 25 ──
     const hindiFetch = (async () => {
       let count = 0;
       // Gemini: 2 batches × 25 = 50 Hindi
@@ -1440,27 +1435,24 @@ async function fetchAndAppendMore() {
           if (qs && qs.length > 0) {
             window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
             count += qs.length;
-            console.log(`[Hindi] Gemini batch ${b+1}: +${qs.length} questions`);
+            console.log(`[Hindi] Gemini batch ${b+1}: +${qs.length}`);
           }
           if (b < 1) await new Promise(r => setTimeout(r, 400));
         } catch(e) { console.warn('Hindi Gemini batch failed:', e.message); }
       }
-      // NVIDIA: 2 batches × 25 = 50 Hindi
-      for (let b = 0; b < 2; b++) {
-        try {
-          const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'hi');
-          if (qs && qs.length > 0) {
-            window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
-            count += qs.length;
-            console.log(`[Hindi] NVIDIA batch ${b+1}: +${qs.length} questions`);
-          }
-          if (b < 1) await new Promise(r => setTimeout(r, 400));
-        } catch(e) { console.warn('Hindi NVIDIA batch failed:', e.message); }
-      }
+      // NVIDIA: 1 batch × 25 = 25 Hindi
+      try {
+        const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'hi');
+        if (qs && qs.length > 0) {
+          window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
+          count += qs.length;
+          console.log(`[Hindi] NVIDIA batch: +${qs.length}`);
+        }
+      } catch(e) { console.warn('Hindi NVIDIA batch failed:', e.message); }
       return count;
     })();
 
-    // ── 100 ENGLISH questions (Gemini 2×25 + NVIDIA 2×25) ──
+    // ── 75 ENGLISH questions: 3 batches × 25 ──
     const englishFetch = (async () => {
       let count = 0;
       // Gemini: 2 batches × 25 = 50 English
@@ -1470,23 +1462,20 @@ async function fetchAndAppendMore() {
           if (qs && qs.length > 0) {
             window.QUIZ_POOL_BILINGUAL.en.push(...qs);
             count += qs.length;
-            console.log(`[English] Gemini batch ${b+1}: +${qs.length} questions`);
+            console.log(`[English] Gemini batch ${b+1}: +${qs.length}`);
           }
           if (b < 1) await new Promise(r => setTimeout(r, 400));
         } catch(e) { console.warn('English Gemini batch failed:', e.message); }
       }
-      // NVIDIA: 2 batches × 25 = 50 English
-      for (let b = 0; b < 2; b++) {
-        try {
-          const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'en');
-          if (qs && qs.length > 0) {
-            window.QUIZ_POOL_BILINGUAL.en.push(...qs);
-            count += qs.length;
-            console.log(`[English] NVIDIA batch ${b+1}: +${qs.length} questions`);
-          }
-          if (b < 1) await new Promise(r => setTimeout(r, 400));
-        } catch(e) { console.warn('English NVIDIA batch failed:', e.message); }
-      }
+      // NVIDIA: 1 batch × 25 = 25 English
+      try {
+        const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'en');
+        if (qs && qs.length > 0) {
+          window.QUIZ_POOL_BILINGUAL.en.push(...qs);
+          count += qs.length;
+          console.log(`[English] NVIDIA batch: +${qs.length}`);
+        }
+      } catch(e) { console.warn('English NVIDIA batch failed:', e.message); }
       return count;
     })();
 
@@ -1499,9 +1488,7 @@ async function fetchAndAppendMore() {
       : window.QUIZ_POOL_BILINGUAL.en;
     QUIZ_POOL.push(...currentLangPool);
 
-    console.log(`✅ Pool refreshed: +${hiCount} Hindi, +${enCount} English. Current lang pool: ${QUIZ_POOL.length} total`);
-
-    // QUIZ_POOL_BILINGUAL reset karo (next refresh ke liye fresh start)
+    console.log(`✅ Pool refreshed: +${hiCount} Hindi, +${enCount} English. Total: ${QUIZ_POOL.length}`);
     window.QUIZ_POOL_BILINGUAL = { hi: [], en: [] };
 
   } catch(e) {
@@ -1727,8 +1714,10 @@ function switchLang(){lang=lang==='hi'?'en':'hi';lsSet('sm_lang',lang);applyLang
 
 function switchMode(m){
   mode=m;
-  document.getElementById('text-panel').style.display=m==='text'?'block':'none';
-  document.getElementById('img-panel').style.display=m==='image'?'block':'none';
+  const tp=document.getElementById('text-panel');
+  const ip=document.getElementById('img-panel');
+  if(tp) tp.style.display=m==='text'?'block':'none';
+  if(ip) ip.style.display=m==='image'?'block':'none';
   document.getElementById('tab-text')?.classList.toggle('act',m==='text');
   document.getElementById('tab-image')?.classList.toggle('act',m==='image');
   document.getElementById('nb-text')?.classList.toggle('act',m==='text');
@@ -1797,104 +1786,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const zone=document.getElementById('img-zone');
   if(zone) zone.addEventListener('click',triggerGallery);
   fetchRuntimeKeys();
-
-});
-
-// ══════════════════════════════════════════════════════
-//  🔔  NOTIFICATION SYSTEM
-// ══════════════════════════════════════════════════════
-
-// ── TELEGRAM ADMIN CONFIG ─────────────────────────────
-// 1. @BotFather se bot banao → BOT_TOKEN milega
-// 2. Bot ko apne chat mein /start bhejo → CHAT_ID milega (@userinfobot se)
-const _TG_TOKEN   = '__TELEGRAM_BOT_TOKEN__';  // GitHub Secret: TELEGRAM_BOT_TOKEN
-const _TG_CHAT_ID = '__TELEGRAM_CHAT_ID__';    // GitHub Secret: TELEGRAM_CHAT_ID
-const _TG_URL     = `https://api.telegram.org/bot${_TG_TOKEN}/sendMessage`;
-
-// Track API fail counts per session
-const _apiFailLog    = {};
-const _notifCooldown = {}; // prevent spam — 1 notif per api per 5 min
-
-// ── USER BROWSER NOTIFICATION ─────────────────────────
-let _notifPermAsked = false;
-function _askNotifPermission() {
-  if (_notifPermAsked) return;
-  _notifPermAsked = true;
-  if (!('Notification' in window)) return;
-  if (Notification.permission === 'default') {
-    setTimeout(() => Notification.requestPermission(), 1500);
-  }
-}
-
-function _sendUserNotif(title, body, tag='api-error') {
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
-  try {
-    new Notification(title, {
-      body,
-      tag,
-      icon: 'https://cdn.jsdelivr.net/npm/twemoji@14/72x72/1f9e0.png',
-      badge: 'https://cdn.jsdelivr.net/npm/twemoji@14/72x72/26a0.png',
-      requireInteraction: false,
-      silent: false
-    });
-  } catch(e) {}
-}
-
-// ── ADMIN NOTIFICATION via Telegram Bot ──────────────
-async function _sendAdminNotif(api, failCount, errMsg, isNet) {
-  if (!_TG_TOKEN || _TG_TOKEN.startsWith('__')) return; // not configured
-  // Cooldown: 1 notif per API per 5 min
-  const now = Date.now();
-  if (_notifCooldown[api] && now - _notifCooldown[api] < 5 * 60 * 1000) return;
-  _notifCooldown[api] = now;
-
-  const emoji  = isNet ? '📡' : '🔴';
-  const badge  = failCount >= 3 ? '🚨' : '⚠️';
-  const reason = isNet ? 'Network / internet error' : 'API returned error';
-  const time   = new Date().toLocaleString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true, day:'numeric', month:'short'});
-
-  const text = `${badge} <b>AI Solving Math — API Alert</b>\n\n` +
-    `${emoji} <b>API:</b> ${api.toUpperCase()}\n` +
-    `❌ <b>Fail count:</b> ${failCount}\n` +
-    `📋 <b>Reason:</b> ${reason}\n` +
-    `🔎 <b>Error:</b> <code>${(errMsg||'unknown').substring(0, 200)}</code>\n` +
-    `🕐 <b>Time:</b> ${time}`;
-
-  try {
-    await fetch(_TG_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id:    _TG_CHAT_ID,
-        text,
-        parse_mode: 'HTML'
-      })
-    });
-  } catch(e) { /* silently ignore if offline */ }
-}
-
-// ── MAIN FAIL LOGGER ─────────────────────────────────
-function logApiFail(apiName, errMsg='', isNetErr=false) {
-  _apiFailLog[apiName] = (_apiFailLog[apiName]||0) + 1;
-  const count = _apiFailLog[apiName];
-
-  // User notification (browser)
-  const userTitle = lang === 'hi' ? '⚠️ जवाब नहीं मिला' : '⚠️ Couldn\'t get answer';
-  const userBody  = isNetErr
-    ? (lang === 'hi' ? 'इंटरनेट कनेक्शन चेक करो और फिर से try करो।' : 'Check your internet and try again.')
-    : (lang === 'hi' ? `सभी APIs बंद हैं। ${count} बार fail हुआ — थोड़ी देर बाद try करो।` : `All APIs down. Failed ${count} time(s) — try again later.`);
-  _sendUserNotif(userTitle, userBody);
-
-  // Admin notification (Telegram)
-  _sendAdminNotif(apiName, count, errMsg, isNetErr);
-
-  return count;
-}
-
-// Ask for notification permission after DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-  // Triggered on first solve — see _askNotifPermission()
 });
 
 function handleImg(input){
@@ -2179,154 +2070,43 @@ async function callGeminiModel(userContent, model, onChunk=null){
 // 🚀 MAIN ENGINE — 3-TIER AUTO FALLBACK
 //  NVIDIA → OpenRouter → Gemini (sabse cheap aakhri try)
 // ══════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════
-//  🩺  API HEALTH TRACKER + AUTO-HEAL RETRY SYSTEM
-// ══════════════════════════════════════════════════════
-const _API = {
-  // Health map: api → {fails, lastFail, cooldownUntil, wins}
-  health: {
-    gemini:     { fails:0, wins:0, cooldownUntil:0 },
-    openrouter: { fails:0, wins:0, cooldownUntil:0 },
-    nvidia:     { fails:0, wins:0, cooldownUntil:0 }
-  },
-
-  COOLDOWN_MS: 5 * 60 * 1000, // 5 min cooldown after 3 consecutive fails
-  MAX_FAILS: 3,
-
-  isDown(api) {
-    const h = this.health[api];
-    if (!h) return false;
-    if (h.cooldownUntil && Date.now() < h.cooldownUntil) return true;
-    if (h.cooldownUntil && Date.now() >= h.cooldownUntil) {
-      // Cooldown expired — reset and try again
-      h.fails = 0; h.cooldownUntil = 0;
-      console.log(`[APIHealth] ♻️ ${api} cooldown ended — retrying`);
-    }
-    return false;
-  },
-
-  recordFail(api, model, errMsg) {
-    const h = this.health[api];
-    if (!h) return;
-    h.fails++;
-    h.lastFail = Date.now();
-    console.warn(`[APIHealth] ❌ ${api}(${model}) fail #${h.fails}: ${errMsg}`);
-    if (h.fails >= this.MAX_FAILS) {
-      h.cooldownUntil = Date.now() + this.COOLDOWN_MS;
-      console.warn(`[APIHealth] 🔴 ${api} — ${this.MAX_FAILS} fails, cooling down 5 min`);
-      // Log into SH system too
-      _SH.log.push({
-        fn: `API:${api}`,
-        error: errMsg.substring(0,80),
-        fix: `Auto-skipped for 5 min (${this.MAX_FAILS} fails)`,
-        time: new Date().toLocaleTimeString()
-      });
-      _SH.count++;
-      _SH.showBadge(`API:${api} paused`);
-      // Admin notification — API hit cooldown threshold
-      _sendAdminNotif(api, h.fails, errMsg, errMsg?.includes('fetch')||errMsg?.includes('network'));
-    }
-  },
-
-  recordWin(api, model) {
-    const h = this.health[api];
-    if (!h) return;
-    h.wins++;
-    h.fails = 0; // reset on success
-    h.cooldownUntil = 0;
-  },
-
-  // Get ordered API list — put healthy ones first
-  orderedAPIs() {
-    const all = ['gemini','openrouter','nvidia'];
-    const down = all.filter(a => this.isDown(a));
-    const up   = all.filter(a => !this.isDown(a));
-    // Sort up by fail count (least fails first)
-    up.sort((a,b) => this.health[a].fails - this.health[b].fails);
-    return [...up, ...down]; // try down ones last (cooldown may have expired)
-  },
-
-  statusLine() {
-    return Object.entries(this.health).map(([api, h]) => {
-      const down = this.isDown(api);
-      const icon = down ? '🔴' : h.fails > 0 ? '🟡' : '🟢';
-      return `${icon}${api}(W:${h.wins}/F:${h.fails})`;
-    }).join(' ');
-  }
-};
-
 async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
   const errLog = [];
-  const orderedAPIs = _API.orderedAPIs();
-  console.log('[AutoFallback] API order:', orderedAPIs, '|', _API.statusLine());
 
-  for (const api of orderedAPIs) {
-    const isDown = _API.isDown(api);
-
-    // ── GEMINI ────────────────────────────────────────────
-    if (api === 'gemini') {
-      const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
-      for (const model of gmModels) {
-        try {
-          console.log('[T1] Gemini:', model, isDown ? '(cooldown—trying anyway)' : '');
-          const r = await callGeminiModel(userContent, model, onChunk);
-          if (r && r.trim()) {
-            _API.recordWin('gemini', model);
-            console.log('[T1] ✅ Gemini success');
-            return r;
-          }
-        } catch(e) {
-          console.warn('[T1] Gemini failed:', model, e.message);
-          errLog.push('Gemini('+model+'): '+e.message);
-          _API.recordFail('gemini', model, e.message);
-        }
-      }
-    }
-
-    // ── OPENROUTER ────────────────────────────────────────
-    if (api === 'openrouter') {
-      const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
-      for (const model of orModels) {
-        try {
-          console.log('[T2] OpenRouter:', model, isDown ? '(cooldown—trying anyway)' : '');
-          const r = await callOpenRouterModel(userContent, model, onChunk);
-          if (r && r.trim()) {
-            _API.recordWin('openrouter', model);
-            console.log('[T2] ✅ OpenRouter success');
-            return r;
-          }
-        } catch(e) {
-          console.warn('[T2] OpenRouter failed:', model, e.message);
-          errLog.push('OpenRouter('+model+'): '+e.message);
-          _API.recordFail('openrouter', model, e.message);
-        }
-      }
-    }
-
-    // ── NVIDIA ────────────────────────────────────────────
-    if (api === 'nvidia') {
-      const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
-      let lastErr;
-      for (const model of nvModels) {
-        try {
-          console.log('[T3] NVIDIA:', model, isDown ? '(cooldown—trying anyway)' : '');
-          const r = await callNvidiaNIM(userContent, model, onChunk);
-          if (r && r.trim()) {
-            _API.recordWin('nvidia', model);
-            console.log('[T3] ✅ NVIDIA success');
-            return r;
-          }
-        } catch(e) {
-          console.warn('[T3] NVIDIA failed:', model, e.message);
-          errLog.push('NVIDIA('+model+'): '+e.message);
-          _API.recordFail('nvidia', model, e.message);
-          lastErr = e;
-        }
-      }
-    }
+  // ── TIER 1: GEMINI (fastest, direct, free) ──────────
+  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
+  let lastErr;
+  for(const model of gmModels){
+    try{
+      console.log('[T1] Gemini:', model);
+      const r = await callGeminiModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); return r; }
+    } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; }
   }
 
-  const finalErr = new Error('ALL_APIS_FAILED');
+  // ── TIER 2: OPENROUTER (free auto router) ───────────
+  console.warn('[T2] Gemini failed → OpenRouter...');
+  const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
+  for(const model of orModels){
+    try{
+      console.log('[T2] OpenRouter:', model);
+      const r = await callOpenRouterModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); return r; }
+    } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); }
+  }
+
+  // ── TIER 3: NVIDIA (last resort) ────────────────────
+  console.warn('[T3] OpenRouter failed → NVIDIA...');
+  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
+  for(const model of nvModels){
+    try{
+      console.log('[T3] NVIDIA:', model);
+      const r = await callNvidiaNIM(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); return r; }
+    } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; }
+  }
+
+  const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
   finalErr.detailLog = errLog.join(' | ');
   throw finalErr;
 }
@@ -2350,7 +2130,6 @@ async function callOpenRouter(userContent, model){ return await callOpenRouterMo
 
 // ── SOLVE ──────────────────────────────────────────────
 async function solve(){
-  _askNotifPermission(); // Ask for notif permission on first solve
   const s=S[lang];
   const qt=document.getElementById('qt').value.trim();
   const qc=document.getElementById('qc').value.trim();
@@ -2360,7 +2139,6 @@ async function solve(){
 
   loading=true; setSt('');
   document.getElementById('go-btn').disabled=true;
-  const sb=document.getElementById('send-btn'); if(sb) sb.disabled=true;
   // loading-wrap hidden (thinking shown in chat now)
   document.getElementById('welcome').style.display='none';
 
@@ -2375,7 +2153,7 @@ async function solve(){
   ];
   if(harmPatterns.some(re=>re.test(qt+' '+qc))){
     loading=false;
-    document.getElementById('go-btn').disabled=false; const _sb=document.getElementById('send-btn'); if(_sb) _sb.disabled=false;
+    document.getElementById('go-btn').disabled=false;
     const id='id-'+Date.now();
     appendStreamCard(id, displayQ);
     const bodyEl=document.getElementById(id+'-body');
@@ -2404,14 +2182,12 @@ ${extendedRule}
 RESPONSE FORMAT RULES (follow strictly):
 - NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
 - DO NOT use any emojis anywhere in your response. No emojis at all.
-- DO NOT create any table, grid, two-column, or side-by-side layout. NEVER put key and value next to each other horizontally.
 - FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features.
 - ANY math/calculation → show each step on new line in <div class="step">, final answer bold. EXACTLY like:
 <div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
 - For algebra/equation → same format, each line one operation, last line Answer bold.
-- THEORY/CONCEPT/GK → Use <div class="step"><strong>[Topic Name]</strong><br>explanation on next line...</div> then bullet points. Each point on its OWN line using &lt;br&gt; or &lt;li&gt;. NO horizontal splitting.
+- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>[Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
 - LANGUAGE/GRAMMAR → <div class="step">explanation</div> with examples as bullets.
-- EVERY piece of information goes TOP-TO-BOTTOM, never left-to-right side by side.
 ${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
 - OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
 
@@ -2550,7 +2326,7 @@ Now begin:`;
       ${steps.map((s,i)=>`
       <div id="${thinkId}-step-${i}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:${i===0?'rgba(79,70,229,.15)':'rgba(255,255,255,.02)'};border:1px solid ${i===0?'rgba(99,102,241,.35)':'rgba(255,255,255,.04)'};transition:all .5s cubic-bezier(.2,.8,.2,1)">
         <div id="${thinkId}-dot-${i}" style="width:22px;height:22px;border-radius:6px;background:${i===0?'linear-gradient(135deg,#4f46e5,#7c3aed)':'rgba(255,255,255,.05)'};border:1px solid ${i===0?'rgba(99,102,241,.6)':'rgba(255,255,255,.08)'};display:flex;align-items:center;justify-content:center;font-size:.58rem;flex-shrink:0;transition:all .5s;color:${i===0?'#fff':'rgba(148,163,184,.4)'};font-weight:800;font-family:'Azeret Mono',monospace">${i===0?'▶':'0'+(i+1)}</div>
-        <span style="font-size:.78rem;font-family:'Outfit',sans-serif;color:${i===0?'rgba(226,232,240,.9)':'rgba(148,163,184,.4)'};font-weight:${i===0?'600':'400'};transition:all .5s;letter-spacing:.2px">${s}</span>
+        <span style="font-size:.78rem;font-family:'Outfit',sans-serif;color:${i===0?'rgba(226,232,240,.9)':'rgba(148,163,184,.4)'};font-weight:${i===0?'600':'400'};transition:all .5s;letter-spacing:.2px">${s.text}</span>
         ${i===0?`<div style="margin-left:auto;display:flex;gap:3px">${[0,1,2].map(j=>`<div style="width:3px;height:3px;border-radius:50%;background:#818cf8;animation:dotBounce 1.2s ease infinite;animation-delay:${j*0.2}s"></div>`).join('')}</div>`:''}
       </div>`).join('')}
     </div>
@@ -2753,56 +2529,14 @@ Now begin:`;
   }catch(e){
     console.error('All APIs failed:',e);
     const _errQ = document.getElementById('qt') ? document.getElementById('qt').value.trim() : '';
-    const isNetErr = e && (e.message?.includes('fetch')||e.message?.includes('network')||e.message?.includes('Failed to fetch')||!navigator.onLine);
-    const _detail = e && e.detailLog ? `<details style="margin-top:8px"><summary style="font-size:.68rem;color:#94a3b8;cursor:pointer">Details</summary><div style="font-size:.65rem;color:#94a3b8;margin-top:6px;word-break:break-all;background:rgba(0,0,0,.2);padding:8px;border-radius:8px">${e.detailLog}</div></details>` : '';
-
-    // Count fails this session + fire notifications
-    const failCount = logApiFail('solve', e?.message||'', isNetErr);
-
+    const _detail = e && e.detailLog ? `<div style="font-size:.7rem;color:#94a3b8;margin-top:8px;word-break:break-all">${e.detailLog}</div>` : '';
     if(bodyEl) bodyEl.innerHTML = lang==='hi'
-      ? `<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">
-           <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25)">
-             <span style="font-size:1.5rem">😔</span>
-             <div>
-               <div style="color:#f87171;font-weight:700;font-size:.9rem">जवाब नहीं मिला</div>
-               <div style="color:#94a3b8;font-size:.75rem;margin-top:3px">${isNetErr?'📡 इंटरनेट कनेक्शन चेक करो':'🔁 सभी API बंद हैं, थोड़ी देर बाद try करो'}</div>
-             </div>
-           </div>
-           <div style="display:flex;gap:8px">
-             <button onclick="document.getElementById('qt').value=${JSON.stringify(_errQ)};this.closest('.ai-card').style.display='none';solve();"
-               style="flex:1;padding:10px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-               🔄 फिर से कोशिश करें
-             </button>
-             <button onclick="this.parentElement.parentElement.parentElement.parentElement.style.display='none'"
-               style="padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#94a3b8;font-size:.82rem;font-weight:700;cursor:pointer">
-               ✕
-             </button>
-           </div>
-           ${failCount>=2?`<div style="font-size:.7rem;color:#94a3b8;text-align:center;padding:4px 0">⚠️ ${failCount} baar fail hua — thodi der baad try karo ya internet check karo</div>`:''}
-           ${_detail}
-         </div>`
-      : `<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">
-           <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25)">
-             <span style="font-size:1.5rem">😔</span>
-             <div>
-               <div style="color:#f87171;font-weight:700;font-size:.9rem">Couldn't get answer</div>
-               <div style="color:#94a3b8;font-size:.75rem;margin-top:3px">${isNetErr?'📡 Check your internet connection':'🔁 All APIs busy — please try again later'}</div>
-             </div>
-           </div>
-           <div style="display:flex;gap:8px">
-             <button onclick="document.getElementById('qt').value=${JSON.stringify(_errQ)};this.closest('.ai-card').style.display='none';solve();"
-               style="flex:1;padding:10px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-               🔄 Try Again
-             </button>
-             <button onclick="this.parentElement.parentElement.parentElement.parentElement.style.display='none'"
-               style="padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#94a3b8;font-size:.82rem;font-weight:700;cursor:pointer">
-               ✕
-             </button>
-           </div>
-           ${failCount>=2?`<div style="font-size:.7rem;color:#94a3b8;text-align:center;padding:4px 0">⚠️ Failed ${failCount} times — wait a bit or check internet</div>`:''}
-           ${_detail}
-         </div>`;
-
+      ? `<div style="color:#f87171">❌ जवाब नहीं मिला — इंटरनेट चेक करें या फिर से कोशिश करें</div>${_detail}
+         <button onclick="document.getElementById('qt').value='${_errQ.replace(/'/g,"\'")}';this.closest('.ai-card').style.display='none';solve();" 
+           style="margin-top:10px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">🔄 फिर से कोशिश करें</button>`
+      : `<div style="color:#f87171">❌ Could not get answer — Check internet & try again</div>${_detail}
+         <button onclick="document.getElementById('qt').value='${_errQ.replace(/'/g,"\'")}';this.closest('.ai-card').style.display='none';solve();" 
+           style="margin-top:10px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">🔄 Try Again</button>`;
     setSt('', false);
   }finally{
     // Always show card (even on error)
@@ -2812,7 +2546,7 @@ Now begin:`;
     const _think = document.getElementById(id+'-think');
     if(_think) _think.remove();
     loading=false;
-    document.getElementById('go-btn').disabled=false; const _sb=document.getElementById('send-btn'); if(_sb) _sb.disabled=false;
+    document.getElementById('go-btn').disabled=false;
     // loading-wrap off
   }
 }
@@ -4335,272 +4069,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-
-// ══════════════════════════════════════════════════════
-//  🛡️  SELF-HEALING ENGINE  (AI Auto-Fix System)
-// ══════════════════════════════════════════════════════
-const _SH = {
-  queue: [],          // pending errors to fix
-  fixed: {},          // fnName → fixed code (cache)
-  busy: false,        // one fix at a time
-  count: 0,           // total fixes this session
-  log: [],            // fix history
-
-  // Extract function source from page JS
-  extractFn(name) {
-    try {
-      const fn = window[name];
-      if (typeof fn === 'function') return fn.toString();
-    } catch(e) {}
-    // fallback: scan script tags
-    const scripts = document.querySelectorAll('script:not([src])');
-    for (const s of scripts) {
-      const src = s.textContent;
-      // match: function name(...) { or const/let/var name = function/async
-      const patterns = [
-        new RegExp(`((?:async\\s+)?function\\s+${name}\\s*\\([^)]*\\)\\s*\\{[\\s\\S]*?\\n\\})`, 'm'),
-        new RegExp(`((?:const|let|var)\\s+${name}\\s*=\\s*(?:async\\s+)?function[\\s\\S]*?\\n\\};)`, 'm'),
-        new RegExp(`((?:const|let|var)\\s+${name}\\s*=\\s*(?:async\\s+)?\\([^)]*\\)\\s*=>\\s*\\{[\\s\\S]*?\\n\\};)`, 'm'),
-      ];
-      for (const re of patterns) {
-        const m = src.match(re);
-        if (m) return m[1];
-      }
-    }
-    return null;
-  },
-
-  // Patch the function live in window scope
-  patchFn(name, newCode) {
-    try {
-      // eval in global scope
-      const patched = (new Function(`return (${newCode})`))();
-      if (typeof patched === 'function') {
-        window[name] = patched;
-        return true;
-      }
-    } catch(e) {
-      console.warn('[AutoFix] patch failed:', e);
-    }
-    return false;
-  },
-
-  // Silent — no UI shown, only console log
-  showBadge(fnName) {
-    console.log(`[AutoFix] 🛡️ Fixed: ${fnName} (total: ${_SH.count})`);
-  },
-
-  // Silent no-op
-  showLog() {},
-
-  // Core: ask Claude to fix a broken function
-  async fixWithAI(fnName, errorMsg, errorStack) {
-    const fnSource = _SH.extractFn(fnName);
-    if (!fnSource) return false;
-
-    // Don't re-fix what's already been fixed
-    if (_SH.fixed[fnName]) {
-      _SH.patchFn(fnName, _SH.fixed[fnName]);
-      return true;
-    }
-
-    const prompt = `You are a JavaScript auto-repair AI for a single-page student homework app (AI Solving Math). Fix the broken function below.
-
-APP CONTEXT: This is a single HTML file app with features — AI question solving (Gemini/OpenRouter/NVIDIA APIs), quiz system, XP/streak gamification, guild/leaderboard (JSONBin), history panel, voice input, image upload, MathJax rendering, bilingual Hindi/English support.
-
-FUNCTION NAME: ${fnName}
-ERROR: ${errorMsg}
-STACK: ${(errorStack||'').split('\n').slice(0,4).join(' | ')}
-
-BROKEN CODE:
-\`\`\`javascript
-${fnSource}
-\`\`\`
-
-RULES:
-1. Return ONLY the fixed function code — no explanation, no markdown, no backticks
-2. Keep the same function name and signature
-3. Fix only what's needed — minimal change
-4. Common fixes: missing null/undefined checks, wrong DOM element IDs, missing try/catch, undefined variables, async/await issues, JSON parse errors, localStorage access errors
-5. If a DOM element might not exist — add a null guard before accessing it
-6. Start your response directly with: function ${fnName}( OR async function ${fnName}(`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 2000,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      const data = await res.json();
-      const fixedCode = data?.content?.[0]?.text?.trim();
-      if (!fixedCode || fixedCode.length < 20) return false;
-
-      const ok = _SH.patchFn(fnName, fixedCode);
-      if (ok) {
-        _SH.fixed[fnName] = fixedCode;
-        _SH.count++;
-        _SH.log.push({
-          fn: fnName,
-          error: errorMsg.substring(0, 80),
-          fix: 'AI ne live patch kar diya ✅',
-          time: new Date().toLocaleTimeString()
-        });
-        _SH.showBadge(fnName);
-        console.log(`[AutoFix] ✅ ${fnName} fixed & patched live`);
-        return true;
-      }
-    } catch(e) {
-      console.warn('[AutoFix] AI call failed:', e);
-    }
-    return false;
-  },
-
-  // Process error queue one-by-one
-  async process() {
-    if (_SH.busy || _SH.queue.length === 0) return;
-    _SH.busy = true;
-    const { fnName, errorMsg, stack } = _SH.queue.shift();
-    console.log(`[AutoFix] 🔧 Fixing: ${fnName} — ${errorMsg}`);
-    await _SH.fixWithAI(fnName, errorMsg, stack);
-    _SH.busy = false;
-    if (_SH.queue.length > 0) setTimeout(() => _SH.process(), 500);
-  },
-
-  // Push error into queue
-  push(fnName, errorMsg, stack) {
-    // Deduplicate
-    if (_SH.queue.some(q => q.fnName === fnName)) return;
-    if (_SH.fixed[fnName]) {
-      // Already have a fix, re-apply silently
-      _SH.patchFn(fnName, _SH.fixed[fnName]);
-      return;
-    }
-    _SH.queue.push({ fnName, errorMsg, stack });
-    _SH.process();
-  }
-};
-
-// Extract function name from error stack
-function _shParseFnName(stack) {
-  if (!stack) return null;
-  const _shIgnore = new Set([
-    '_shParseFnName','_SH','push','process','fixWithAI','patchFn','extractFn',
-    'showBadge','showLog','anonymous','Promise','setTimeout','setInterval',
-    'eval','Function','forEach','map','filter','reduce','then','catch',
-    'addEventListener','dispatchEvent','_shWrap'
-  ]);
-  const lines = stack.split('\n');
-  for (const line of lines) {
-    // Match "at functionName (" or "at Object.functionName ("
-    const m = line.match(/at (?:Object\.)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*[\(\[]/);
-    if (m && m[1] && !_shIgnore.has(m[1])) {
-      // Must be a real function in window scope
-      if (typeof window[m[1]] === 'function') return m[1];
-    }
-  }
-  return null;
-}
-
-// ── GLOBAL ERROR INTERCEPTORS ──────────────────────────
-window.addEventListener('error', e => {
-  const fnName = _shParseFnName(e.error?.stack || '');
-  if (fnName && typeof window[fnName] === 'function') {
-    _SH.push(fnName, e.message || 'Unknown error', e.error?.stack || '');
-  }
-  // Don't suppress — let normal handling continue
-});
-
-window.addEventListener('unhandledrejection', e => {
-  const err = e.reason;
-  const msg = err?.message || String(err);
-  const stack = err?.stack || '';
-  const fnName = _shParseFnName(stack);
-  if (fnName && typeof window[fnName] === 'function') {
-    _SH.push(fnName, msg, stack);
-  }
-});
-
-// Wrap any known critical functions with auto-retry on error
-function _shWrap(fnName) {
-  const orig = window[fnName];
-  if (typeof orig !== 'function') return;
-  window[fnName] = async function(...args) {
-    try {
-      return await orig.apply(this, args);
-    } catch(e) {
-      console.warn(`[AutoFix] Caught in ${fnName}:`, e.message);
-      _SH.push(fnName, e.message, e.stack || '');
-      // Wait for fix attempt, then retry once
-      await new Promise(r => setTimeout(r, 3500));
-      const patched = window[fnName];
-      if (patched !== window[fnName] || _SH.fixed[fnName]) {
-        try { return await patched.apply(this, args); } catch(_) {}
-      }
-      throw e; // re-throw if still broken
-    }
-  };
-}
-
-// ── ALL APP FUNCTIONS WRAPPED ──────────────────────────
-// API layer
-['callNvidiaNIM','callOpenRouterModel','callGeminiModel','callWithAutoFallback',
- 'callGeminiDirect','callOpenRouter','readSSEStream','fetchWithTimeout',
- 'generateImage','generateAndShowImage'].forEach(_shWrap);
-
-// Core solve + rendering
-['solve','appendStreamCard','appendChat','cleanHtml','injectSamjhaoButtons',
- 'toggleSamjhao','renderGraph','generateDiagram','needsDiagram','needsGraph',
- 'parseGraphFunction','safeMathEval','buildMessages'].forEach(_shWrap);
-
-// State + progress
-['saveState','loadState','updateProgress','updateStatsUI','updateXpBar',
- 'updateStreakCheck','updateHeaderName','addXP','showXpToast'].forEach(_shWrap);
-
-// Quiz system
-['openQuiz','loadQuizQuestion','answerQuiz','nextQuizQ','showQuizResult',
- 'playAgainQuiz','prepareQuizQuestions','preloadQuizPool','fetchQuizBatch',
- 'fetchQuizBatchBilingual','fetchQuizBatchNvidia','fetchQuizBatchNvidiaLang',
- 'fetchAndAppendMore','pick10FromPool'].forEach(_shWrap);
-
-// UI + mode switching
-['applyLang','renderChips','switchLang','switchMode','setAnswerMode',
- 'setChip','setSt','triggerGallery','openCamera','handleImg','handleDrop',
- 'removeImg','toggleVoice','startVoice','stopVoice','toggleLike','feedback',
- 'copyAns','shareAns'].forEach(_shWrap);
-
-// History panel
-['renderHistory','loadHistItem','clearHistory','openPanel','closePanel'].forEach(_shWrap);
-
-// Onboarding + profile
-['checkOnboarding','checkUrlGuildJoin','showNameOnboardIfNeeded','finishOnboard',
- 'pickStartLang','buildOnboardAvatars','pickOnboardAvatar','onboardNameCheck',
- 'openProfileMenu','closeProfileMenu','openChangeName','closeChangeName',
- 'saveChangedName','openChangeAvatar','closeChangeAvatar','pickChangeAvatar',
- 'saveChangedAvatar'].forEach(_shWrap);
-
-// Guild system
-['openGuild','closeGuild','switchGuildTab','updateCreateTabVisibility',
- 'renderGuildModal','renderMyGuild','selectEmoji','makeLeader',
- 'guildFetchAll','guildSaveAll','guildSyncMine','loadGuildRankings',
- 'rosterFetchAll','rosterSaveAll','rosterSyncMe','rosterRemoveMe',
- 'rosterRemoveGuild','rosterMakeLeader','generateCode','createGuild',
- 'joinGuild','joinGuildWithData','leaveGuild','guildRemove',
- 'openEditGuild','closeEditGuild','selectEditEmoji','saveEditedGuild',
- 'copyInviteCode','shareGuild','showShareLinkPopup','copyShareLink',
- 'nativeShare','showGuildToast'].forEach(_shWrap);
-
-// Leaderboard
-['lbFetchAll','lbSaveAll'].forEach(_shWrap);
-
-// AutoFix badge CSS removed — runs silently in background
-
-console.log('[AutoFix] 🛡️ Self-Healing Engine active');
-// ══════════════════════════════════════════════════════
-
+// ── BOOT ──────────────────────────────────────════════
 loadState();
 applyLang();
 updateProgress();
