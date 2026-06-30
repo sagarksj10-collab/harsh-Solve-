@@ -1935,6 +1935,44 @@ async function readSSEStream(response, onChunk){
 // 🟢 TIER 1 — NVIDIA NIM STREAMING
 // ══════════════════════════════════════════════════════
 // ── Timeout-wrapped fetch: agar response na aaye to abort karke turant next tier try ho ──
+// ══════════════════════════════════════════════════════
+//  📊 API HEALTH TRACKER — dead APIs ko temporarily skip karo
+// ══════════════════════════════════════════════════════
+const _API = {
+  MAX_FAILS: 3,
+  COOLDOWN_MS: 5 * 60 * 1000, // 5 min
+  health: {
+    gemini:     { fails: 0, wins: 0, cooldownUntil: 0, lastFail: 0 },
+    openrouter: { fails: 0, wins: 0, cooldownUntil: 0, lastFail: 0 },
+    nvidia:     { fails: 0, wins: 0, cooldownUntil: 0, lastFail: 0 }
+  },
+  isDown(api) {
+    const h = this.health[api];
+    return h && h.cooldownUntil > Date.now();
+  },
+  recordWin(api) {
+    const h = this.health[api];
+    if (!h) return;
+    h.wins++;
+    h.fails = 0; // reset on success
+    h.cooldownUntil = 0;
+  },
+  recordFail(api, model, errMsg) {
+    const h = this.health[api];
+    if (!h) return;
+    h.fails++;
+    h.lastFail = Date.now();
+    console.warn(`[APIHealth] ❌ ${api}(${model}) fail #${h.fails}: ${errMsg}`);
+    if (h.fails >= this.MAX_FAILS) {
+      h.cooldownUntil = Date.now() + this.COOLDOWN_MS;
+      console.warn(`[APIHealth] 🔴 ${api} — ${this.MAX_FAILS} fails, cooling down 5 min`);
+      if (typeof _sendAdminNotif === 'function') {
+        _sendAdminNotif(api, h.fails, errMsg, errMsg?.includes('fetch')||errMsg?.includes('network'));
+      }
+    }
+  }
+};
+
 async function fetchWithTimeout(url, options, timeoutMs=3000){
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
@@ -1952,7 +1990,7 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
     body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 8000 : 3000, temperature:0.3, stream: streaming})
-  }, isImg ? 25000 : 3000);
+  }, isImg ? 25000 : 10000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -1988,7 +2026,7 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'X-Title':'AI Solving Math'
         },
         body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 8000 : 3000, stream: true})
-      }, isImgOR ? 25000 : 5000);
+      }, isImgOR ? 25000 : 12000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
@@ -2076,34 +2114,46 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
   // ── TIER 1: GEMINI (fastest, direct, free) ──────────
   const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
   let lastErr;
-  for(const model of gmModels){
-    try{
-      console.log('[T1] Gemini:', model);
-      const r = await callGeminiModel(userContent, model, onChunk);
-      if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); return r; }
-    } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; }
+  if (!_API.isDown('gemini')) {
+    for(const model of gmModels){
+      try{
+        console.log('[T1] Gemini:', model);
+        const r = await callGeminiModel(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); _API.recordWin('gemini'); return r; }
+      } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; _API.recordFail('gemini', model, e.message); }
+    }
+  } else {
+    console.log('[T1] Gemini in cooldown, skipping...');
   }
 
   // ── TIER 2: OPENROUTER (free auto router) ───────────
-  console.warn('[T2] Gemini failed → OpenRouter...');
+  console.warn('[T2] Trying OpenRouter...');
   const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
-  for(const model of orModels){
-    try{
-      console.log('[T2] OpenRouter:', model);
-      const r = await callOpenRouterModel(userContent, model, onChunk);
-      if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); return r; }
-    } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); }
+  if (!_API.isDown('openrouter')) {
+    for(const model of orModels){
+      try{
+        console.log('[T2] OpenRouter:', model);
+        const r = await callOpenRouterModel(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); _API.recordWin('openrouter'); return r; }
+      } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); _API.recordFail('openrouter', model, e.message); }
+    }
+  } else {
+    console.log('[T2] OpenRouter in cooldown, skipping...');
   }
 
   // ── TIER 3: NVIDIA (last resort) ────────────────────
-  console.warn('[T3] OpenRouter failed → NVIDIA...');
+  console.warn('[T3] Trying NVIDIA...');
   const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
-  for(const model of nvModels){
-    try{
-      console.log('[T3] NVIDIA:', model);
-      const r = await callNvidiaNIM(userContent, model, onChunk);
-      if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); return r; }
-    } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; }
+  if (!_API.isDown('nvidia')) {
+    for(const model of nvModels){
+      try{
+        console.log('[T3] NVIDIA:', model);
+        const r = await callNvidiaNIM(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); _API.recordWin('nvidia'); return r; }
+      } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; _API.recordFail('nvidia', model, e.message); }
+    }
+  } else {
+    console.log('[T3] NVIDIA in cooldown, skipping...');
   }
 
   const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
