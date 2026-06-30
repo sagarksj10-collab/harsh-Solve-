@@ -966,6 +966,9 @@ function getNextGeminiKey(){
   return key;
 }
 
+// ── Placeholder key check — agar GitHub Actions ne key inject nahi ki to '__XXX__' wahi reh jaata hai ──
+function isValidKey(k){ return !!(k && !k.startsWith('__') && k.length > 10); }
+
 // Internal aliases
 let _GEMINI_KEY = GEMINI_KEY;
 let _keysFetched = true;
@@ -1983,7 +1986,17 @@ async function fetchWithTimeout(url, options, timeoutMs=3000){
   }
 }
 
+// ── Kabhi kabhi NVIDIA guard-model "unsafe" JSON return karta hai asli answer ki jagah ──
+// ── Isko detect karke fail treat karo taaki next tier (fallback) try ho ──
+function isSafetyBlockResponse(text){
+  if(!text) return false;
+  const t = text.trim();
+  if(t.length > 300) return false; // asli answers lambe hote hain, safety JSON chhota
+  return /user\s*safety/i.test(t) && /(unsafe|safe)/i.test(t) && /safety\s*categor/i.test(t);
+}
+
 async function callNvidiaNIM(userContent, model, onChunk=null){
+  if(!isValidKey(NVIDIA_KEY)) throw new Error('NV_NO_KEY');
   const streaming = !!onChunk;
   const isImg = Array.isArray(userContent);
   const res = await fetchWithTimeout(NVIDIA_BASE + '/chat/completions', {
@@ -1999,11 +2012,13 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
     let full = '';
     await readSSEStream(res, chunk => { full += chunk; onChunk(chunk); });
     if(!full.trim()) throw new Error('NV_EMPTY');
+    if(isSafetyBlockResponse(full)) throw new Error('NV_SAFETY_BLOCK');
     return full;
   }
   const data = await res.json().catch(()=>({}));
   const text = data.choices?.[0]?.message?.content || '';
   if(!text.trim()) throw new Error('NV_EMPTY');
+  if(isSafetyBlockResponse(text)) throw new Error('NV_SAFETY_BLOCK');
   return text;
 }
 
@@ -2012,7 +2027,8 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
 // ══════════════════════════════════════════════════════
 async function callOpenRouterModel(userContent, model, onChunk=null){
   const streaming = !!onChunk;
-  const keys = [OPENROUTER_KEY, OPENROUTER_KEY2].filter(k => k && k.length > 10);
+  const keys = [OPENROUTER_KEY, OPENROUTER_KEY2].filter(k => isValidKey(k));
+  if(keys.length === 0) throw new Error('OR_NO_KEY');
   let lastErr = null;
   for(const key of keys){
     try{
@@ -2032,12 +2048,13 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
         let full = '';
         await readSSEStream(res, chunk => { full += chunk; onChunk(chunk); });
         if(!full.trim()) throw new Error('OR_EMPTY');
+        if(isSafetyBlockResponse(full)) throw new Error('OR_SAFETY_BLOCK');
         return full;
       }
       const data = await res.json().catch(()=>({}));
       if(data.error){ lastErr=new Error('OR_ERR'); continue; }
       const text = data.choices?.[0]?.message?.content || '';
-      if(text.trim()) return text;
+      if(text.trim() && !isSafetyBlockResponse(text)) return text;
       lastErr = new Error('OR_EMPTY');
     } catch(e){ lastErr = e; }
   }
@@ -2096,11 +2113,13 @@ async function callGeminiModel(userContent, model, onChunk=null){
       }
     }
     if(!full.trim()) throw new Error('GM_EMPTY');
+    if(isSafetyBlockResponse(full)) throw new Error('GM_SAFETY_BLOCK');
     return full;
   }
   const data = await res.json().catch(()=>({}));
   const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
   if(!text.trim()) throw new Error('GM_EMPTY');
+  if(isSafetyBlockResponse(text)) throw new Error('GM_SAFETY_BLOCK');
   return text;
 }
 
