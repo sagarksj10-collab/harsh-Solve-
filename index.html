@@ -1167,7 +1167,7 @@ const S={
     quizComplete:'क्विज़ पूरा हुआ!',quizScore:'आपका स्कोर:',quizAvail:'सवाल उपलब्ध हैं ✨',
     quizShabad:'शाबाश! बहुत अच्छा! 🌟',quizAccha:'अच्छा किया! और अभ्यास करें 💪',quizTry:'कोई बात नहीं, फिर से कोशिश करें! 🔄',
     quizWrong:'❌ गलत! सही जवाब:',quizResults:'🏆 परिणाम',
-    samjhaoBtn:'🤔 क्यों? (समझाएं)',samjhaoLoading:'समझा रहा हूँ...',samjhaoTitle:'💡 सिद्धांत समझें',
+    samjhaoBtn:'🤔 क्यों?',samjhaoLoading:'समझा रहा हूँ...',samjhaoTitle:'💡 सिद्धांत समझें',
     samjhaoFormula:'📐 फॉर्मूला / नियम:',samjhaoWhy:'🧠 ऐसा क्यों है?',samjhaoExample:'✏️ उदाहरण:'
   },
   en:{flag:'🇬🇧',code:'EN',gr:'Online • English',tabT:'Text',tabI:'Image',tabV:'Voice',
@@ -1189,7 +1189,7 @@ const S={
     quizComplete:'Quiz Complete!',quizScore:'Your score:',quizAvail:'questions available ✨',
     quizShabad:'Excellent! Outstanding! 🌟',quizAccha:'Good job! Keep practicing 💪',quizTry:'No worries, try again! 🔄',
     quizWrong:'❌ Wrong! Correct answer:',quizResults:'🏆 Results',
-    samjhaoBtn:'🤔 Why? (Explain)',samjhaoLoading:'Explaining...',samjhaoTitle:'💡 Understand the Concept',
+    samjhaoBtn:'🤔 Why?',samjhaoLoading:'Explaining...',samjhaoTitle:'💡 Understand the Concept',
     samjhaoFormula:'📐 Formula / Rule:',samjhaoWhy:'🧠 Why this works:',samjhaoExample:'✏️ Example:'
   }
 };
@@ -3071,11 +3071,6 @@ function appendChat(id,q,html){
         </div>
       </div>
       <div class="ai-body" id="${id}-body">${enrichedHtml}</div>
-      <div class="feedback-row">
-        <span class="fb-lbl">Helpful tha?</span>
-        <div class="fb-btn" id="fb-up-${id}" onclick="feedback('${id}','up')">👍</div>
-        <div class="fb-btn" id="fb-dn-${id}" onclick="feedback('${id}','down')">👎</div>
-      </div>
     </div>`;
   area.insertBefore(div,area.firstChild);
   setTimeout(()=>div.scrollIntoView({behavior:'smooth',block:'start'}),100);
@@ -3106,11 +3101,6 @@ function appendStreamCard(id, q){
         </div>
       </div>
       <div class="ai-body" id="${id}-body"></div>
-      <div class="feedback-row">
-        <span class="fb-lbl">Helpful tha?</span>
-        <div class="fb-btn" id="fb-up-${id}" onclick="feedback('${id}','up')">👍</div>
-        <div class="fb-btn" id="fb-dn-${id}" onclick="feedback('${id}','down')">👎</div>
-      </div>
     </div>`;
   area.insertBefore(div, area.firstChild);
   setTimeout(()=>div.scrollIntoView({behavior:'smooth', block:'start'}), 80);
