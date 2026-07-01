@@ -380,20 +380,7 @@ textarea::placeholder{color:var(--t3)}
 .ld-label{font-size:.75rem;color:var(--t2);font-weight:600;font-family:'Azeret Mono',monospace}
 
 /* SAMJHAO MUJHE */
-.samjhao-wrap{margin-top:8px}
-.samjhao-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:var(--c2);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
-.samjhao-btn:hover{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.4)}
-.samjhao-btn:active{transform:scale(.94)}
-.samjhao-btn.open{background:rgba(167,139,250,.2);border-color:var(--c2)}
-.samjhao-panel{display:none;margin-top:8px;border-radius:10px;background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(124,58,237,.06));border:1px solid rgba(167,139,250,.2);overflow:hidden;animation:fadeUp .25s ease}
-.samjhao-panel.show{display:block}
-.samjhao-loading{padding:14px;display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--t2);font-family:'Azeret Mono',monospace}
-.samjhao-loading .ld-spinner{width:18px;height:18px;border-width:2px}
-.samjhao-content{padding:14px}
-.samjhao-section{margin-bottom:12px}
-.samjhao-section:last-child{margin-bottom:0}
-.samjhao-label{font-size:.65rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;font-family:'Azeret Mono',monospace;color:var(--c2);margin-bottom:5px}
-.samjhao-text{font-size:.83rem;line-height:1.7;color:var(--t2);background:rgba(13,20,38,.6);border-radius:8px;padding:9px 12px;border:1px solid rgba(126,179,255,.07)}
+
 
 /* STUDY GUILD */
 .guild-modal{max-width:440px}
@@ -995,7 +982,6 @@ const NVIDIA_IMAGE_MODELS = [
 const OR_TEXT_MODELS = [
   'openrouter/free',              // auto best free model (text + image)
   'meta-llama/llama-3.3-70b-instruct:free',
-  'deepseek/deepseek-r1:free',
 ];
 
 // ── TIER 2 OPENROUTER: Free image models ─────────────
@@ -1166,9 +1152,7 @@ const S={
     quizClose:'बंद करें',quizNext:'आगे →',quizDone:'✓ हो गया',quizAgain:'🔄 फिर से खेलें',
     quizComplete:'क्विज़ पूरा हुआ!',quizScore:'आपका स्कोर:',quizAvail:'सवाल उपलब्ध हैं ✨',
     quizShabad:'शाबाश! बहुत अच्छा! 🌟',quizAccha:'अच्छा किया! और अभ्यास करें 💪',quizTry:'कोई बात नहीं, फिर से कोशिश करें! 🔄',
-    quizWrong:'❌ गलत! सही जवाब:',quizResults:'🏆 परिणाम',
-    samjhaoBtn:'🤔 क्यों?',samjhaoLoading:'समझा रहा हूँ...',samjhaoTitle:'💡 सिद्धांत समझें',
-    samjhaoFormula:'📐 फॉर्मूला / नियम:',samjhaoWhy:'🧠 ऐसा क्यों है?',samjhaoExample:'✏️ उदाहरण:'
+    quizWrong:'❌ गलत! सही जवाब:'
   },
   en:{flag:'🇬🇧',code:'EN',gr:'Online • English',tabT:'Text',tabI:'Image',tabV:'Voice',
     stxt:'Solve Now',utitle:'Upload Image',usub:'Tap or drag here',
@@ -1188,9 +1172,7 @@ const S={
     quizClose:'Close',quizNext:'Next →',quizDone:'✓ Done',quizAgain:'🔄 Play Again',
     quizComplete:'Quiz Complete!',quizScore:'Your score:',quizAvail:'questions available ✨',
     quizShabad:'Excellent! Outstanding! 🌟',quizAccha:'Good job! Keep practicing 💪',quizTry:'No worries, try again! 🔄',
-    quizWrong:'❌ Wrong! Correct answer:',quizResults:'🏆 Results',
-    samjhaoBtn:'🤔 Why?',samjhaoLoading:'Explaining...',samjhaoTitle:'💡 Understand the Concept',
-    samjhaoFormula:'📐 Formula / Rule:',samjhaoWhy:'🧠 Why this works:',samjhaoExample:'✏️ Example:'
+    quizWrong:'❌ Wrong! Correct answer:',quizResults:'🏆 Results'
   }
 };
 
@@ -1910,28 +1892,47 @@ function buildMessages(userContent){
 // ══════════════════════════════════════════════════════
 // 📡 SSE STREAM READER — har chunk ko real-time parse karo
 // ══════════════════════════════════════════════════════
-async function readSSEStream(response, onChunk){
+async function readSSEStream(response, onChunk, firstChunkTimeoutMs=8000){
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
-  while(true){
-    const {done, value} = await reader.read();
-    if(done) break;
-    buffer += decoder.decode(value, {stream:true});
-    const lines = buffer.split('\n');
-    buffer = lines.pop(); // incomplete line wapis buffer mein
-    for(const line of lines){
-      const trimmed = line.trim();
-      if(!trimmed || trimmed === 'data: [DONE]') continue;
-      if(trimmed.startsWith('data: ')){
-        try{
-          const json = JSON.parse(trimmed.slice(6));
-          const chunk = json.choices?.[0]?.delta?.content || '';
-          if(chunk) onChunk(chunk);
-        } catch(e){ /* incomplete JSON ignore */ }
+  let firstChunkReceived = false;
+
+  // Agar firstChunkTimeoutMs mein pehla chunk na aaye to abort
+  let timeoutId;
+  const firstChunkPromise = new Promise((_, reject)=>{
+    timeoutId = setTimeout(()=>{
+      if(!firstChunkReceived){
+        reader.cancel();
+        reject(new Error('SSE_FIRST_CHUNK_TIMEOUT'));
+      }
+    }, firstChunkTimeoutMs);
+  });
+
+  const readPromise = (async()=>{
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      if(!firstChunkReceived){ firstChunkReceived = true; clearTimeout(timeoutId); }
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // incomplete line wapis buffer mein
+      for(const line of lines){
+        const trimmed = line.trim();
+        if(!trimmed || trimmed === 'data: [DONE]') continue;
+        if(trimmed.startsWith('data: ')){
+          try{
+            const json = JSON.parse(trimmed.slice(6));
+            const chunk = json.choices?.[0]?.delta?.content || '';
+            if(chunk) onChunk(chunk);
+          } catch(e){ /* incomplete JSON ignore */ }
+        }
       }
     }
-  }
+    clearTimeout(timeoutId);
+  })();
+
+  await Promise.race([readPromise, firstChunkPromise]);
 }
 
 // ══════════════════════════════════════════════════════
@@ -2084,7 +2085,7 @@ async function callGeminiModel(userContent, model, onChunk=null){
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0.3}})
-  }, typeof userContent === 'string' ? 10000 : 30000);
+  }, typeof userContent === 'string' ? 20000 : 30000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -2094,24 +2095,34 @@ async function callGeminiModel(userContent, model, onChunk=null){
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '', full = '';
-    while(true){
-      const {done, value} = await reader.read();
-      if(done) break;
-      buffer += decoder.decode(value, {stream:true});
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for(const line of lines){
-        const trimmed = line.trim();
-        if(!trimmed || trimmed==='data: [DONE]') continue;
-        if(trimmed.startsWith('data: ')){
-          try{
-            const json = JSON.parse(trimmed.slice(6));
-            const chunk = json.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
-            if(chunk){ full += chunk; onChunk(chunk); }
-          } catch(e){}
+    let firstChunkReceived = false;
+    const firstChunkTimeout = 8000;
+    let timedOut = false;
+    const timer = setTimeout(()=>{
+      if(!firstChunkReceived){ timedOut = true; reader.cancel(); }
+    }, firstChunkTimeout);
+    try{
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        if(!firstChunkReceived){ firstChunkReceived = true; clearTimeout(timer); }
+        buffer += decoder.decode(value, {stream:true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for(const line of lines){
+          const trimmed = line.trim();
+          if(!trimmed || trimmed==='data: [DONE]') continue;
+          if(trimmed.startsWith('data: ')){
+            try{
+              const json = JSON.parse(trimmed.slice(6));
+              const chunk = json.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
+              if(chunk){ full += chunk; onChunk(chunk); }
+            } catch(e){}
+          }
         }
       }
-    }
+    } finally { clearTimeout(timer); }
+    if(timedOut) throw new Error('GM_FIRST_CHUNK_TIMEOUT');
     if(!full.trim()) throw new Error('GM_EMPTY');
     if(isSafetyBlockResponse(full)) throw new Error('GM_SAFETY_BLOCK');
     return full;
@@ -2705,109 +2716,10 @@ function cleanHtml(text){
 
 // ── SAMJHAO MUJHE ──────────────────────────────────────
 function injectSamjhaoButtons(html, cardId){
-  // After each <li> or .step, inject a samjhao button
-  const s=S[lang];
-  let stepIdx=0;
-  // Inject after </li>
-  html=html.replace(/<\/li>/g,()=>{
-    const sid=`${cardId}-s${stepIdx++}`;
-    return `</li><div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
-  });
-  // Inject after </div> that closes a .step
-  html=html.replace(/(<div class="step">[\s\S]*?<\/div>)/g,(match)=>{
-    const sid=`${cardId}-s${stepIdx++}`;
-    return `${match}<div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
-  });
+  // Samjhao buttons removed
   return html;
 }
 
-async function toggleSamjhao(sid, cardId){
-  const btn=document.getElementById('btn-'+sid);
-  const panel=document.getElementById('panel-'+sid);
-  if(!btn||!panel)return;
-  const s=S[lang];
-
-  // Toggle close if already open
-  if(panel.classList.contains('show')){
-    panel.classList.remove('show');
-    btn.classList.remove('open');
-    btn.textContent=s.samjhaoBtn;
-    return;
-  }
-
-  btn.classList.add('open');
-  btn.textContent=s.samjhaoLoading;
-  panel.classList.add('show');
-
-  // Already loaded — just show
-  if(panel.dataset.loaded==='1'){
-    btn.textContent=s.samjhaoBtn;
-    return;
-  }
-
-  panel.innerHTML=`<div class="samjhao-loading"><div class="ld-spinner"></div>${s.samjhaoLoading}</div>`;
-
-  // ── Robust step text extraction ──
-  const cardBody=document.getElementById(cardId+'-body');
-  const stepIdx=parseInt(sid.split('-s').pop())||0;
-  // querySelectorAll on li and .step — but exclude nested samjhao-wrap children
-  const stepEls=cardBody?Array.from(cardBody.querySelectorAll('li, .step')).filter(el=>!el.closest('.samjhao-wrap')):[];
-  const stepEl=stepEls[stepIdx]||stepEls[0];
-  // Get clean text — strip any samjhao button text inside
-  let stepText='';
-  if(stepEl){
-    const clone=stepEl.cloneNode(true);
-    clone.querySelectorAll('.samjhao-wrap').forEach(n=>n.remove());
-    stepText=(clone.innerText||clone.textContent||'').trim();
-  }
-
-  // ── Robust question extraction ──
-  // Walk up from cardBody → ai-card → parent div → user-bubble sibling
-  let question='';
-  try{
-    const aiCard=cardBody?.closest('.ai-card');
-    const wrapper=aiCard?.parentElement;
-    const userRow=wrapper?.querySelector('.user-bubble');
-    if(userRow) question=(userRow.innerText||userRow.textContent||'').trim();
-  }catch(_){}
-
-  const prompt=lang==='hi'
-    ?`छात्र को यह स्टेप समझाओ। केवल JSON दो, कुछ और नहीं। पूरा जवाब शुद्ध हिंदी (देवनागरी लिपि) में लिखो, Hinglish या Roman script में नहीं।
-सवाल: "${question}"
-स्टेप: "${stepText}"
-JSON format (no markdown, no extra text):
-{"formula":"यहाँ इस्तेमाल हुआ फॉर्मूला/नियम (1-2 लाइन, हिंदी में)","why":"यह स्टेप क्यों ज़रूरी है (2-3 लाइन, हिंदी में)","example":"एक और उदाहरण (1-2 लाइन, हिंदी में)"}`
-    :`Explain this step to a student. Return JSON only, nothing else.
-Question: "${question}"
-Step: "${stepText}"
-JSON format (no markdown, no extra text):
-{"formula":"Formula/Rule used here (1-2 lines)","why":"Why this step is needed (2-3 lines)","example":"One more similar example (1-2 lines)"}`;
-
-  try{
-    const raw=await callWithAutoFallback(prompt, false);
-    // Robust JSON extraction — find first { ... } block
-    const jsonMatch=raw.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('NO_JSON');
-    const data=JSON.parse(jsonMatch[0]);
-    panel.innerHTML=`
-      <div class="samjhao-content">
-        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoFormula}</div><div class="samjhao-text">${esc(data.formula||'—')}</div></div>
-        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoWhy}</div><div class="samjhao-text">${esc(data.why||'—')}</div></div>
-        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoExample}</div><div class="samjhao-text">${esc(data.example||'—')}</div></div>
-      </div>`;
-    panel.dataset.loaded='1';
-  }catch(err){
-    console.error('Samjhao error:',err);
-    panel.dataset.loaded='';
-    btn.classList.remove('open');
-    panel.classList.remove('show');
-    panel.innerHTML=`<div class="samjhao-loading" style="color:#f87171;cursor:pointer" onclick="toggleSamjhao('${sid}','${cardId}')">❌ Load nahi hua — Tap karke retry karo</div>`;
-    panel.classList.add('show');
-    btn.textContent=s.samjhaoBtn;
-    return;
-  }
-  btn.textContent=s.samjhaoBtn;
-}
 
 // ── SMART GRAPH ENGINE ──────────────────────────────────
 
@@ -4136,4 +4048,4 @@ checkOnboarding();
 setTimeout(()=>preloadQuizPool(), 3000); // Background mein AI quiz pool load karo
 </script>
 </body>
-</html>
+  </html>
