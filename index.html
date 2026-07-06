@@ -969,31 +969,32 @@ const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 // ── TIER 1 NVIDIA: Free text models ──────────────────
 const NVIDIA_MODELS = [
-  'meta/llama-3.1-8b-instruct',  // fastest & lightest
+  'meta/llama-3.1-8b-instruct',       // fastest text model
+  'meta/llama-3.3-70b-instruct',       // fallback text
 ];
 
-// ── TIER 1 NVIDIA: Free vision/image models ──────────
+// ── NVIDIA: Free vision/image models ──────────────────
 const NVIDIA_IMAGE_MODELS = [
   'meta/llama-3.2-11b-vision-instruct',
   'meta/llama-4-scout-17b-16e-instruct',
 ];
 
-// ── TIER 2 OPENROUTER: Auto free router (always valid) ──
+// ── OPENROUTER: Fast free text models ─────────────────
 const OR_TEXT_MODELS = [
-  'openrouter/free',              // auto best free model (text + image)
   'meta-llama/llama-3.3-70b-instruct:free',
+  'openrouter/free',
 ];
 
-// ── TIER 2 OPENROUTER: Free image models ─────────────
+// ── OPENROUTER: Free image models ─────────────────────
 const OR_IMAGE_MODELS = [
-  'openrouter/free',                               // auto selects best free vision model
-  'meta-llama/llama-3.2-11b-vision-instruct:free', // fallback vision model
-  'nvidia/nemotron-nano-12b-v2-vl:free',           // NVIDIA vision model (free)
+  'meta-llama/llama-3.2-11b-vision-instruct:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
+  'openrouter/free',
 ];
 
-// ── Gemini Models ──
-const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];       // text: fast & free
-const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash'];            // image: flash-lite vision support nahi karta
+// ── Gemini Models (last resort, cheapest) ─────────────
+const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];
+const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash-lite-preview-06-17', 'gemini-2.5-flash'];
 
 // ══════════════════════════════════════════════════════
 // 🎨 IMAGE GENERATION — OpenRouter FLUX (Free)
@@ -2003,8 +2004,8 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(NVIDIA_BASE + '/chat/completions', {
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
-    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 8000 : 3000, temperature:0.3, stream: streaming})
-  }, isImg ? 25000 : 10000);
+    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 2000 : 2000, temperature:0.3, stream: streaming})
+  }, isImg ? 15000 : 10000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -2042,8 +2043,8 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'HTTP-Referer':'https://ai-solving-math.app',
           'X-Title':'AI Solving Math'
         },
-        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 8000 : 3000, stream: true})
-      }, isImgOR ? 25000 : 12000);
+        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 2000 : 2000, stream: true})
+      }, isImgOR ? 15000 : 12000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
@@ -2084,8 +2085,8 @@ async function callGeminiModel(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0.3}})
-  }, typeof userContent === 'string' ? 20000 : 30000);
+    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 2000 : 2000, temperature:0.3}})
+  }, typeof userContent === 'string' ? 20000 : 15000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -2141,22 +2142,22 @@ async function callGeminiModel(userContent, model, onChunk=null){
 async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
   const errLog = [];
 
-  // ── TIER 1: GEMINI (fastest, direct, free) ──────────
-  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
+  // ── TIER 1: NVIDIA (fastest, priority) ──────────────
+  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
   let lastErr;
-  if (!_API.isDown('gemini')) {
-    for(const model of gmModels){
+  if (!_API.isDown('nvidia')) {
+    for(const model of nvModels){
       try{
-        console.log('[T1] Gemini:', model);
-        const r = await callGeminiModel(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); _API.recordWin('gemini'); return r; }
-      } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; _API.recordFail('gemini', model, e.message); }
+        console.log('[T1] NVIDIA:', model);
+        const r = await callNvidiaNIM(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T1] ✅ NVIDIA success'); _API.recordWin('nvidia'); return r; }
+      } catch(e){ console.warn('[T1] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; _API.recordFail('nvidia', model, e.message); }
     }
   } else {
-    console.log('[T1] Gemini in cooldown, skipping...');
+    console.log('[T1] NVIDIA in cooldown, skipping...');
   }
 
-  // ── TIER 2: OPENROUTER (free auto router) ───────────
+  // ── TIER 2: OPENROUTER (free fallback) ──────────────
   console.warn('[T2] Trying OpenRouter...');
   const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
   if (!_API.isDown('openrouter')) {
@@ -2171,19 +2172,19 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
     console.log('[T2] OpenRouter in cooldown, skipping...');
   }
 
-  // ── TIER 3: NVIDIA (last resort) ────────────────────
-  console.warn('[T3] Trying NVIDIA...');
-  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
-  if (!_API.isDown('nvidia')) {
-    for(const model of nvModels){
+  // ── TIER 3: GEMINI (last resort, cheapest) ──────────
+  console.warn('[T3] Trying Gemini...');
+  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
+  if (!_API.isDown('gemini')) {
+    for(const model of gmModels){
       try{
-        console.log('[T3] NVIDIA:', model);
-        const r = await callNvidiaNIM(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); _API.recordWin('nvidia'); return r; }
-      } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; _API.recordFail('nvidia', model, e.message); }
+        console.log('[T3] Gemini:', model);
+        const r = await callGeminiModel(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T3] ✅ Gemini success'); _API.recordWin('gemini'); return r; }
+      } catch(e){ console.warn('[T3] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; _API.recordFail('gemini', model, e.message); }
     }
   } else {
-    console.log('[T3] NVIDIA in cooldown, skipping...');
+    console.log('[T3] Gemini in cooldown, skipping...');
   }
 
   const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
@@ -2271,27 +2272,20 @@ RESPONSE FORMAT RULES (follow strictly):
 ${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
 - OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
 
-  // ── Image-specific prompt (sabhi questions solve karo) ──
+  // ── Image-specific prompt (fast & concise) ──
   const userInstruction = qc && qc.trim() ? qc.trim() : '';
   const imgPrompt=`${sys}
 
-USER INSTRUCTION (HIGHEST PRIORITY — follow this EXACTLY):
-${userInstruction ? `"${userInstruction}"
-→ If user said to solve only specific questions (e.g. "solve Q3 and Q5" or "only 8 questions"), do EXACTLY that. Do NOT solve more or less.
-→ If user asked to explain, translate, or do something specific — do that.` : 'Solve ALL questions visible in the image.'}
+${userInstruction ? `USER INSTRUCTION: "${userInstruction}" — Follow EXACTLY.` : 'Solve ALL visible questions in the image.'}
 
-IMAGE ANALYSIS RULES — FOLLOW STRICTLY:
-1. SCAN the ENTIRE image carefully from top to bottom, left to right.
-2. ${userInstruction ? 'Follow the user instruction above — solve only what user asked for.' : 'FIND every single question, problem, exercise, or sub-part visible — even if numbered (Q1, Q2, 1., 2., a), b) etc.).'}
-3. SOLVE EACH requested question one by one. DO NOT skip any. DO NOT solve only the first one.
-4. For EACH question, wrap its answer in a separate numbered heading like:
-   <div class="step"><strong>Q1.</strong> [question text here]<br>[step-by-step solution]<br><strong>Answer: [final answer]</strong></div>
-5. If multiple subjects/topics are in the image (Math + Science + English etc.), solve ALL of them.
-6. If a question has sub-parts (a, b, c), solve EVERY sub-part separately.
-7. Give COMPLETE answers — do not cut short, do not say "and so on". Finish every question fully.
-8. OUTPUT: Only raw HTML. No markdown. No extra explanation outside HTML tags.
+RULES:
+1. Scan full image top-to-bottom.
+2. For each question: <div class="step"><strong>Q[n].</strong> [question]<br>[solution steps]<br><strong>Answer: [answer]</strong></div>
+3. Sub-parts (a,b,c) — solve each separately inside same div.
+4. Be FAST and DIRECT. No lengthy intros. No filler text.
+5. Raw HTML only. No markdown.
 
-Now begin:`;
+Begin:`;
 
   let userContent;
   if(mode==='image'){
@@ -4048,4 +4042,4 @@ checkOnboarding();
 setTimeout(()=>preloadQuizPool(), 3000); // Background mein AI quiz pool load karo
 </script>
 </body>
-  </html>
+</html>
