@@ -290,7 +290,8 @@ textarea::placeholder{color:var(--t3)}
 .ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t);word-break:break-word;box-sizing:border-box}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
-.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
+.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8;display:flex;flex-direction:column;gap:5px}
+.ai-body .step strong:first-child{display:inline-block;color:#c4b5fd;font-weight:700;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;background:rgba(196,181,253,.08);border:1px solid rgba(196,181,253,.2);border-radius:6px;padding:2px 8px;margin-bottom:2px;width:fit-content}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
@@ -380,7 +381,20 @@ textarea::placeholder{color:var(--t3)}
 .ld-label{font-size:.75rem;color:var(--t2);font-weight:600;font-family:'Azeret Mono',monospace}
 
 /* SAMJHAO MUJHE */
-
+.samjhao-wrap{margin-top:8px}
+.samjhao-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:var(--c2);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
+.samjhao-btn:hover{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.4)}
+.samjhao-btn:active{transform:scale(.94)}
+.samjhao-btn.open{background:rgba(167,139,250,.2);border-color:var(--c2)}
+.samjhao-panel{display:none;margin-top:8px;border-radius:10px;background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(124,58,237,.06));border:1px solid rgba(167,139,250,.2);overflow:hidden;animation:fadeUp .25s ease}
+.samjhao-panel.show{display:block}
+.samjhao-loading{padding:14px;display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--t2);font-family:'Azeret Mono',monospace}
+.samjhao-loading .ld-spinner{width:18px;height:18px;border-width:2px}
+.samjhao-content{padding:14px}
+.samjhao-section{margin-bottom:12px}
+.samjhao-section:last-child{margin-bottom:0}
+.samjhao-label{font-size:.65rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;font-family:'Azeret Mono',monospace;color:var(--c2);margin-bottom:5px}
+.samjhao-text{font-size:.83rem;line-height:1.7;color:var(--t2);background:rgba(13,20,38,.6);border-radius:8px;padding:9px 12px;border:1px solid rgba(126,179,255,.07)}
 
 /* STUDY GUILD */
 .guild-modal{max-width:440px}
@@ -953,9 +967,6 @@ function getNextGeminiKey(){
   return key;
 }
 
-// ── Placeholder key check — agar GitHub Actions ne key inject nahi ki to '__XXX__' wahi reh jaata hai ──
-function isValidKey(k){ return !!(k && !k.startsWith('__') && k.length > 10); }
-
 // Internal aliases
 let _GEMINI_KEY = GEMINI_KEY;
 let _keysFetched = true;
@@ -969,32 +980,30 @@ const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 // ── TIER 1 NVIDIA: Free text models ──────────────────
 const NVIDIA_MODELS = [
-  'meta/llama-3.1-8b-instruct',       // fastest text model
-  'meta/llama-3.3-70b-instruct',       // fallback text
+  'meta/llama-3.1-8b-instruct',        // fastest & lightest
+  'meta/llama-3.3-70b-instruct',        // stronger fallback
 ];
 
-// ── NVIDIA: Free vision/image models ──────────────────
+// ── TIER 1 NVIDIA: Free vision/image models ──────────
 const NVIDIA_IMAGE_MODELS = [
   'meta/llama-3.2-11b-vision-instruct',
   'meta/llama-4-scout-17b-16e-instruct',
 ];
 
-// ── OPENROUTER: Fast free text models ─────────────────
+// ── TIER 2 OPENROUTER: Fast free models only ──────────
 const OR_TEXT_MODELS = [
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'openrouter/free',
+  'openrouter/free',                              // auto best free model
+  'meta-llama/llama-3.3-70b-instruct:free',       // fast 70B
 ];
 
-// ── OPENROUTER: Free image models ─────────────────────
+// ── TIER 2 OPENROUTER: Free image models ─────────────
 const OR_IMAGE_MODELS = [
-  'meta-llama/llama-3.2-11b-vision-instruct:free',
-  'nvidia/nemotron-nano-12b-v2-vl:free',
   'openrouter/free',
+  'meta-llama/llama-3.2-11b-vision-instruct:free',
 ];
 
-// ── Gemini Models (last resort, cheapest) ─────────────
-const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];
-const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash-lite-preview-06-17', 'gemini-2.5-flash'];
+const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
 
 // ══════════════════════════════════════════════════════
 // 🎨 IMAGE GENERATION — OpenRouter FLUX (Free)
@@ -1153,7 +1162,9 @@ const S={
     quizClose:'बंद करें',quizNext:'आगे →',quizDone:'✓ हो गया',quizAgain:'🔄 फिर से खेलें',
     quizComplete:'क्विज़ पूरा हुआ!',quizScore:'आपका स्कोर:',quizAvail:'सवाल उपलब्ध हैं ✨',
     quizShabad:'शाबाश! बहुत अच्छा! 🌟',quizAccha:'अच्छा किया! और अभ्यास करें 💪',quizTry:'कोई बात नहीं, फिर से कोशिश करें! 🔄',
-    quizWrong:'❌ गलत! सही जवाब:'
+    quizWrong:'❌ गलत! सही जवाब:',quizResults:'🏆 परिणाम',
+    samjhaoBtn:'🤔 क्यों? (समझाएं)',samjhaoLoading:'समझा रहा हूँ...',samjhaoTitle:'💡 सिद्धांत समझें',
+    samjhaoFormula:'📐 फॉर्मूला / नियम:',samjhaoWhy:'🧠 ऐसा क्यों है?',samjhaoExample:'✏️ उदाहरण:'
   },
   en:{flag:'🇬🇧',code:'EN',gr:'Online • English',tabT:'Text',tabI:'Image',tabV:'Voice',
     stxt:'Solve Now',utitle:'Upload Image',usub:'Tap or drag here',
@@ -1173,7 +1184,9 @@ const S={
     quizClose:'Close',quizNext:'Next →',quizDone:'✓ Done',quizAgain:'🔄 Play Again',
     quizComplete:'Quiz Complete!',quizScore:'Your score:',quizAvail:'questions available ✨',
     quizShabad:'Excellent! Outstanding! 🌟',quizAccha:'Good job! Keep practicing 💪',quizTry:'No worries, try again! 🔄',
-    quizWrong:'❌ Wrong! Correct answer:',quizResults:'🏆 Results'
+    quizWrong:'❌ Wrong! Correct answer:',quizResults:'🏆 Results',
+    samjhaoBtn:'🤔 Why? (Explain)',samjhaoLoading:'Explaining...',samjhaoTitle:'💡 Understand the Concept',
+    samjhaoFormula:'📐 Formula / Rule:',samjhaoWhy:'🧠 Why this works:',samjhaoExample:'✏️ Example:'
   }
 };
 
@@ -1893,47 +1906,28 @@ function buildMessages(userContent){
 // ══════════════════════════════════════════════════════
 // 📡 SSE STREAM READER — har chunk ko real-time parse karo
 // ══════════════════════════════════════════════════════
-async function readSSEStream(response, onChunk, firstChunkTimeoutMs=8000){
+async function readSSEStream(response, onChunk){
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
-  let firstChunkReceived = false;
-
-  // Agar firstChunkTimeoutMs mein pehla chunk na aaye to abort
-  let timeoutId;
-  const firstChunkPromise = new Promise((_, reject)=>{
-    timeoutId = setTimeout(()=>{
-      if(!firstChunkReceived){
-        reader.cancel();
-        reject(new Error('SSE_FIRST_CHUNK_TIMEOUT'));
-      }
-    }, firstChunkTimeoutMs);
-  });
-
-  const readPromise = (async()=>{
-    while(true){
-      const {done, value} = await reader.read();
-      if(done) break;
-      if(!firstChunkReceived){ firstChunkReceived = true; clearTimeout(timeoutId); }
-      buffer += decoder.decode(value, {stream:true});
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // incomplete line wapis buffer mein
-      for(const line of lines){
-        const trimmed = line.trim();
-        if(!trimmed || trimmed === 'data: [DONE]') continue;
-        if(trimmed.startsWith('data: ')){
-          try{
-            const json = JSON.parse(trimmed.slice(6));
-            const chunk = json.choices?.[0]?.delta?.content || '';
-            if(chunk) onChunk(chunk);
-          } catch(e){ /* incomplete JSON ignore */ }
-        }
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    buffer += decoder.decode(value, {stream:true});
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // incomplete line wapis buffer mein
+    for(const line of lines){
+      const trimmed = line.trim();
+      if(!trimmed || trimmed === 'data: [DONE]') continue;
+      if(trimmed.startsWith('data: ')){
+        try{
+          const json = JSON.parse(trimmed.slice(6));
+          const chunk = json.choices?.[0]?.delta?.content || '';
+          if(chunk) onChunk(chunk);
+        } catch(e){ /* incomplete JSON ignore */ }
       }
     }
-    clearTimeout(timeoutId);
-  })();
-
-  await Promise.race([readPromise, firstChunkPromise]);
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -1988,24 +1982,14 @@ async function fetchWithTimeout(url, options, timeoutMs=3000){
   }
 }
 
-// ── Kabhi kabhi NVIDIA guard-model "unsafe" JSON return karta hai asli answer ki jagah ──
-// ── Isko detect karke fail treat karo taaki next tier (fallback) try ho ──
-function isSafetyBlockResponse(text){
-  if(!text) return false;
-  const t = text.trim();
-  if(t.length > 300) return false; // asli answers lambe hote hain, safety JSON chhota
-  return /user\s*safety/i.test(t) && /(unsafe|safe)/i.test(t) && /safety\s*categor/i.test(t);
-}
-
 async function callNvidiaNIM(userContent, model, onChunk=null){
-  if(!isValidKey(NVIDIA_KEY)) throw new Error('NV_NO_KEY');
   const streaming = !!onChunk;
   const isImg = Array.isArray(userContent);
   const res = await fetchWithTimeout(NVIDIA_BASE + '/chat/completions', {
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
-    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 2000 : 2000, temperature:0.3, stream: streaming})
-  }, isImg ? 15000 : 10000);
+    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 8000 : 3000, temperature:0, stream: streaming})
+  }, isImg ? 25000 : 10000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -2014,13 +1998,11 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
     let full = '';
     await readSSEStream(res, chunk => { full += chunk; onChunk(chunk); });
     if(!full.trim()) throw new Error('NV_EMPTY');
-    if(isSafetyBlockResponse(full)) throw new Error('NV_SAFETY_BLOCK');
     return full;
   }
   const data = await res.json().catch(()=>({}));
   const text = data.choices?.[0]?.message?.content || '';
   if(!text.trim()) throw new Error('NV_EMPTY');
-  if(isSafetyBlockResponse(text)) throw new Error('NV_SAFETY_BLOCK');
   return text;
 }
 
@@ -2029,8 +2011,7 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
 // ══════════════════════════════════════════════════════
 async function callOpenRouterModel(userContent, model, onChunk=null){
   const streaming = !!onChunk;
-  const keys = [OPENROUTER_KEY, OPENROUTER_KEY2].filter(k => isValidKey(k));
-  if(keys.length === 0) throw new Error('OR_NO_KEY');
+  const keys = [OPENROUTER_KEY, OPENROUTER_KEY2].filter(k => k && k.length > 10);
   let lastErr = null;
   for(const key of keys){
     try{
@@ -2043,20 +2024,19 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'HTTP-Referer':'https://ai-solving-math.app',
           'X-Title':'AI Solving Math'
         },
-        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 2000 : 2000, stream: true})
-      }, isImgOR ? 15000 : 12000);
+        body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 8000 : 3000, stream: true})
+      }, isImgOR ? 25000 : 12000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
         await readSSEStream(res, chunk => { full += chunk; onChunk(chunk); });
         if(!full.trim()) throw new Error('OR_EMPTY');
-        if(isSafetyBlockResponse(full)) throw new Error('OR_SAFETY_BLOCK');
         return full;
       }
       const data = await res.json().catch(()=>({}));
       if(data.error){ lastErr=new Error('OR_ERR'); continue; }
       const text = data.choices?.[0]?.message?.content || '';
-      if(text.trim() && !isSafetyBlockResponse(text)) return text;
+      if(text.trim()) return text;
       lastErr = new Error('OR_EMPTY');
     } catch(e){ lastErr = e; }
   }
@@ -2085,8 +2065,8 @@ async function callGeminiModel(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 2000 : 2000, temperature:0.3}})
-  }, typeof userContent === 'string' ? 20000 : 15000);
+    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0}})
+  }, typeof userContent === 'string' ? 10000 : 30000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -2096,42 +2076,30 @@ async function callGeminiModel(userContent, model, onChunk=null){
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '', full = '';
-    let firstChunkReceived = false;
-    const firstChunkTimeout = 8000;
-    let timedOut = false;
-    const timer = setTimeout(()=>{
-      if(!firstChunkReceived){ timedOut = true; reader.cancel(); }
-    }, firstChunkTimeout);
-    try{
-      while(true){
-        const {done, value} = await reader.read();
-        if(done) break;
-        if(!firstChunkReceived){ firstChunkReceived = true; clearTimeout(timer); }
-        buffer += decoder.decode(value, {stream:true});
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-        for(const line of lines){
-          const trimmed = line.trim();
-          if(!trimmed || trimmed==='data: [DONE]') continue;
-          if(trimmed.startsWith('data: ')){
-            try{
-              const json = JSON.parse(trimmed.slice(6));
-              const chunk = json.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
-              if(chunk){ full += chunk; onChunk(chunk); }
-            } catch(e){}
-          }
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for(const line of lines){
+        const trimmed = line.trim();
+        if(!trimmed || trimmed==='data: [DONE]') continue;
+        if(trimmed.startsWith('data: ')){
+          try{
+            const json = JSON.parse(trimmed.slice(6));
+            const chunk = json.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
+            if(chunk){ full += chunk; onChunk(chunk); }
+          } catch(e){}
         }
       }
-    } finally { clearTimeout(timer); }
-    if(timedOut) throw new Error('GM_FIRST_CHUNK_TIMEOUT');
+    }
     if(!full.trim()) throw new Error('GM_EMPTY');
-    if(isSafetyBlockResponse(full)) throw new Error('GM_SAFETY_BLOCK');
     return full;
   }
   const data = await res.json().catch(()=>({}));
   const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
   if(!text.trim()) throw new Error('GM_EMPTY');
-  if(isSafetyBlockResponse(text)) throw new Error('GM_SAFETY_BLOCK');
   return text;
 }
 
@@ -2142,22 +2110,22 @@ async function callGeminiModel(userContent, model, onChunk=null){
 async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
   const errLog = [];
 
-  // ── TIER 1: NVIDIA (fastest, priority) ──────────────
-  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
+  // ── TIER 1: GEMINI (fastest, direct, free) ──────────
+  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
   let lastErr;
-  if (!_API.isDown('nvidia')) {
-    for(const model of nvModels){
+  if (!_API.isDown('gemini')) {
+    for(const model of gmModels){
       try{
-        console.log('[T1] NVIDIA:', model);
-        const r = await callNvidiaNIM(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T1] ✅ NVIDIA success'); _API.recordWin('nvidia'); return r; }
-      } catch(e){ console.warn('[T1] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; _API.recordFail('nvidia', model, e.message); }
+        console.log('[T1] Gemini:', model);
+        const r = await callGeminiModel(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); _API.recordWin('gemini'); return r; }
+      } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; _API.recordFail('gemini', model, e.message); }
     }
   } else {
-    console.log('[T1] NVIDIA in cooldown, skipping...');
+    console.log('[T1] Gemini in cooldown, skipping...');
   }
 
-  // ── TIER 2: OPENROUTER (free fallback) ──────────────
+  // ── TIER 2: OPENROUTER (free auto router) ───────────
   console.warn('[T2] Trying OpenRouter...');
   const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
   if (!_API.isDown('openrouter')) {
@@ -2172,19 +2140,19 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
     console.log('[T2] OpenRouter in cooldown, skipping...');
   }
 
-  // ── TIER 3: GEMINI (last resort, cheapest) ──────────
-  console.warn('[T3] Trying Gemini...');
-  const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
-  if (!_API.isDown('gemini')) {
-    for(const model of gmModels){
+  // ── TIER 3: NVIDIA (last resort) ────────────────────
+  console.warn('[T3] Trying NVIDIA...');
+  const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
+  if (!_API.isDown('nvidia')) {
+    for(const model of nvModels){
       try{
-        console.log('[T3] Gemini:', model);
-        const r = await callGeminiModel(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T3] ✅ Gemini success'); _API.recordWin('gemini'); return r; }
-      } catch(e){ console.warn('[T3] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; _API.recordFail('gemini', model, e.message); }
+        console.log('[T3] NVIDIA:', model);
+        const r = await callNvidiaNIM(userContent, model, onChunk);
+        if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); _API.recordWin('nvidia'); return r; }
+      } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; _API.recordFail('nvidia', model, e.message); }
     }
   } else {
-    console.log('[T3] Gemini in cooldown, skipping...');
+    console.log('[T3] NVIDIA in cooldown, skipping...');
   }
 
   const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
@@ -2253,39 +2221,38 @@ async function solve(){
         : `\nEXTENDED MODE (Detailed answer): Explain every concept fully. For each step, also explain WHY it is done. Give real-life examples. Define important terms. Be as detailed as possible — the student should understand completely.`)
     : '';
 
-  // ── System prompt (text + image common) ───────────────
-  const sys=`You are AI Solving Math, a smart tutor made by Harsh.
-If asked your name or identity: say only "Main hoon AI Solving Math, made by Harsh."
-Language rule: ${lang==='hi' ? 'Reply ONLY in pure Hindi using Devanagari script (शुद्ध हिंदी). Do NOT use Hinglish or Roman/English script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay in English/numerals, but all sentences and explanations must be written in Devanagari script.' : 'Reply in English.'}
-${subject?`Subject context: ${subject}`:''}
-${extendedRule}
+  // ── System prompt ──────────────────────────────────────
+  const sys=`You are AI Solving Math, a smart tutor by Harsh. If asked identity: "Main hoon AI Solving Math, made by Harsh."
+Lang: ${lang==='hi' ? 'Reply ONLY in Hindi Devanagari script. Numbers/formulas/names can be in English.' : 'Reply in English.'}
+${subject?`Subject: ${subject}`:''}${extendedRule}
 
-RESPONSE FORMAT RULES (follow strictly):
-- NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
-- DO NOT use any emojis anywhere in your response. No emojis at all.
-- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features.
-- ANY math/calculation → show each step on new line in <div class="step">, final answer bold. EXACTLY like:
-<div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
-- For algebra/equation → same format, each line one operation, last line Answer bold.
-- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>[Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
-- LANGUAGE/GRAMMAR → <div class="step">explanation</div> with examples as bullets.
-${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
-- OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
+FORMAT (strict, no markdown, no emojis, raw HTML only):
+- Bullets: <ul class="ai-bullets"><li>...</li></ul>
+- Math/steps: <div class="step">step1<br>step2<br><strong>Answer</strong></div>
+- Theory: <div class="step"><strong>Topic</strong><br>explanation</div> then bullets
+${answerMode==='extended' ? '- EXTENDED: Write multiple detailed step blocks. Include why/examples/definitions.' : '- Be FAST. Answer directly. No intro.'}`;
 
-  // ── Image-specific prompt (fast & concise) ──
+  // ── Image-specific prompt (sabhi questions solve karo) ──
   const userInstruction = qc && qc.trim() ? qc.trim() : '';
   const imgPrompt=`${sys}
 
-${userInstruction ? `USER INSTRUCTION: "${userInstruction}" — Follow EXACTLY.` : 'Solve ALL visible questions in the image.'}
+USER INSTRUCTION (HIGHEST PRIORITY — follow this EXACTLY):
+${userInstruction ? `"${userInstruction}"
+→ If user said to solve only specific questions (e.g. "solve Q3 and Q5" or "only 8 questions"), do EXACTLY that. Do NOT solve more or less.
+→ If user asked to explain, translate, or do something specific — do that.` : 'Solve ALL questions visible in the image.'}
 
-RULES:
-1. Scan full image top-to-bottom.
-2. For each question: <div class="step"><strong>Q[n].</strong> [question]<br>[solution steps]<br><strong>Answer: [answer]</strong></div>
-3. Sub-parts (a,b,c) — solve each separately inside same div.
-4. Be FAST and DIRECT. No lengthy intros. No filler text.
-5. Raw HTML only. No markdown.
+IMAGE ANALYSIS RULES — FOLLOW STRICTLY:
+1. SCAN the ENTIRE image carefully from top to bottom, left to right.
+2. ${userInstruction ? 'Follow the user instruction above — solve only what user asked for.' : 'FIND every single question, problem, exercise, or sub-part visible — even if numbered (Q1, Q2, 1., 2., a), b) etc.).'}
+3. SOLVE EACH requested question one by one. DO NOT skip any. DO NOT solve only the first one.
+4. For EACH question, wrap its answer in a separate numbered heading like:
+   <div class="step"><strong>Q1.</strong> [question text here]<br>[step-by-step solution]<br><strong>Answer: [final answer]</strong></div>
+5. If multiple subjects/topics are in the image (Math + Science + English etc.), solve ALL of them.
+6. If a question has sub-parts (a, b, c), solve EVERY sub-part separately.
+7. Give COMPLETE answers — do not cut short, do not say "and so on". Finish every question fully.
+8. OUTPUT: Only raw HTML. No markdown. No extra explanation outside HTML tags.
 
-Begin:`;
+Now begin:`;
 
   let userContent;
   if(mode==='image'){
@@ -2540,11 +2507,12 @@ Begin:`;
   let renderTimer = null;
   const bodyEl = document.getElementById(id + '-body');
 
-  function flushRender(){
+  function flushRender(final=false){
     if(!bodyEl) return;
     const html = cleanHtml(rawBuffer);
     bodyEl.innerHTML = html;
-    if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
+    // MathJax sirf final render pe — streaming me skip karo (heavy)
+    if(final && window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
   }
 
   let cardShown = false;
@@ -2563,7 +2531,7 @@ Begin:`;
     rawBuffer += chunk;
     showCardNow();
     if(!renderTimer){
-      renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(); }, 80);
+      renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(false); }, 150);
     }
   }
 
@@ -2572,7 +2540,7 @@ Begin:`;
 
     // ── Final render — cursor hatao, samjhao buttons lagao ──
     if(renderTimer){ clearTimeout(renderTimer); renderTimer=null; }
-    showCardNow(); // non-streaming (e.g. image mode) ke liye card guarantee show karo
+    showCardNow();
     const finalHtml = cleanHtml(rawText || rawBuffer);
     if(!finalHtml.trim()){
       bodyEl.innerHTML = lang==='hi' ? '❌ खाली जवाब मिला, फिर से कोशिश करें' : '❌ Empty response, try again';
@@ -2581,6 +2549,7 @@ Begin:`;
     const enriched = injectSamjhaoButtons(finalHtml, id);
     bodyEl.style.display = 'block';
     bodyEl.innerHTML = enriched;
+    if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
 
     // Update gamification
     solved++;
@@ -2710,10 +2679,109 @@ function cleanHtml(text){
 
 // ── SAMJHAO MUJHE ──────────────────────────────────────
 function injectSamjhaoButtons(html, cardId){
-  // Samjhao buttons removed
+  // After each <li> or .step, inject a samjhao button
+  const s=S[lang];
+  let stepIdx=0;
+  // Inject after </li>
+  html=html.replace(/<\/li>/g,()=>{
+    const sid=`${cardId}-s${stepIdx++}`;
+    return `</li><div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
+  });
+  // Inject after </div> that closes a .step
+  html=html.replace(/(<div class="step">[\s\S]*?<\/div>)/g,(match)=>{
+    const sid=`${cardId}-s${stepIdx++}`;
+    return `${match}<div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
+  });
   return html;
 }
 
+async function toggleSamjhao(sid, cardId){
+  const btn=document.getElementById('btn-'+sid);
+  const panel=document.getElementById('panel-'+sid);
+  if(!btn||!panel)return;
+  const s=S[lang];
+
+  // Toggle close if already open
+  if(panel.classList.contains('show')){
+    panel.classList.remove('show');
+    btn.classList.remove('open');
+    btn.textContent=s.samjhaoBtn;
+    return;
+  }
+
+  btn.classList.add('open');
+  btn.textContent=s.samjhaoLoading;
+  panel.classList.add('show');
+
+  // Already loaded — just show
+  if(panel.dataset.loaded==='1'){
+    btn.textContent=s.samjhaoBtn;
+    return;
+  }
+
+  panel.innerHTML=`<div class="samjhao-loading"><div class="ld-spinner"></div>${s.samjhaoLoading}</div>`;
+
+  // ── Robust step text extraction ──
+  const cardBody=document.getElementById(cardId+'-body');
+  const stepIdx=parseInt(sid.split('-s').pop())||0;
+  // querySelectorAll on li and .step — but exclude nested samjhao-wrap children
+  const stepEls=cardBody?Array.from(cardBody.querySelectorAll('li, .step')).filter(el=>!el.closest('.samjhao-wrap')):[];
+  const stepEl=stepEls[stepIdx]||stepEls[0];
+  // Get clean text — strip any samjhao button text inside
+  let stepText='';
+  if(stepEl){
+    const clone=stepEl.cloneNode(true);
+    clone.querySelectorAll('.samjhao-wrap').forEach(n=>n.remove());
+    stepText=(clone.innerText||clone.textContent||'').trim();
+  }
+
+  // ── Robust question extraction ──
+  // Walk up from cardBody → ai-card → parent div → user-bubble sibling
+  let question='';
+  try{
+    const aiCard=cardBody?.closest('.ai-card');
+    const wrapper=aiCard?.parentElement;
+    const userRow=wrapper?.querySelector('.user-bubble');
+    if(userRow) question=(userRow.innerText||userRow.textContent||'').trim();
+  }catch(_){}
+
+  const prompt=lang==='hi'
+    ?`छात्र को यह स्टेप समझाओ। केवल JSON दो, कुछ और नहीं। पूरा जवाब शुद्ध हिंदी (देवनागरी लिपि) में लिखो, Hinglish या Roman script में नहीं।
+सवाल: "${question}"
+स्टेप: "${stepText}"
+JSON format (no markdown, no extra text):
+{"formula":"यहाँ इस्तेमाल हुआ फॉर्मूला/नियम (1-2 लाइन, हिंदी में)","why":"यह स्टेप क्यों ज़रूरी है (2-3 लाइन, हिंदी में)","example":"एक और उदाहरण (1-2 लाइन, हिंदी में)"}`
+    :`Explain this step to a student. Return JSON only, nothing else.
+Question: "${question}"
+Step: "${stepText}"
+JSON format (no markdown, no extra text):
+{"formula":"Formula/Rule used here (1-2 lines)","why":"Why this step is needed (2-3 lines)","example":"One more similar example (1-2 lines)"}`;
+
+  try{
+    const raw=await callWithAutoFallback(prompt, false);
+    // Robust JSON extraction — find first { ... } block
+    const jsonMatch=raw.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('NO_JSON');
+    const data=JSON.parse(jsonMatch[0]);
+    panel.innerHTML=`
+      <div class="samjhao-content">
+        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoFormula}</div><div class="samjhao-text">${esc(data.formula||'—')}</div></div>
+        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoWhy}</div><div class="samjhao-text">${esc(data.why||'—')}</div></div>
+        <div class="samjhao-section"><div class="samjhao-label">${s.samjhaoExample}</div><div class="samjhao-text">${esc(data.example||'—')}</div></div>
+      </div>`;
+    panel.dataset.loaded='1';
+  }catch(err){
+    console.error('Samjhao error:',err);
+    panel.dataset.loaded='';
+    btn.classList.remove('open');
+    panel.classList.remove('show');
+    panel.innerHTML=`<div class="samjhao-loading" style="color:#f87171;cursor:pointer" onclick="toggleSamjhao('${sid}','${cardId}')">❌ Load nahi hua — Tap karke retry karo</div>`;
+    panel.classList.add('show');
+    btn.textContent=s.samjhaoBtn;
+    return;
+  }
+  btn.textContent=s.samjhaoBtn;
+}
 
 // ── SMART GRAPH ENGINE ──────────────────────────────────
 
@@ -2977,6 +3045,11 @@ function appendChat(id,q,html){
         </div>
       </div>
       <div class="ai-body" id="${id}-body">${enrichedHtml}</div>
+      <div class="feedback-row">
+        <span class="fb-lbl">Helpful tha?</span>
+        <div class="fb-btn" id="fb-up-${id}" onclick="feedback('${id}','up')">👍</div>
+        <div class="fb-btn" id="fb-dn-${id}" onclick="feedback('${id}','down')">👎</div>
+      </div>
     </div>`;
   area.insertBefore(div,area.firstChild);
   setTimeout(()=>div.scrollIntoView({behavior:'smooth',block:'start'}),100);
@@ -3007,6 +3080,11 @@ function appendStreamCard(id, q){
         </div>
       </div>
       <div class="ai-body" id="${id}-body"></div>
+      <div class="feedback-row">
+        <span class="fb-lbl">Helpful tha?</span>
+        <div class="fb-btn" id="fb-up-${id}" onclick="feedback('${id}','up')">👍</div>
+        <div class="fb-btn" id="fb-dn-${id}" onclick="feedback('${id}','down')">👎</div>
+      </div>
     </div>`;
   area.insertBefore(div, area.firstChild);
   setTimeout(()=>div.scrollIntoView({behavior:'smooth', block:'start'}), 80);
