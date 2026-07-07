@@ -290,8 +290,8 @@ textarea::placeholder{color:var(--t3)}
 .ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t);word-break:break-word;box-sizing:border-box}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
-.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8;display:flex;flex-direction:column;gap:4px}
-.ai-body .step>strong:first-child{display:inline-block;color:#c4b5fd;font-weight:700;font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;background:rgba(196,181,253,.08);border:1px solid rgba(196,181,253,.2);border-radius:6px;padding:2px 8px;width:fit-content}
+.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
+.ai-body .step>strong:first-child{display:block;color:#c4b5fd;font-weight:700;font-size:.8rem;margin-bottom:4px}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
@@ -2704,19 +2704,7 @@ function cleanHtml(text){
 
 // ── SAMJHAO MUJHE ──────────────────────────────────────
 function injectSamjhaoButtons(html, cardId){
-  // After each <li> or .step, inject a samjhao button
-  const s=S[lang];
-  let stepIdx=0;
-  // Inject after </li>
-  html=html.replace(/<\/li>/g,()=>{
-    const sid=`${cardId}-s${stepIdx++}`;
-    return `</li><div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
-  });
-  // Inject after </div> that closes a .step
-  html=html.replace(/(<div class="step">[\s\S]*?<\/div>)/g,(match)=>{
-    const sid=`${cardId}-s${stepIdx++}`;
-    return `${match}<div class="samjhao-wrap"><button class="samjhao-btn" id="btn-${sid}" onclick="toggleSamjhao('${sid}','${cardId}')">${s.samjhaoBtn}</button><div class="samjhao-panel" id="panel-${sid}"></div></div>`;
-  });
+  // Samjhao buttons removed — clean output
   return html;
 }
 
