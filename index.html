@@ -290,8 +290,8 @@ textarea::placeholder{color:var(--t3)}
 .ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t);word-break:break-word;box-sizing:border-box}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
-.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8;display:flex;flex-direction:column;gap:5px}
-.ai-body .step strong:first-child{display:inline-block;color:#c4b5fd;font-weight:700;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;background:rgba(196,181,253,.08);border:1px solid rgba(196,181,253,.2);border-radius:6px;padding:2px 8px;margin-bottom:2px;width:fit-content}
+.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8;display:flex;flex-direction:column;gap:4px}
+.ai-body .step>strong:first-child{display:inline-block;color:#c4b5fd;font-weight:700;font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;background:rgba(196,181,253,.08);border:1px solid rgba(196,181,253,.2);border-radius:6px;padding:2px 8px;width:fit-content}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
@@ -333,7 +333,7 @@ textarea::placeholder{color:var(--t3)}
 .nb:hover{color:var(--t2)}
 .nb:active{transform:scale(.88)}
 .nb.act{background:rgba(79,70,229,.15);border-color:rgba(126,179,255,.2);color:var(--c1)}
-.nb-icon{width:22px;height:22px;line-height:1;position:relative;display:flex;align-items:center;justify-content:center}
+.nb-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;line-height:1;position:relative}
 .nb-badge{position:absolute;top:-5px;right:-7px;width:13px;height:13px;border-radius:50%;background:var(--c2);color:#fff;font-size:.52rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--bg);font-family:'Azeret Mono',monospace}
 .nb-badge.show{display:flex}
 .nb-lbl{font-size:.56rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
@@ -377,6 +377,7 @@ textarea::placeholder{color:var(--t3)}
 @keyframes brainPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 8px rgba(99,102,241,0)}}
 @keyframes ripplePing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.6);opacity:0}}
 @keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-3px);opacity:1}}
+@keyframes barWave{0%,100%{transform:scaleY(1);opacity:.4}50%{transform:scaleY(2.2);opacity:1}}
 .ld-spinner{width:28px;height:28px;border:2.5px solid rgba(255,255,255,.08);border-top-color:var(--c1);border-radius:50%;animation:spin .8s linear infinite}
 .ld-label{font-size:.75rem;color:var(--t2);font-weight:600;font-family:'Azeret Mono',monospace}
 
@@ -890,34 +891,23 @@ textarea::placeholder{color:var(--t3)}
     <!-- BOTTOM NAV -->
     <div class="bnav">
       <button class="nb act" id="nb-text" onclick="switchMode('text')">
-        <div class="nb-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        </div>
+        <div class="nb-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
         <div class="nb-lbl" id="nb-t-lbl">Text</div>
       </button>
       <button class="nb" id="nb-image" onclick="switchMode('image')">
-        <div class="nb-icon" style="color:#22d3ee">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        </div>
+        <div class="nb-icon" style="color:#22d3ee"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
         <div class="nb-lbl" id="nb-i-lbl">Image</div>
       </button>
       <button class="nb" id="nb-quiz" onclick="openQuiz()">
-        <div class="nb-icon" style="color:#a78bfa">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
+        <div class="nb-icon" style="color:#a78bfa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="nb-lbl">Quiz</div>
       </button>
       <button class="nb" onclick="openGuild()">
-        <div class="nb-icon" style="color:#34d399">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
+        <div class="nb-icon" style="color:#34d399"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="nb-lbl">Guild</div>
       </button>
       <button class="nb" onclick="openPanel()">
-        <div class="nb-icon" style="position:relative;color:#fb923c">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-          <div class="nb-badge" id="nb-badge"></div>
-        </div>
+        <div class="nb-icon" style="position:relative;color:#fb923c"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><div class="nb-badge" id="nb-badge"></div></div>
         <div class="nb-lbl" id="nb-h-lbl">History</div>
       </button>
     </div>
@@ -980,8 +970,7 @@ const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 // ── TIER 1 NVIDIA: Free text models ──────────────────
 const NVIDIA_MODELS = [
-  'meta/llama-3.1-8b-instruct',        // fastest & lightest
-  'meta/llama-3.3-70b-instruct',        // stronger fallback
+  'meta/llama-3.1-8b-instruct',  // fastest & lightest
 ];
 
 // ── TIER 1 NVIDIA: Free vision/image models ──────────
@@ -990,20 +979,23 @@ const NVIDIA_IMAGE_MODELS = [
   'meta/llama-4-scout-17b-16e-instruct',
 ];
 
-// ── TIER 2 OPENROUTER: Fast free models only ──────────
+// ── TIER 2 OPENROUTER: Auto free router (always valid) ──
 const OR_TEXT_MODELS = [
-  'openrouter/free',                              // auto best free model
-  'meta-llama/llama-3.3-70b-instruct:free',       // fast 70B
+  'openrouter/free',              // auto best free model (text + image)
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'deepseek/deepseek-r1:free',
 ];
 
 // ── TIER 2 OPENROUTER: Free image models ─────────────
 const OR_IMAGE_MODELS = [
-  'openrouter/free',
-  'meta-llama/llama-3.2-11b-vision-instruct:free',
+  'openrouter/free',                               // auto selects best free vision model
+  'meta-llama/llama-3.2-11b-vision-instruct:free', // fallback vision model
+  'nvidia/nemotron-nano-12b-v2-vl:free',           // NVIDIA vision model (free)
 ];
 
-const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite', 'gemini-2.0-flash'];
-const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+// ── Gemini Models ──
+const GEMINI_TEXT_MODELS  = ['gemini-2.5-flash-lite'];       // text: fast & free
+const GEMINI_IMAGE_MODELS = ['gemini-2.5-flash'];            // image: flash-lite vision support nahi karta
 
 // ══════════════════════════════════════════════════════
 // 🎨 IMAGE GENERATION — OpenRouter FLUX (Free)
@@ -1303,7 +1295,7 @@ function pick10FromPool() {
     if (idx >= 0) QUIZ_USED.add(idx);
   });
 
-  // Last 30 questions bache to background mein 150 aur fetch karo (75 Hindi + 75 English)
+  // Last 30 questions bache to background mein 100 aur fetch karo
   const remaining = QUIZ_POOL.length - QUIZ_USED.size;
   if (remaining < 30 && !quizPoolLoading) {
     setTimeout(() => fetchAndAppendMore(), 300);
@@ -1413,18 +1405,20 @@ Return JSON array ONLY, no markdown, no explanation:
   return [];
 }
 
-// Background mein 150 questions — 75 Hindi + 75 English — parallel fetch
+// Background mein 200 questions — 100 Hindi + 100 English — parallel fetch
 async function fetchAndAppendMore() {
   if (quizPoolLoading) return;
   quizPoolLoading = true;
-  console.log('Fetching 150 more quiz questions in background (75 Hindi + 75 English)...');
+  console.log('Fetching 200 more quiz questions in background (100 Hindi + 100 English)...');
 
+  // Bilingual QUIZ_POOL: dono language store hogi
+  // Current lang wale dikhenge, dusri bhi pool mein rahegi for lang switch
   if (!window.QUIZ_POOL_BILINGUAL) window.QUIZ_POOL_BILINGUAL = { hi: [], en: [] };
 
   const offset = QUIZ_POOL.length;
 
   try {
-    // ── 75 HINDI questions: 3 batches × 25 ──
+    // ── 100 HINDI questions (Gemini 2×25 + NVIDIA 2×25) ──
     const hindiFetch = (async () => {
       let count = 0;
       // Gemini: 2 batches × 25 = 50 Hindi
@@ -1434,24 +1428,27 @@ async function fetchAndAppendMore() {
           if (qs && qs.length > 0) {
             window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
             count += qs.length;
-            console.log(`[Hindi] Gemini batch ${b+1}: +${qs.length}`);
+            console.log(`[Hindi] Gemini batch ${b+1}: +${qs.length} questions`);
           }
           if (b < 1) await new Promise(r => setTimeout(r, 400));
         } catch(e) { console.warn('Hindi Gemini batch failed:', e.message); }
       }
-      // NVIDIA: 1 batch × 25 = 25 Hindi
-      try {
-        const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'hi');
-        if (qs && qs.length > 0) {
-          window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
-          count += qs.length;
-          console.log(`[Hindi] NVIDIA batch: +${qs.length}`);
-        }
-      } catch(e) { console.warn('Hindi NVIDIA batch failed:', e.message); }
+      // NVIDIA: 2 batches × 25 = 50 Hindi
+      for (let b = 0; b < 2; b++) {
+        try {
+          const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'hi');
+          if (qs && qs.length > 0) {
+            window.QUIZ_POOL_BILINGUAL.hi.push(...qs);
+            count += qs.length;
+            console.log(`[Hindi] NVIDIA batch ${b+1}: +${qs.length} questions`);
+          }
+          if (b < 1) await new Promise(r => setTimeout(r, 400));
+        } catch(e) { console.warn('Hindi NVIDIA batch failed:', e.message); }
+      }
       return count;
     })();
 
-    // ── 75 ENGLISH questions: 3 batches × 25 ──
+    // ── 100 ENGLISH questions (Gemini 2×25 + NVIDIA 2×25) ──
     const englishFetch = (async () => {
       let count = 0;
       // Gemini: 2 batches × 25 = 50 English
@@ -1461,20 +1458,23 @@ async function fetchAndAppendMore() {
           if (qs && qs.length > 0) {
             window.QUIZ_POOL_BILINGUAL.en.push(...qs);
             count += qs.length;
-            console.log(`[English] Gemini batch ${b+1}: +${qs.length}`);
+            console.log(`[English] Gemini batch ${b+1}: +${qs.length} questions`);
           }
           if (b < 1) await new Promise(r => setTimeout(r, 400));
         } catch(e) { console.warn('English Gemini batch failed:', e.message); }
       }
-      // NVIDIA: 1 batch × 25 = 25 English
-      try {
-        const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'en');
-        if (qs && qs.length > 0) {
-          window.QUIZ_POOL_BILINGUAL.en.push(...qs);
-          count += qs.length;
-          console.log(`[English] NVIDIA batch: +${qs.length}`);
-        }
-      } catch(e) { console.warn('English NVIDIA batch failed:', e.message); }
+      // NVIDIA: 2 batches × 25 = 50 English
+      for (let b = 0; b < 2; b++) {
+        try {
+          const qs = await fetchQuizBatchNvidiaLang(25, offset + count, 'en');
+          if (qs && qs.length > 0) {
+            window.QUIZ_POOL_BILINGUAL.en.push(...qs);
+            count += qs.length;
+            console.log(`[English] NVIDIA batch ${b+1}: +${qs.length} questions`);
+          }
+          if (b < 1) await new Promise(r => setTimeout(r, 400));
+        } catch(e) { console.warn('English NVIDIA batch failed:', e.message); }
+      }
       return count;
     })();
 
@@ -1487,7 +1487,9 @@ async function fetchAndAppendMore() {
       : window.QUIZ_POOL_BILINGUAL.en;
     QUIZ_POOL.push(...currentLangPool);
 
-    console.log(`✅ Pool refreshed: +${hiCount} Hindi, +${enCount} English. Total: ${QUIZ_POOL.length}`);
+    console.log(`✅ Pool refreshed: +${hiCount} Hindi, +${enCount} English. Current lang pool: ${QUIZ_POOL.length} total`);
+
+    // QUIZ_POOL_BILINGUAL reset karo (next refresh ke liye fresh start)
     window.QUIZ_POOL_BILINGUAL = { hi: [], en: [] };
 
   } catch(e) {
@@ -1713,10 +1715,8 @@ function switchLang(){lang=lang==='hi'?'en':'hi';lsSet('sm_lang',lang);applyLang
 
 function switchMode(m){
   mode=m;
-  const tp=document.getElementById('text-panel');
-  const ip=document.getElementById('img-panel');
-  if(tp) tp.style.display=m==='text'?'block':'none';
-  if(ip) ip.style.display=m==='image'?'block':'none';
+  document.getElementById('text-panel').style.display=m==='text'?'block':'none';
+  document.getElementById('img-panel').style.display=m==='image'?'block':'none';
   document.getElementById('tab-text')?.classList.toggle('act',m==='text');
   document.getElementById('tab-image')?.classList.toggle('act',m==='image');
   document.getElementById('nb-text')?.classList.toggle('act',m==='text');
@@ -1931,47 +1931,35 @@ async function readSSEStream(response, onChunk){
 }
 
 // ══════════════════════════════════════════════════════
+//  📱 TELEGRAM ADMIN NOTIFICATIONS
+// ══════════════════════════════════════════════════════
+const _TG_TOKEN   = '8631727345:AAEiniCMoQF8iq8AR185QvQtN8d4orypJ0c';
+const _TG_CHAT_ID = '7737659999';
+const _TG_URL     = `https://api.telegram.org/bot${_TG_TOKEN}/sendMessage`;
+const _notifCooldown = {};
+
+async function _sendAdminNotif(api, failCount, errMsg, isNet) {
+  const now = Date.now();
+  if (_notifCooldown[api] && now - _notifCooldown[api] < 5 * 60 * 1000) return;
+  _notifCooldown[api] = now;
+  const emoji  = isNet ? '📡' : '🔴';
+  const badge  = failCount >= 3 ? '🚨' : '⚠️';
+  const reason = isNet ? 'Network/internet error' : 'API returned error';
+  const time   = new Date().toLocaleString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true, day:'numeric', month:'short'});
+  const text = `${badge} <b>AI Solving Math</b>\n\n${emoji} <b>API:</b> ${api.toUpperCase()}\n❌ <b>Fails:</b> ${failCount}\n📋 <b>Reason:</b> ${reason}\n🔎 <b>Error:</b> <code>${(errMsg||'unknown').substring(0,200)}</code>\n🕐 <b>Time:</b> ${time}`;
+  try {
+    await fetch(_TG_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:_TG_CHAT_ID, text, parse_mode:'HTML'})
+    });
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════
 // 🟢 TIER 1 — NVIDIA NIM STREAMING
 // ══════════════════════════════════════════════════════
 // ── Timeout-wrapped fetch: agar response na aaye to abort karke turant next tier try ho ──
-// ══════════════════════════════════════════════════════
-//  📊 API HEALTH TRACKER — dead APIs ko temporarily skip karo
-// ══════════════════════════════════════════════════════
-const _API = {
-  MAX_FAILS: 3,
-  COOLDOWN_MS: 5 * 60 * 1000, // 5 min
-  health: {
-    gemini:     { fails: 0, wins: 0, cooldownUntil: 0, lastFail: 0 },
-    openrouter: { fails: 0, wins: 0, cooldownUntil: 0, lastFail: 0 },
-    nvidia:     { fails: 0, wins: 0, cooldownUntil: 0, lastFail: 0 }
-  },
-  isDown(api) {
-    const h = this.health[api];
-    return h && h.cooldownUntil > Date.now();
-  },
-  recordWin(api) {
-    const h = this.health[api];
-    if (!h) return;
-    h.wins++;
-    h.fails = 0; // reset on success
-    h.cooldownUntil = 0;
-  },
-  recordFail(api, model, errMsg) {
-    const h = this.health[api];
-    if (!h) return;
-    h.fails++;
-    h.lastFail = Date.now();
-    console.warn(`[APIHealth] ❌ ${api}(${model}) fail #${h.fails}: ${errMsg}`);
-    if (h.fails >= this.MAX_FAILS) {
-      h.cooldownUntil = Date.now() + this.COOLDOWN_MS;
-      console.warn(`[APIHealth] 🔴 ${api} — ${this.MAX_FAILS} fails, cooling down 5 min`);
-      if (typeof _sendAdminNotif === 'function') {
-        _sendAdminNotif(api, h.fails, errMsg, errMsg?.includes('fetch')||errMsg?.includes('network'));
-      }
-    }
-  }
-};
-
 async function fetchWithTimeout(url, options, timeoutMs=3000){
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
@@ -1988,8 +1976,8 @@ async function callNvidiaNIM(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(NVIDIA_BASE + '/chat/completions', {
     method: 'POST',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+NVIDIA_KEY},
-    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 8000 : 3000, temperature:0, stream: streaming})
-  }, isImg ? 25000 : 10000);
+    body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImg ? 8000 : 3000, temperature:0.3, stream: streaming})
+  }, isImg ? 25000 : 3000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('NV:' + (data.detail || data.error?.message || res.status));
@@ -2025,7 +2013,7 @@ async function callOpenRouterModel(userContent, model, onChunk=null){
           'X-Title':'AI Solving Math'
         },
         body: JSON.stringify({model, messages: buildMessages(userContent), max_tokens: isImgOR ? 8000 : 3000, stream: true})
-      }, isImgOR ? 25000 : 12000);
+      }, isImgOR ? 25000 : 5000);
       if(!res.ok){ const d=await res.json().catch(()=>({})); lastErr=new Error('OR:'+res.status+JSON.stringify(d.error||'')); continue; }
       if(streaming){
         let full = '';
@@ -2065,7 +2053,7 @@ async function callGeminiModel(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0}})
+    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0.3}})
   }, typeof userContent === 'string' ? 10000 : 30000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
@@ -2113,46 +2101,34 @@ async function callWithAutoFallback(userContent, isImage=false, onChunk=null){
   // ── TIER 1: GEMINI (fastest, direct, free) ──────────
   const gmModels = isImage ? GEMINI_IMAGE_MODELS : GEMINI_TEXT_MODELS;
   let lastErr;
-  if (!_API.isDown('gemini')) {
-    for(const model of gmModels){
-      try{
-        console.log('[T1] Gemini:', model);
-        const r = await callGeminiModel(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); _API.recordWin('gemini'); return r; }
-      } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; _API.recordFail('gemini', model, e.message); }
-    }
-  } else {
-    console.log('[T1] Gemini in cooldown, skipping...');
+  for(const model of gmModels){
+    try{
+      console.log('[T1] Gemini:', model);
+      const r = await callGeminiModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T1] ✅ Gemini success'); return r; }
+    } catch(e){ console.warn('[T1] Gemini failed:', model, e.message); errLog.push('Gemini('+model+'): '+e.message); lastErr = e; }
   }
 
   // ── TIER 2: OPENROUTER (free auto router) ───────────
-  console.warn('[T2] Trying OpenRouter...');
+  console.warn('[T2] Gemini failed → OpenRouter...');
   const orModels = isImage ? OR_IMAGE_MODELS : OR_TEXT_MODELS;
-  if (!_API.isDown('openrouter')) {
-    for(const model of orModels){
-      try{
-        console.log('[T2] OpenRouter:', model);
-        const r = await callOpenRouterModel(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); _API.recordWin('openrouter'); return r; }
-      } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); _API.recordFail('openrouter', model, e.message); }
-    }
-  } else {
-    console.log('[T2] OpenRouter in cooldown, skipping...');
+  for(const model of orModels){
+    try{
+      console.log('[T2] OpenRouter:', model);
+      const r = await callOpenRouterModel(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T2] ✅ OpenRouter success'); return r; }
+    } catch(e){ console.warn('[T2] OpenRouter failed:', model, e.message); errLog.push('OpenRouter('+model+'): '+e.message); }
   }
 
   // ── TIER 3: NVIDIA (last resort) ────────────────────
-  console.warn('[T3] Trying NVIDIA...');
+  console.warn('[T3] OpenRouter failed → NVIDIA...');
   const nvModels = isImage ? NVIDIA_IMAGE_MODELS : NVIDIA_MODELS;
-  if (!_API.isDown('nvidia')) {
-    for(const model of nvModels){
-      try{
-        console.log('[T3] NVIDIA:', model);
-        const r = await callNvidiaNIM(userContent, model, onChunk);
-        if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); _API.recordWin('nvidia'); return r; }
-      } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; _API.recordFail('nvidia', model, e.message); }
-    }
-  } else {
-    console.log('[T3] NVIDIA in cooldown, skipping...');
+  for(const model of nvModels){
+    try{
+      console.log('[T3] NVIDIA:', model);
+      const r = await callNvidiaNIM(userContent, model, onChunk);
+      if(r && r.trim()){ console.log('[T3] ✅ NVIDIA success'); return r; }
+    } catch(e){ console.warn('[T3] NVIDIA failed:', model, e.message); errLog.push('NVIDIA('+model+'): '+e.message); lastErr = e; }
   }
 
   const finalErr = lastErr || new Error('ALL_3_TIERS_FAILED');
@@ -2221,16 +2197,24 @@ async function solve(){
         : `\nEXTENDED MODE (Detailed answer): Explain every concept fully. For each step, also explain WHY it is done. Give real-life examples. Define important terms. Be as detailed as possible — the student should understand completely.`)
     : '';
 
-  // ── System prompt ──────────────────────────────────────
-  const sys=`You are AI Solving Math, a smart tutor by Harsh. If asked identity: "Main hoon AI Solving Math, made by Harsh."
-Lang: ${lang==='hi' ? 'Reply ONLY in Hindi Devanagari script. Numbers/formulas/names can be in English.' : 'Reply in English.'}
-${subject?`Subject: ${subject}`:''}${extendedRule}
+  // ── System prompt (text + image common) ───────────────
+  const sys=`You are AI Solving Math, a smart tutor made by Harsh.
+If asked your name or identity: say only "Main hoon AI Solving Math, made by Harsh."
+Language rule: ${lang==='hi' ? 'Reply ONLY in pure Hindi using Devanagari script (शुद्ध हिंदी). Do NOT use Hinglish or Roman/English script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay in English/numerals, but all sentences and explanations must be written in Devanagari script.' : 'Reply in English.'}
+${subject?`Subject context: ${subject}`:''}
+${extendedRule}
 
-FORMAT (strict, no markdown, no emojis, raw HTML only):
-- Bullets: <ul class="ai-bullets"><li>...</li></ul>
-- Math/steps: <div class="step">step1<br>step2<br><strong>Answer</strong></div>
-- Theory: <div class="step"><strong>Topic</strong><br>explanation</div> then bullets
-${answerMode==='extended' ? '- EXTENDED: Write multiple detailed step blocks. Include why/examples/definitions.' : '- Be FAST. Answer directly. No intro.'}`;
+RESPONSE FORMAT RULES (follow strictly):
+- NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
+- DO NOT use any emojis anywhere in your response. No emojis at all.
+- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features.
+- ANY math/calculation → show each step on new line in <div class="step">, final answer bold. EXACTLY like:
+<div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
+- For algebra/equation → same format, each line one operation, last line Answer bold.
+- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>[Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
+- LANGUAGE/GRAMMAR → <div class="step">explanation</div> with examples as bullets.
+${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
+- OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
 
   // ── Image-specific prompt (sabhi questions solve karo) ──
   const userInstruction = qc && qc.trim() ? qc.trim() : '';
@@ -2396,20 +2380,60 @@ Now begin:`;
     <!-- Bottom glow bar -->
     <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(99,102,241,.3),rgba(6,182,212,.3),transparent)"></div>
   </div>` : `
-  <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--s1);border:1px solid var(--b2);margin-bottom:10px;animation:fadeUp .3s ease">
-    <div class="orbit-logo" style="width:32px;height:32px;flex-shrink:0"><div class="orbit-ring"></div><div class="orbit-dot od1"></div><div class="orbit-dot od2"></div><div class="orbit-dot od3"></div></div>
-    <div class="typing-label" id="${thinkId}-label">${lang==='hi'?'सोच रहा है...':'Thinking...'}</div>
+  <div style="border-radius:20px;background:linear-gradient(135deg,rgba(10,15,35,.97),rgba(15,20,50,.97));border:1px solid rgba(99,102,241,.25);margin-bottom:12px;overflow:hidden;animation:fadeUp .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05)">
+    <div style="height:2px;background:linear-gradient(90deg,transparent 0%,#4f46e5 20%,#7c3aed 50%,#06b6d4 80%,transparent 100%);animation:scanBar 2s ease-in-out infinite"></div>
+    <div style="padding:14px 16px 0;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(79,70,229,.3),rgba(124,58,237,.3));border:1px solid rgba(99,102,241,.4);display:flex;align-items:center;justify-content:center;animation:brainPulse 2s ease infinite">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="url(#tg${thinkId})" stroke-width="1.5" stroke-linecap="round"><defs><linearGradient id="tg${thinkId}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>
+        </div>
+        <div>
+          <div style="font-size:.7rem;font-weight:800;letter-spacing:1.5px;color:#818cf8;font-family:'Azeret Mono',monospace;text-transform:uppercase">${lang==='hi'?'सोच रहा है':'Thinking'}</div>
+          <div style="font-size:.6rem;color:rgba(148,163,184,.5);font-family:'Azeret Mono',monospace;margin-top:1px" id="${thinkId}-label">${lang==='hi'?'जवाब तैयार हो रहा है...':'Preparing answer...'}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10b981;animation:pulse 1s ease infinite"></div>
+        <span style="font-size:.58rem;font-weight:700;letter-spacing:1px;color:#10b981;font-family:'Azeret Mono',monospace">LIVE</span>
+      </div>
+    </div>
+    <!-- Animated dots row -->
+    <div style="padding:12px 16px 8px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:.65rem;color:rgba(148,163,184,.4);font-family:'Azeret Mono',monospace;letter-spacing:.5px">${lang==='hi'?'प्रोसेसिंग':'PROCESSING'}</span>
+      <div style="display:flex;gap:4px;align-items:center">
+        ${[0,1,2,3,4,5,6,7,8,9,10,11].map(j=>`<div style="width:3px;height:${8+Math.round(Math.sin(j)*5)}px;border-radius:2px;background:rgba(129,140,248,${0.2+Math.abs(Math.sin(j))*0.6});animation:barWave 1.4s ease-in-out infinite;animation-delay:${(j*0.1).toFixed(1)}s"></div>`).join('')}
+      </div>
+    </div>
+    <!-- Steps -->
+    <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:6px">
+      ${steps.map((s,i)=>`
+      <div id="${thinkId}-step-${i}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:${i===0?'rgba(79,70,229,.15)':'rgba(255,255,255,.02)'};border:1px solid ${i===0?'rgba(99,102,241,.35)':'rgba(255,255,255,.04)'};transition:all .5s cubic-bezier(.2,.8,.2,1)">
+        <div id="${thinkId}-dot-${i}" style="width:20px;height:20px;border-radius:6px;background:${i===0?'linear-gradient(135deg,#4f46e5,#7c3aed)':'rgba(255,255,255,.05)'};border:1px solid ${i===0?'rgba(99,102,241,.6)':'rgba(255,255,255,.08)'};display:flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0;transition:all .5s;color:${i===0?'#fff':'rgba(148,163,184,.4)'};font-weight:800;font-family:'Azeret Mono',monospace">${i===0?'▶':'0'+(i+1)}</div>
+        <span style="font-size:.77rem;font-family:'Outfit',sans-serif;color:${i===0?'rgba(226,232,240,.9)':'rgba(148,163,184,.4)'};font-weight:${i===0?'600':'400'};transition:all .5s;letter-spacing:.2px">${s.text}</span>
+        ${i===0?`<div style="margin-left:auto;display:flex;gap:3px">${[0,1,2].map(j=>`<div style="width:3px;height:3px;border-radius:50%;background:#818cf8;animation:dotBounce 1.2s ease infinite;animation-delay:${j*0.2}s"></div>`).join('')}</div>`:''}
+      </div>`).join('')}
+    </div>
+    <!-- Fun fact -->
+    <div style="margin:0 16px 16px;padding:11px 13px;border-radius:12px;background:linear-gradient(135deg,rgba(6,182,212,.06),rgba(79,70,229,.06));border:1px solid rgba(6,182,212,.15);position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(6,182,212,.4),transparent)"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="color:#06b6d4;display:flex;align-items:center">${randomFactObj.icon}</span>
+        <span style="font-size:.58rem;font-weight:800;letter-spacing:1.5px;color:#06b6d4;font-family:'Azeret Mono',monospace;text-transform:uppercase">DID YOU KNOW</span>
+      </div>
+      <div style="font-size:.75rem;color:rgba(203,213,225,.75);font-family:'Outfit',sans-serif;line-height:1.6">${randomFactObj.text}</div>
+    </div>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(99,102,241,.3),rgba(6,182,212,.3),transparent)"></div>
   </div>`;
 
   const _wrap = document.getElementById(id+'-wrap');
   if(_wrap) _wrap.insertBefore(thinkEl, _wrap.firstChild);
 
-  // ── Image mode: animate steps + progress bar ──
+  // ── Both modes: animate steps + progress bar ──
   let stepTimer = null;
-  if(isImgMode){
+  if(isImgMode || !isImgMode){
     let currentStep = 0;
     const totalSteps = steps.length;
-    const stepDuration = 4000; // 4s per step
+    const stepDuration = isImgMode ? 4000 : 2500;
     function advanceStep(){
       if(currentStep < totalSteps - 1){
         // Done old step - tick + dim
@@ -2507,12 +2531,11 @@ Now begin:`;
   let renderTimer = null;
   const bodyEl = document.getElementById(id + '-body');
 
-  function flushRender(final=false){
+  function flushRender(){
     if(!bodyEl) return;
     const html = cleanHtml(rawBuffer);
     bodyEl.innerHTML = html;
-    // MathJax sirf final render pe — streaming me skip karo (heavy)
-    if(final && window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
+    if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
   }
 
   let cardShown = false;
@@ -2531,7 +2554,7 @@ Now begin:`;
     rawBuffer += chunk;
     showCardNow();
     if(!renderTimer){
-      renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(false); }, 150);
+      renderTimer = setTimeout(()=>{ renderTimer=null; flushRender(); }, 80);
     }
   }
 
@@ -2540,7 +2563,7 @@ Now begin:`;
 
     // ── Final render — cursor hatao, samjhao buttons lagao ──
     if(renderTimer){ clearTimeout(renderTimer); renderTimer=null; }
-    showCardNow();
+    showCardNow(); // non-streaming (e.g. image mode) ke liye card guarantee show karo
     const finalHtml = cleanHtml(rawText || rawBuffer);
     if(!finalHtml.trim()){
       bodyEl.innerHTML = lang==='hi' ? '❌ खाली जवाब मिला, फिर से कोशिश करें' : '❌ Empty response, try again';
@@ -2549,7 +2572,6 @@ Now begin:`;
     const enriched = injectSamjhaoButtons(finalHtml, id);
     bodyEl.style.display = 'block';
     bodyEl.innerHTML = enriched;
-    if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
 
     // Update gamification
     solved++;
@@ -2571,6 +2593,9 @@ Now begin:`;
 
   }catch(e){
     console.error('All APIs failed:',e);
+    // Admin ko Telegram pe notify karo
+    const isNet = e?.message?.toLowerCase().includes('fetch') || e?.message?.toLowerCase().includes('network') || e?.message?.toLowerCase().includes('abort');
+    _sendAdminNotif('all_apis', 1, e?.message||'Unknown error', isNet);
     const _errQ = document.getElementById('qt') ? document.getElementById('qt').value.trim() : '';
     const _detail = e && e.detailLog ? `<div style="font-size:.7rem;color:#94a3b8;margin-top:8px;word-break:break-all">${e.detailLog}</div>` : '';
     if(bodyEl) bodyEl.innerHTML = lang==='hi'
