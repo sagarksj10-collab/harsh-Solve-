@@ -291,7 +291,7 @@ textarea::placeholder{color:var(--t3)}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
 .ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
-.ai-body .step>strong:first-child{display:block;color:#c4b5fd;font-weight:700;font-size:.8rem;margin-bottom:4px}
+.ai-body .step>strong:first-child{color:#c4b5fd;font-weight:700;font-size:.85rem}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
@@ -2206,12 +2206,10 @@ ${extendedRule}
 
 RESPONSE FORMAT RULES (follow strictly):
 - NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
-- DO NOT use any emojis anywhere in your response. No emojis at all.
-- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags when listing multiple points, properties, examples, or features.
-- ANY math/calculation → show each step on new line in <div class="step">, final answer bold. EXACTLY like:
-<div class="step">2 - 3 = -1<br>-1 - 4 = <strong>-5</strong></div>
-- For algebra/equation → same format, each line one operation, last line Answer bold.
-- THEORY/CONCEPT/GK → Use a heading <div class="step"><strong>[Topic Name]</strong><br>explanation...</div> then bullet points for key facts.
+- DO NOT use any emojis anywhere in your response.
+- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags.
+- ANY math/calculation → <div class="step">step1<br>step2<br><strong>Answer: X</strong></div>
+- THEORY/CONCEPT/GK → ALWAYS use this exact format: <div class="step"><strong>Topic Name</strong><br>explanation here on next line</div> — NEVER put text on same line as strong tag, ALWAYS add <br> after </strong>
 - LANGUAGE/GRAMMAR → <div class="step">explanation</div> with examples as bullets.
 ${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
 - OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
@@ -2628,7 +2626,10 @@ function cleanHtml(text){
   // Remove remaining single stars
   text=text.replace(/\*([^*]+)\*/g,'$1');
 
-  // Already valid HTML — return as-is (handles Q1/Q2 multi-answer divs, ai-bullets)
+  // Auto-fix: <strong>Label</strong> ke baad <br> nahi hai to add karo (vertical text fix)
+  text=text.replace(/(<strong>[^<]+<\/strong>)(?!\s*<br)/g,'$1<br>');
+
+  // Already valid HTML — return as-is
   if(text.includes('<div class="step">')||text.includes('<ol>')||text.includes('<ul')||text.includes('<li>')){
     return text;
   }
