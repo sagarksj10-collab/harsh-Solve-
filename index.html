@@ -307,8 +307,9 @@ textarea::placeholder{color:var(--t3)}
 .ai-body{padding:15px;font-size:.88rem;line-height:1.85;overflow-x:auto;color:var(--t);word-break:break-word;box-sizing:border-box}
 .ai-body h3{font-family:'Bricolage Grotesque',sans-serif;font-size:.8rem;font-weight:800;color:var(--c1);margin:14px 0 9px;padding:8px 12px;background:rgba(79,70,229,.1);border-radius:10px;border-left:1px solid var(--c1);display:flex;align-items:center;gap:6px}
 .ai-body h3::before{content:'◆';font-size:.58rem;opacity:.7}
-.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:12px 14px;border-radius:var(--r2);margin-bottom:9px;border-left:2px solid rgba(126,179,255,.25);font-size:.87rem;line-height:1.8}
-.ai-body .step>strong:first-child{color:#c4b5fd;font-weight:700;font-size:.85rem}
+.ai-body .step{background:rgba(17,29,53,.8);border:1px solid rgba(126,179,255,.08);padding:14px 16px;border-radius:var(--r2);margin-bottom:10px;border-left:3px solid rgba(126,179,255,.3);font-size:.88rem;line-height:1.85;display:block;width:100%;box-sizing:border-box}
+.ai-body .step strong{color:#c4b5fd;font-weight:700;font-size:.88rem;display:inline}
+.ai-body .step br{display:block;content:'';margin-top:2px}
 .ai-body ol{padding-left:0;list-style:none;counter-reset:li}
 .ai-body ol li{counter-increment:li;margin-bottom:8px;padding:9px 13px 9px 42px;background:rgba(17,29,53,.8);border-radius:var(--r2);position:relative;border:1px solid rgba(126,179,255,.08);border-left:1px solid var(--c3);font-size:.87rem}
 .ai-body ol li::before{content:counter(li);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Azeret Mono',monospace}
@@ -2322,50 +2323,45 @@ async function solve(){
   // ── System prompt (text + image common) ───────────────
   const sys=`You are AI Solving Math, a smart tutor made by Harsh.
 If asked your name or identity: say only "Main hoon AI Solving Math, made by Harsh."
-Language rule: ${lang==='hi' ? 'Reply ONLY in pure Hindi using Devanagari script (शुद्ध हिंदी). Do NOT use Hinglish or Roman/English script for Hindi words. Numbers, units, formulas, and proper nouns (names of people/places/brands) can stay in English/numerals, but all sentences and explanations must be written in Devanagari script.' : 'Reply in English.'}
-${subject?`Subject context: ${subject}`:''}
+${lang==='hi' ? 'Language: Reply ONLY in Hindi (Devanagari). Numbers/formulas/names can be in English.' : 'Language: Reply in English.'}
+${subject?`Subject: ${subject}`:''}
 ${extendedRule}
 
-RESPONSE FORMAT RULES (follow strictly):
-- NEVER use markdown. NEVER use ** asterisks **, stars, or backticks. Only raw HTML.
-- DO NOT use any emojis anywhere in your response.
-- FOR BULLET POINTS: Use <ul class="ai-bullets"> with <li> tags.
-- ANY math/calculation → <div class="step">step1<br>step2<br><strong>Answer: X</strong></div>
-- THEORY/CONCEPT/GK → ALWAYS use this exact format: <div class="step"><strong>Topic Name</strong><br>explanation here on next line</div> — NEVER put text on same line as strong tag, ALWAYS add <br> after </strong>
-- LANGUAGE/GRAMMAR → <div class="step">explanation</div> with examples as bullets.
-${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, write multiple detailed <div class="step"> blocks. Each important point gets its own block. Include Tip, Key Point, and Real-life example sections.' : '- Be FAST. Give answer directly. No lengthy intro.'}
-- OUTPUT: Raw HTML only. No extra text outside HTML tags.`;
+OUTPUT FORMAT — FOLLOW EXACTLY:
+- Output raw HTML only. No markdown. No asterisks. No backticks. No emojis.
+- Use ONLY these two HTML elements:
+
+1. For any heading, label, topic name, or question number:
+<div class="step"><strong>Topic or Question heading</strong><br>Full explanation or answer written here as normal flowing text. Each point on its own line using br tag.</div>
+
+2. For bullet lists:
+<ul class="ai-bullets"><li>Point one</li><li>Point two</li></ul>
+
+CRITICAL RULES:
+- After every </strong> always put <br> before the content text
+- Never put label and content on the same line without <br> between them  
+- Never use tables, columns, grids, or side-by-side layouts
+- Never use inline styles or extra divs inside step divs
+- Keep output simple and clean — one topic per step div, content flows naturally below the heading
+- ${answerMode==='extended'?'EXTENDED: Write detailed multi-paragraph answers with examples.':'Be direct and concise.'}`;
 
   // ── Image-specific prompt (sabhi questions solve karo) ──
   const userInstruction = qc && qc.trim() ? qc.trim() : '';
   const imgPrompt=`${sys}
 
-USER INSTRUCTION (HIGHEST PRIORITY):
-${userInstruction ? `"${userInstruction}"
-→ Solve ONLY what user asked (e.g. "solve Q3 and Q5" → only those). Not more, not less.
-→ If user asked to explain or translate — do that.` : 'Solve ALL questions visible in the image.'}
+IMAGE TASK:
+${userInstruction ? `User instruction: "${userInstruction}" — follow exactly.` : 'Solve ALL questions visible in the image. Do not skip any.'}
 
-IMAGE ANALYSIS RULES — FOLLOW STRICTLY:
-1. SCAN entire image top to bottom, left to right carefully.
-2. ${userInstruction ? 'Follow user instruction — solve only what asked.' : 'Find EVERY question, problem, sub-part visible (Q1, Q2, 1., 2., a), b) etc.).'}
-3. Solve each question ONE BY ONE. Do NOT skip any.
-4. FORMAT — use EXACTLY this structure for every question:
-<div class="step"><strong>Q1. [full question text here]</strong><br>[solution line 1]<br>[solution line 2]<br><strong>Answer: [final answer]</strong></div>
+RULES:
+1. Read entire image carefully top to bottom.
+2. For EACH question or sub-part, write a separate div:
+<div class="step"><strong>Q1. [question text]</strong><br>[answer line 1]<br>[answer line 2]<br><strong>Answer: [final answer]</strong></div>
+3. Sub-parts (a, b, c) each get their own separate div.
+4. Never mix two questions in one div.
+5. Never use tables or columns — everything flows top to bottom only.
+6. Complete every answer fully.
 
-CRITICAL FORMAT RULES:
-- Every question starts on its OWN new line inside its own <div class="step">
-- Question text goes on FIRST line after <strong>
-- Each solution step on SEPARATE line using <br>
-- NEVER put question and answer on same line
-- NEVER mix multiple questions inside one <div>
-- Final answer always in <strong>Answer: ...</strong>
-- Sub-parts (a, b, c) each get their own <div class="step">
-
-5. Multiple subjects in image (Math + Science + English) → solve ALL.
-6. Give COMPLETE answers — never cut short, never say "and so on".
-7. OUTPUT: Only raw HTML. No markdown. No text outside HTML tags.
-
-Now begin solving:`;
+Now solve:`;
 
   let userContent;
   if(mode==='image'){
