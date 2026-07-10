@@ -2148,8 +2148,17 @@ async function callGeminiModel(userContent, model, onChunk=null){
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({contents:[{role:'user', parts}], generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0.3}})
-  }, typeof userContent === 'string' ? 10000 : 30000);
+    body: JSON.stringify({
+      contents:[{role:'user', parts}],
+      generationConfig:{maxOutputTokens: typeof userContent === 'string' ? 3000 : 8000, temperature:0.3},
+      safetySettings:[
+        {category:'HARM_CATEGORY_HARASSMENT',threshold:'BLOCK_NONE'},
+        {category:'HARM_CATEGORY_HATE_SPEECH',threshold:'BLOCK_NONE'},
+        {category:'HARM_CATEGORY_SEXUALLY_EXPLICIT',threshold:'BLOCK_NONE'},
+        {category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_NONE'}
+      ]
+    })
+  }, typeof userContent === 'string' ? 10000 : 45000);
   if(!res.ok){
     const data = await res.json().catch(()=>({}));
     throw new Error('GM:' + (data.error?.message || res.status));
@@ -2743,6 +2752,8 @@ Now begin solving:`;
 
 function cleanHtml(text){
   if(!text)return'';
+  // Strip Gemini safety metadata lines
+  text=text.replace(/^(User Safety|Response Safety|Safety Categories|safetyRatings|blockReason):.*$/gmi,'').trim();
   // Strip code fences
   text=text.replace(/```html/gi,'').replace(/```/g,'').trim();
   // Convert **bold** → <strong>
