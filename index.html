@@ -2,15 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>AI Solving Math</title>
+<meta name="description" content="AI se Math solve karo — free, fast, bilingual"/>
+<meta name="theme-color" content="#0a0f23"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="AI Math"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Azeret+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet"/></noscript>
 <script>
 window.MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]]},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}};
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+// MathJax lazy load — sirf tab load hoga jab math content aaye
+function _loadMathJax(){
+  if(window._mjLoaded) return;
+  window._mjLoaded=true;
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+  s.async=true;
+  document.head.appendChild(s);
+}</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
@@ -1931,7 +1948,85 @@ async function readSSEStream(response, onChunk){
 }
 
 // ══════════════════════════════════════════════════════
-//  📱 TELEGRAM ADMIN NOTIFICATIONS
+//  📱 PWA — Service Worker + Offline + Install
+// ══════════════════════════════════════════════════════
+(function(){
+  // Service Worker register
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').then(()=>{
+      console.log('[PWA] Service Worker registered');
+    }).catch(()=>{});
+  }
+
+  // Offline/Online banner
+  function showNetBanner(offline){
+    let b = document.getElementById('_net-banner');
+    if(!b){
+      b = document.createElement('div');
+      b.id = '_net-banner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;text-align:center;font-size:.78rem;font-weight:700;font-family:Outfit,sans-serif;transition:all .3s;letter-spacing:.3px';
+      document.body.appendChild(b);
+    }
+    if(offline){
+      b.style.background = 'linear-gradient(90deg,#dc2626,#b91c1c)';
+      b.style.color = '#fff';
+      b.textContent = '📡 Internet nahi hai — Sirf cached answers dikhenge';
+      b.style.display = 'block';
+    } else {
+      b.style.background = 'linear-gradient(90deg,#059669,#047857)';
+      b.style.color = '#fff';
+      b.textContent = '✅ Internet wapas aa gaya!';
+      b.style.display = 'block';
+      setTimeout(()=>{ if(b) b.style.display='none'; }, 3000);
+    }
+  }
+
+  window.addEventListener('online',  ()=>showNetBanner(false));
+  window.addEventListener('offline', ()=>showNetBanner(true));
+  if(!navigator.onLine) setTimeout(()=>showNetBanner(true), 1000);
+
+  // Install prompt (Add to Home Screen)
+  let _deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e=>{
+    e.preventDefault();
+    _deferredPrompt = e;
+    // Show install button after 30s or after 3 solves
+    setTimeout(()=>_showInstallBtn(), 30000);
+  });
+
+  window._showInstallBtn = function(){
+    if(!_deferredPrompt) return;
+    let btn = document.getElementById('_install-btn');
+    if(btn) return;
+    btn = document.createElement('button');
+    btn.id = '_install-btn';
+    btn.innerHTML = '📲 App Install karo';
+    btn.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:25px;padding:10px 24px;font-size:.82rem;font-weight:700;font-family:Outfit,sans-serif;cursor:pointer;box-shadow:0 8px 24px rgba(79,70,229,.5);animation:pulse 2s infinite';
+    btn.onclick = async()=>{
+      _deferredPrompt.prompt();
+      const {outcome} = await _deferredPrompt.userChoice;
+      if(outcome==='accepted') btn.remove();
+      _deferredPrompt = null;
+    };
+    document.body.appendChild(btn);
+    setTimeout(()=>{ if(btn.parentNode) btn.remove(); }, 15000);
+  };
+
+  // Offline answer cache — last 20 answers save karo
+  window._offlineCache = JSON.parse(localStorage.getItem('_offcache')||'{}');
+  window._saveOfflineAnswer = function(q, html){
+    const key = q.trim().toLowerCase().substring(0,80);
+    _offlineCache[key] = {html, t:Date.now()};
+    // Max 20 entries rakhho
+    const keys = Object.keys(_offlineCache).sort((a,b)=>_offlineCache[b].t-_offlineCache[a].t);
+    if(keys.length>20) keys.slice(20).forEach(k=>delete _offlineCache[k]);
+    try{ localStorage.setItem('_offcache', JSON.stringify(_offlineCache)); }catch(e){}
+  };
+  window._getOfflineAnswer = function(q){
+    const key = q.trim().toLowerCase().substring(0,80);
+    return _offlineCache[key]?.html || null;
+  };
+})();
 // ══════════════════════════════════════════════════════
 const _TG_TOKEN   = '8631727345:AAEiniCMoQF8iq8AR185QvQtN8d4orypJ0c';
 const _TG_CHAT_ID = '7737659999';
@@ -2167,6 +2262,24 @@ async function solve(){
   // loading-wrap hidden (thinking shown in chat now)
   document.getElementById('welcome').style.display='none';
 
+  // ── Offline check: cached answer dikhao ──────────────
+  if(!navigator.onLine && mode==='text'){
+    const cached = window._getOfflineAnswer?.(qt);
+    if(cached){
+      loading=false;
+      document.getElementById('go-btn').disabled=false;
+      const id='id-'+Date.now();
+      appendStreamCard(id, qt);
+      const bodyEl=document.getElementById(id+'-body');
+      if(bodyEl){ bodyEl.style.display='block'; bodyEl.innerHTML=cached+`<div style="margin-top:8px;font-size:.7rem;color:#f59e0b;font-family:'Azeret Mono',monospace">📦 Cached answer (offline mode)</div>`; }
+      return;
+    }
+    setSt('📡 Internet nahi — pehle ye question online solve karo', true);
+    loading=false;
+    document.getElementById('go-btn').disabled=false;
+    return;
+  }
+
   const displayQ=mode==='image'?(qc||'📷 Image Question'):qt;
   const subject=activeChip>0?S[lang].pills[activeChip]:'';
 
@@ -2218,23 +2331,32 @@ ${answerMode==='extended' ? '- EXTENDED MODE: For theory/concept questions, writ
   const userInstruction = qc && qc.trim() ? qc.trim() : '';
   const imgPrompt=`${sys}
 
-USER INSTRUCTION (HIGHEST PRIORITY — follow this EXACTLY):
+USER INSTRUCTION (HIGHEST PRIORITY):
 ${userInstruction ? `"${userInstruction}"
-→ If user said to solve only specific questions (e.g. "solve Q3 and Q5" or "only 8 questions"), do EXACTLY that. Do NOT solve more or less.
-→ If user asked to explain, translate, or do something specific — do that.` : 'Solve ALL questions visible in the image.'}
+→ Solve ONLY what user asked (e.g. "solve Q3 and Q5" → only those). Not more, not less.
+→ If user asked to explain or translate — do that.` : 'Solve ALL questions visible in the image.'}
 
 IMAGE ANALYSIS RULES — FOLLOW STRICTLY:
-1. SCAN the ENTIRE image carefully from top to bottom, left to right.
-2. ${userInstruction ? 'Follow the user instruction above — solve only what user asked for.' : 'FIND every single question, problem, exercise, or sub-part visible — even if numbered (Q1, Q2, 1., 2., a), b) etc.).'}
-3. SOLVE EACH requested question one by one. DO NOT skip any. DO NOT solve only the first one.
-4. For EACH question, wrap its answer in a separate numbered heading like:
-   <div class="step"><strong>Q1.</strong> [question text here]<br>[step-by-step solution]<br><strong>Answer: [final answer]</strong></div>
-5. If multiple subjects/topics are in the image (Math + Science + English etc.), solve ALL of them.
-6. If a question has sub-parts (a, b, c), solve EVERY sub-part separately.
-7. Give COMPLETE answers — do not cut short, do not say "and so on". Finish every question fully.
-8. OUTPUT: Only raw HTML. No markdown. No extra explanation outside HTML tags.
+1. SCAN entire image top to bottom, left to right carefully.
+2. ${userInstruction ? 'Follow user instruction — solve only what asked.' : 'Find EVERY question, problem, sub-part visible (Q1, Q2, 1., 2., a), b) etc.).'}
+3. Solve each question ONE BY ONE. Do NOT skip any.
+4. FORMAT — use EXACTLY this structure for every question:
+<div class="step"><strong>Q1. [full question text here]</strong><br>[solution line 1]<br>[solution line 2]<br><strong>Answer: [final answer]</strong></div>
 
-Now begin:`;
+CRITICAL FORMAT RULES:
+- Every question starts on its OWN new line inside its own <div class="step">
+- Question text goes on FIRST line after <strong>
+- Each solution step on SEPARATE line using <br>
+- NEVER put question and answer on same line
+- NEVER mix multiple questions inside one <div>
+- Final answer always in <strong>Answer: ...</strong>
+- Sub-parts (a, b, c) each get their own <div class="step">
+
+5. Multiple subjects in image (Math + Science + English) → solve ALL.
+6. Give COMPLETE answers — never cut short, never say "and so on".
+7. OUTPUT: Only raw HTML. No markdown. No text outside HTML tags.
+
+Now begin solving:`;
 
   let userContent;
   if(mode==='image'){
@@ -2533,7 +2655,7 @@ Now begin:`;
     if(!bodyEl) return;
     const html = cleanHtml(rawBuffer);
     bodyEl.innerHTML = html;
-    if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([bodyEl]);
+    if(true) { _loadMathJax(); setTimeout(()=>window.MathJax?.typesetPromise && window.MathJax.typesetPromise([bodyEl]),300); }
   }
 
   let cardShown = false;
@@ -2574,6 +2696,8 @@ Now begin:`;
     // Update gamification
     solved++;
     addXP(10, 'Question solved');
+    // Offline cache me save karo
+    if(mode==='text' && qt) window._saveOfflineAnswer?.(qt, finalHtml);
     const item = {id, q:displayQ, html:finalHtml, t:new Date().toISOString()};
     history.unshift(item);
     if(history.length>80) history = history.slice(0,80);
@@ -2586,7 +2710,7 @@ Now begin:`;
 
     if(needsGraph(displayQ)) setTimeout(()=>renderGraph(id, displayQ), 200);
     if(needsDiagram(displayQ)) setTimeout(()=>generateDiagram(id, displayQ), 800);
-    if(window.MathJax?.typesetPromise) setTimeout(()=>window.MathJax.typesetPromise([bodyEl]), 100);
+    _loadMathJax(); setTimeout(()=>window.MathJax?.typesetPromise&&window.MathJax.typesetPromise([bodyEl]),400);
     setTimeout(()=>document.getElementById(id+'-wrap')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
 
   }catch(e){
@@ -3391,7 +3515,7 @@ function toggleHistAnswer(id){
   if(chevEl) chevEl.classList.toggle('open',!isOpen);
   if(footEl) footEl.style.display=isOpen?'none':'flex';
   // MathJax re-render if needed
-  if(!isOpen && window.MathJax?.typesetPromise) setTimeout(()=>window.MathJax.typesetPromise([ansEl]),80);
+  if(!isOpen){ _loadMathJax(); setTimeout(()=>window.MathJax?.typesetPromise&&window.MathJax.typesetPromise([ansEl]),400); }
 }
 
 function loadHistItem(id){
